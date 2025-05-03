@@ -3,7 +3,7 @@ import { View, TextInput, Text } from 'react-native';
 
 export default function Home() {
   return (
-    <View>
+    <View className="item">
       <Text>Home</Text>
     </View>
   );
