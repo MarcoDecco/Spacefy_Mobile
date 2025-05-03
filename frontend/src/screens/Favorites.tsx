@@ -1,5 +1,4 @@
 // Tela de Fvoritos
-
 import { Text, SafeAreaView } from 'react-native';
 import { favoritesStyles } from '../styles/FavoritesStyles';
 

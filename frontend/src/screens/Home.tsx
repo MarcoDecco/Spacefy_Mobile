@@ -1,5 +1,4 @@
 // Tela Home
-
 import { Text, SafeAreaView, TextInput } from 'react-native';
 import { homeStyles } from '../styles/HomeStyles';
 

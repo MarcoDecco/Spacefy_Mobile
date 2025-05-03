@@ -1,5 +1,4 @@
 // Tela de Chat
-
 import { Text, SafeAreaView } from "react-native";
 import { chatStyles } from "../styles/ChatStyles";
 

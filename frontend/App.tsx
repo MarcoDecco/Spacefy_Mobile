@@ -1,23 +1,8 @@
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import Routes from './src/routes';
 
+// direciona o aplicativo para o arquivo index.tsx dentro da pasta routes
 export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.text}>Bora fazer acontecer</Text>
-    </SafeAreaView>
+    <Routes />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  }
-});

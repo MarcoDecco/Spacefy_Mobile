@@ -1,5 +1,4 @@
 // Tela de Alugados
-
 import { Text, SafeAreaView } from 'react-native';
 import { rentedStyles } from '../styles/RentedStyles';
 

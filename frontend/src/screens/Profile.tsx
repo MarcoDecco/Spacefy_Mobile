@@ -1,5 +1,4 @@
 // Tela de Perfil
-
 import { Text, SafeAreaView } from "react-native";
 import { profileStyles } from "../styles/ProfileStyles";
 
