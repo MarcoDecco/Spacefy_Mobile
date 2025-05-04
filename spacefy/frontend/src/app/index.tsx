@@ -1,5 +1,5 @@
-import TabRoutes from '../routes/tab.routes'
+import Routes from '../routes'
 
 export default function Index() {
-  return <TabRoutes />
+  return <Routes />
 }
