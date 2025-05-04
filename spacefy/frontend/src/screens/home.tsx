@@ -1,10 +1,12 @@
 //Tela Home
-import { Text, View } from "react-native";
+import Search from "../components/searchBarHome";
+
+import { ScrollView } from "react-native";
 
 export default function Home() {
   return (
-    <View className='flex-1 items-center justify-center'>
-      <Text className=''>Home</Text>
-    </View>
+    <ScrollView>
+      <Search/>
+    </ScrollView>
   );
 }
