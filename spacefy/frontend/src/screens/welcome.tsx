@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import logo from '../../assets/ArteIntrodutória.png';
+import logo from '../../assets/arte-introdutoria.png';
 
 export default function Welcome({ navigation }: { navigation: any }) {
   return (
@@ -11,6 +11,7 @@ export default function Welcome({ navigation }: { navigation: any }) {
     >
       <Image
         source={logo}
+        style={{ width: 350, height: 350, marginBottom: 16, resizeMode: 'contain' }}
         resizeMode="contain"
         className="w-[276px] h-[211px] mb-16"
       />

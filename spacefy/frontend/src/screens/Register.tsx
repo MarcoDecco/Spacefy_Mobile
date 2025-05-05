@@ -9,6 +9,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import Perfil from '../../assets/Perfil.png'
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -41,7 +42,7 @@ export default function Register({ navigation }: { navigation: any }) {
           {/* Container para centralizar a imagem */}
           <View style={{ alignItems: 'center' }}>
             <Image
-              source={require('../../assets/Perfil.png')} 
+              source={Perfil} 
               style={{ width: 120, height: 120, marginBottom: 16, resizeMode: 'contain' }}
             />
           </View>
@@ -64,7 +65,7 @@ export default function Register({ navigation }: { navigation: any }) {
             </Text>
             <View className="border-b border-[#E0E0E0] pt-1 pb-1">
               <TextInput
-                className="h-9 text-[#2F2F2F]"
+                className="h-10 text-[#2F2F2F]"
                 placeholder="Digite seu nome completo"
                 value={name}
                 onChangeText={setName}
@@ -89,7 +90,7 @@ export default function Register({ navigation }: { navigation: any }) {
             </Text>
             <View className="border-b border-[#E0E0E0] pt-1 pb-1">
               <TextInput
-                className="h-9 text-[#2F2F2F]"
+                className="h-10 text-[#2F2F2F]"
                 placeholder="seu@email.com"
                 value={email}
                 onChangeText={setEmail}
@@ -115,7 +116,7 @@ export default function Register({ navigation }: { navigation: any }) {
             </Text>
             <View className="border-b border-[#E0E0E0] pt-1 pb-1 flex-row justify-between items-center">
               <TextInput
-                className="flex-1 h-9 text-[#2F2F2F]"
+                className="flex-1 h-10 text-[#2F2F2F]"
                 placeholder="••••••••"
                 value={password}
                 onChangeText={setPassword}
@@ -147,7 +148,7 @@ export default function Register({ navigation }: { navigation: any }) {
             </Text>
             <View className="border-b border-[#E0E0E0] pt-1 pb-1 flex-row justify-between items-center">
               <TextInput
-                className="flex-1 h-9 text-[#2F2F2F]"
+                className="flex-1 h-10 text-[#2F2F2F]"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}

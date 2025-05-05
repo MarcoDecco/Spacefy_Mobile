@@ -8,6 +8,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
+import Perfil from '../../assets/Perfil.png'
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -34,7 +35,7 @@ export default function Login({ navigation }: { navigation: any }) {
       >
         <View className="bg-white p-6 rounded-md shadow-md items-center">
           <Image
-            source={require('../../assets/Perfil.png')} 
+            source={Perfil} 
             style={{ width: 120, height: 120, marginBottom: 16, resizeMode: 'contain' }}
           />
 
@@ -54,7 +55,7 @@ export default function Login({ navigation }: { navigation: any }) {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-                className="h-9 text-[#2F2F2F]"
+                className="h-10 text-[#2F2F2F]"
                 placeholderTextColor="#888888"
                 style={{ 
                   fontFamily: 'Inter_400Regular', 
@@ -79,7 +80,7 @@ export default function Login({ navigation }: { navigation: any }) {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                className="flex-1 h-9 text-[#2F2F2F]"
+                className="flex-1 h-10 text-[#2F2F2F]"
                 placeholderTextColor="#888888"
                 style={{ 
                   fontFamily: 'Inter_400Regular', 

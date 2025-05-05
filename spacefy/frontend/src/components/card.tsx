@@ -32,14 +32,14 @@ export default function Card() {
         ref={scrollRef}
         scrollEventThrottle={16}
       >
-        {images.map((img, index) => (
-          <Image 
-            key={index}
-            source={img} 
-            style={{ width, height: 180 }} 
-            resizeMode="cover"
-          />
-        ))}
+      {images.map((img, index) => (
+         <Image 
+          key={index}
+          source={img} 
+          style={{ width, height: 180 }} 
+          resizeMode="cover"
+        />
+       ))}
       </ScrollView>
         
         {/* Indicadores de página */}

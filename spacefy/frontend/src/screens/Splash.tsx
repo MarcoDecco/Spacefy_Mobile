@@ -26,7 +26,7 @@ export default function Splash({ navigation }: { navigation: any }) {
       >
         SPACEFY
       </Text>
-      <ActivityIndicator size="large" color="#fff" className="mt-2" />
+      <ActivityIndicator size={70} color="#ffffff" className="mt-10" />
     </LinearGradient>
   );
 }
