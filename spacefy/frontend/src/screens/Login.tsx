@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Image, // <-- Importante
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -39,64 +39,73 @@ export default function Login({ navigation }: { navigation: any }) {
           />
 
           {/* Email */}
-          <View className="mb-4 w-full">
+          <View className="mb-5 w-full">
             <Text
-              className="text-base text-neutral-800 mb-2"
-              style={{ fontFamily: 'Inter_500Medium' }}
+              className="text-[#2F2F2F]"
+              style={{ fontFamily: 'Inter_500Medium', fontSize: 16 }}
             >
               Email
             </Text>
-            <TextInput
-              placeholder="seu@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              className="h-12 px-4 border border-gray-300 rounded bg-white text-base text-neutral-800"
-              style={{ fontFamily: 'Inter_400Regular' }}
-            />
+            <View className="border-b border-[#E0E0E0] pt-1 pb-1">
+              <TextInput
+                placeholder="seu@email.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                className="h-9 text-[#2F2F2F]"
+                placeholderTextColor="#888888"
+                style={{ 
+                  fontFamily: 'Inter_400Regular', 
+                  fontSize: 16,
+                  fontWeight: 'normal'
+                }}
+              />
+            </View>
           </View>
 
           {/* Senha */}
-          <View className="mb-4 w-full">
+          <View className="mb-5 w-full">
             <Text
-              className="text-base text-neutral-800 mb-2"
-              style={{ fontFamily: 'Inter_500Medium' }}
+              className="text-[#2F2F2F]"
+              style={{ fontFamily: 'Inter_500Medium', fontSize: 16 }}
             >
               Senha
             </Text>
-            <View className="relative">
+            <View className="border-b border-[#E0E0E0] pt-1 pb-1 flex-row justify-between items-center">
               <TextInput
                 placeholder="••••••••"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
-                className="h-12 px-4 pr-12 border border-gray-300 rounded bg-white text-base text-neutral-800"
-                style={{ fontFamily: 'Inter_400Regular' }}
+                className="flex-1 h-9 text-[#2F2F2F]"
+                placeholderTextColor="#888888"
+                style={{ 
+                  fontFamily: 'Inter_400Regular', 
+                  fontSize: 16,
+                  fontWeight: 'normal'
+                }}
               />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3"
-              >
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <MaterialIcons
                   name={showPassword ? 'visibility-off' : 'visibility'}
-                  size={24}
-                  color="#888"
+                  size={20}
+                  color="#888888"
                 />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Botão de Entrar */}
-          <View className="items-center mt-2 w-full">
+          <View className="items-center mt-6 w-full">
             <TouchableOpacity
               onPress={handleLogin}
               activeOpacity={0.8}
               className="bg-[#1486B8] w-1/2 h-10 rounded justify-center items-center"
             >
               <Text
-                className="text-white text-base font-semibold"
+                className="text-white text-base"
                 style={{ fontFamily: 'Inter_600SemiBold' }}
               >
                 Entrar
@@ -107,7 +116,7 @@ export default function Login({ navigation }: { navigation: any }) {
           {/* Link de cadastro */}
           <View className="mt-6 items-center">
             <Text
-              className="text-sm text-neutral-800 text-center"
+              className="text-sm text-[#2F2F2F] text-center"
               style={{ fontFamily: 'Inter_400Regular' }}
             >
               Não tem uma conta?
