@@ -1,5 +1,5 @@
 //Tela Home
-import Search from "../components/searchBarHome";
+import Search from "../components/searchBar";
 
 import { ScrollView } from "react-native";
 
