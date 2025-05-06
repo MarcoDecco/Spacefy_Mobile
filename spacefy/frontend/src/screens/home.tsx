@@ -79,15 +79,14 @@ export default function Home() {
       <SearchBar />
       
       {/* Seção Destaques (original inalterada) */}
-      <View className="px-4 mt-4">
+      <View className="mx-5 mt-10 mb-4">
         <Text className="text-xl font-bold text-gray-900">Espaços em Destaque</Text>
       </View>
       
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-        className="mt-4 pb-4"
+        className="ml-3 pl-2 pb-3"
       >
         {featuredCards.map((card) => (
           <View key={card.id} style={{ width: width * 0.8, marginRight: 16 }}>
@@ -104,7 +103,7 @@ export default function Home() {
       </ScrollView>
 
       {/* Nova Seção Promoções (adicionada sem conflitos) */}
-      <View className="px-4 mt-4">
+      <View className="mx-5 mt-7 mb-4">
         <Text className="text-xl font-bold text-gray-900">Promoções Imperdíveis</Text>
         <Text className="text-sm text-gray-500">Descontos exclusivos por tempo limitado</Text>
       </View>
@@ -112,8 +111,7 @@ export default function Home() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16 }}
-        className="mt-4 pb-8"
+        className="ml-3 pl-2 pb-3"
       >
         {promoCards.map((card) => (
           <View key={card.id} style={{ width: width * 0.8, marginRight: 16 }}>
