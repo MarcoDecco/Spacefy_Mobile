@@ -36,9 +36,9 @@ export default function PromoCard({
   };
 
   return (
-    <View className="bg-white rounded-2xl shadow-md overflow-hidden border-2 border-red-500">
+    <View className="bg-white rounded-2xl shadow-md overflow-hidden mb-10">
       {/* Tag de desconto */}
-      <View className="absolute top-2 left-2 bg-red-500 px-2 py-1 rounded z-10">
+      <View className="absolute top-2 left-2 bg-red-600 px-2 py-1 rounded z-10">
         <Text className="text-white text-sm font-bold">{discount}</Text>
       </View>
       
@@ -94,13 +94,13 @@ export default function PromoCard({
         </View>
 
         <View className="flex-row items-center mt-2">
-          <Text className="text-base font-semibold text-red-500">
+          <Text className="text-base font-semibold text-red-600">
             {price}
           </Text>
           <Text className="text-sm text-gray-500 line-through ml-2">
             {originalPrice}
           </Text>
-          <Text className="text-sm text-red-500 ml-2">por hora</Text>
+          <Text className="text-sm text-red-6000 ml-2">por hora</Text>
         </View>
 
         <View className="flex-row justify-between items-center mt-4">

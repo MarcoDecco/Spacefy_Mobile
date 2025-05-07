@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Constants from 'expo-constants'
-import { Feather } from '@expo/vector-icons'
+import { Feather, Ionicons } from '@expo/vector-icons'
 import { View, Text, TextInput, Pressable, TouchableOpacity, Button } from 'react-native';
 
 
@@ -31,7 +31,7 @@ export default function Search() {
 
             {/** Filtro */}
             <TouchableOpacity onPress={() => console.log('Filtro')} className='border border-light-gray rounded-xl bg-white mr-5 p-1.5'>
-                <Feather name="sliders" size={30} color="" className='rotate-90' />
+                <Ionicons name="filter" size={30}/>
             </TouchableOpacity>
          </View>
     );
