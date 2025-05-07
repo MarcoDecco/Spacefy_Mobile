@@ -1,9 +1,11 @@
-import { View, Image, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Image, Text, TouchableOpacity, ScrollView, Dimensions, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
+const CARD_WIDTH = screenWidth * 0.8;
+const IMAGE_HEIGHT = 180;
 
 interface CardProps {
   images: any[];
@@ -28,7 +30,7 @@ export default function Card({ images, title, address, price, rating, reviews }:
   const scrollToIndex = (index: number) => {
     const newIndex = Math.max(0, Math.min(index, images.length - 1));
     scrollRef.current?.scrollTo({
-      x: newIndex * screenWidth * 0.8,
+      x: newIndex * CARD_WIDTH,
       animated: true
     });
     setActiveIndex(newIndex);
@@ -46,7 +48,7 @@ export default function Card({ images, title, address, price, rating, reviews }:
   }, [activeIndex, isAutoPlayPaused, images.length]);
 
   return (
-    <View className="bg-white rounded-2xl shadow-md overflow-hidden">
+    <View className="bg-white rounded-2xl shadow-md overflow-hidden" style={{ width: CARD_WIDTH }}>
       {/* Carrossel de Imagens */}
       {images.length > 1 ? (
         <View className="relative">
@@ -59,12 +61,22 @@ export default function Card({ images, title, address, price, rating, reviews }:
             scrollEventThrottle={16}
             onTouchStart={() => setIsAutoPlayPaused(true)}
             onTouchEnd={() => setIsAutoPlayPaused(false)}
+            contentContainerStyle={{ width: CARD_WIDTH * images.length }}
+            style={{ width: CARD_WIDTH }}
           >
             {images.map((img, index) => (
               <Image 
                 key={index}
                 source={img} 
-                style={{ width: screenWidth * 0.8, height: 180 }} 
+                style={{ 
+                  width: CARD_WIDTH, 
+                  height: IMAGE_HEIGHT,
+                  ...Platform.select({
+                    ios: {
+                      borderRadius: 16,
+                    }
+                  })
+                }} 
                 resizeMode="cover"
               />
             ))}
@@ -73,6 +85,17 @@ export default function Card({ images, title, address, price, rating, reviews }:
           {/* Controles de navegação */}
           <TouchableOpacity
             className="absolute left-2 top-1/2 -translate-y-4 bg-black/30 p-2 rounded-full"
+            style={{
+              transform: [{ translateY: -20 }],
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                }
+              })
+            }}
             onPress={() => {
               setIsAutoPlayPaused(true);
               scrollToIndex(activeIndex - 1);
@@ -84,6 +107,17 @@ export default function Card({ images, title, address, price, rating, reviews }:
 
           <TouchableOpacity
             className="absolute right-2 top-1/2 -translate-y-4 bg-black/30 p-2 rounded-full"
+            style={{
+              transform: [{ translateY: -20 }],
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                }
+              })
+            }}
             onPress={() => {
               setIsAutoPlayPaused(true);
               scrollToIndex(activeIndex + 1);
@@ -103,6 +137,16 @@ export default function Card({ images, title, address, price, rating, reviews }:
                   scrollToIndex(index);
                   setTimeout(() => setIsAutoPlayPaused(false), 5000);
                 }}
+                style={{
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 1.41,
+                    }
+                  })
+                }}
               >
                 <View 
                   className={`h-2 w-2 mx-1 rounded-full ${activeIndex === index ? 'bg-white' : 'bg-white/50'}`}
@@ -112,14 +156,34 @@ export default function Card({ images, title, address, price, rating, reviews }:
           </View>
 
           {/* Contador de fotos */}
-          <View className="absolute top-2 right-2 bg-black/50 px-2 py-1 rounded-full">
+          <View 
+            className="absolute top-2 right-2 bg-black/50 px-2 py-1 rounded-full"
+            style={{
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 1.41,
+                }
+              })
+            }}
+          >
             <Text className="text-white text-xs">{activeIndex + 1}/{images.length}</Text>
           </View>
         </View>
       ) : (
         <Image 
           source={images[0]} 
-          style={{ width: screenWidth * 0.8, height: 180 }} 
+          style={{ 
+            width: CARD_WIDTH, 
+            height: IMAGE_HEIGHT,
+            ...Platform.select({
+              ios: {
+                borderRadius: 16,
+              }
+            })
+          }} 
           resizeMode="cover"
         />
       )}
@@ -127,11 +191,22 @@ export default function Card({ images, title, address, price, rating, reviews }:
       {/* Conteúdo do Card */}
       <View className="p-4">
         <View className="flex-row justify-between items-start">
-          <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900">{title}</Text>
-            <Text className="text-sm text-gray-500 mt-1">{address}</Text>
+          <View className="flex-1 mr-2">
+            <Text className="text-lg font-bold text-gray-900" numberOfLines={1}>{title}</Text>
+            <Text className="text-sm text-gray-500 mt-1" numberOfLines={1}>{address}</Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 1.41,
+                }
+              })
+            }}
+          >
             <Feather name="heart" size={20} color="#888" />
           </TouchableOpacity>
         </View>
@@ -147,7 +222,19 @@ export default function Card({ images, title, address, price, rating, reviews }:
             <Text className="ml-1 text-gray-500">({reviews} avaliações)</Text>
           </View>
 
-          <TouchableOpacity className="bg-blue-600 px-3 py-1 rounded-full">
+          <TouchableOpacity 
+            className="bg-blue-600 px-3 py-1 rounded-full"
+            style={{
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 1.41,
+                }
+              })
+            }}
+          >
             <Text className="text-white text-sm font-medium">Ver mais</Text>
           </TouchableOpacity>
         </View>

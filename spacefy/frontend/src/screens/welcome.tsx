@@ -1,46 +1,121 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import logo from '../../assets/arte-introdutoria.png';
 
 export default function Welcome({ navigation }: { navigation: any }) {
   return (
-    <LinearGradient
-      colors={['#C2EBFF', '#6ACDFF']}
-      className="flex-1 justify-center items-center px-6"
-    >
-      <Image
-        source={logo}
-        style={{ width: 350, height: 350, marginBottom: 16, resizeMode: 'contain' }}
-        resizeMode="contain"
-        className="w-[276px] h-[211px] mb-16"
-      />
-
-      {/* Título */}
-      <Text className="text-[20px] font-semibold text-[#2F2F2F] text-center mb-12">
-        Bem-vindo ao SPACEFY!
-      </Text>
-
-      {/* Descrição */}
-      <Text className="text-[13px] text-[#2F2F2F] text-center mb-10 w-[80%]">
-        Antes de começar a utilizar a plataforma, entre com o seu login preenchendo as informações necessárias.
-      </Text>
-
-      {/* Botão "Entrar" */}
-      <TouchableOpacity
-        className="bg-[#1486B8] py-3 px-10 rounded mb-4 w-[50%] items-center"
-        onPress={() => navigation.navigate('Login')}
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar barStyle="dark-content" />
+      <LinearGradient
+        colors={['#C2EBFF', '#6ACDFF']}
+        style={{ flex: 1 }}
       >
-        <Text className="text-white font-bold text-[15px]">Entrar</Text>
-      </TouchableOpacity>
+        <View style={{ 
+          flex: 1, 
+          justifyContent: 'center', 
+          alignItems: 'center',
+          paddingHorizontal: 24,
+          paddingTop: Platform.OS === 'ios' ? 20 : 0
+        }}>
+          <Image
+            source={logo}
+            style={{ 
+              width: 276, 
+              height: 211, 
+              marginBottom: 64,
+              resizeMode: 'contain'
+            }}
+          />
 
-      {/* Botão "Registrar" */}
-      <TouchableOpacity
-        className="bg-white border border-[#1486B8] py-3 px-10 rounded w-[50%] items-center"
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text className="text-[#1486B8] font-bold text-[15px]">Registrar</Text>
-      </TouchableOpacity>
-    </LinearGradient>
+          {/* Título */}
+          <Text style={{ 
+            fontSize: 20,
+            fontWeight: '600',
+            color: '#2F2F2F',
+            textAlign: 'center',
+            marginBottom: 48,
+            fontFamily: 'Inter_600SemiBold'
+          }}>
+            Bem-vindo ao SPACEFY!
+          </Text>
+
+          {/* Descrição */}
+          <Text style={{ 
+            fontSize: 13,
+            color: '#2F2F2F',
+            textAlign: 'center',
+            marginBottom: 40,
+            width: '80%',
+            fontFamily: 'Inter_400Regular'
+          }}>
+            Antes de começar a utilizar a plataforma, entre com o seu login preenchendo as informações necessárias.
+          </Text>
+
+          {/* Botão "Entrar" */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#1486B8',
+              paddingVertical: 12,
+              paddingHorizontal: 40,
+              borderRadius: 8,
+              marginBottom: 16,
+              width: '50%',
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.1,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={{ 
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: 15,
+              fontFamily: 'Inter_600SemiBold'
+            }}>
+              Entrar
+            </Text>
+          </TouchableOpacity>
+
+          {/* Botão "Registrar" */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'white',
+              borderWidth: 1,
+              borderColor: '#1486B8',
+              paddingVertical: 12,
+              paddingHorizontal: 40,
+              borderRadius: 8,
+              width: '50%',
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.1,
+              shadowRadius: 3.84,
+              elevation: 5,
+            }}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={{ 
+              color: '#1486B8',
+              fontWeight: 'bold',
+              fontSize: 15,
+              fontFamily: 'Inter_600SemiBold'
+            }}>
+              Registrar
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }

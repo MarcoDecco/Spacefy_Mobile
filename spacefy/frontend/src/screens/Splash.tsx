@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, ActivityIndicator } from 'react-native';
+import { Text, ActivityIndicator, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function Splash({ navigation }: { navigation: any }) {
@@ -12,21 +12,34 @@ export default function Splash({ navigation }: { navigation: any }) {
   }, []);
 
   return (
-    <LinearGradient
-      colors={['#1EACE3', '#152F6C']}
-      className="flex-1 justify-center items-center"
-    >
-      <Text className="text-[64px] text-blue font-normal tracking-widest mb-5"
-        style={{
-          fontFamily: 'Inter_400Regular',
-          textShadowColor: '#FFFFFF',
-          textShadowOffset: { width: 5, height: 0 },
-          textShadowRadius: 2
-        }}
+    <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" />
+      <LinearGradient
+        colors={['#1EACE3', '#152F6C']}
+        style={{ flex: 1 }}
       >
-        SPACEFY
-      </Text>
-      <ActivityIndicator size={70} color="#ffffff" className="mt-10" />
-    </LinearGradient>
+        <Text 
+          style={{
+            fontSize: 64,
+            color: '#1EACE3',
+            fontFamily: 'Inter_400Regular',
+            letterSpacing: 8,
+            marginBottom: 20,
+            textAlign: 'center',
+            marginTop: Platform.OS === 'ios' ? 40 : 0,
+            textShadowColor: '#FFFFFF',
+            textShadowOffset: { width: 5, height: 0 },
+            textShadowRadius: 2
+          }}
+        >
+          SPACEFY
+        </Text>
+        <ActivityIndicator 
+          size={70} 
+          color="#ffffff" 
+          style={{ marginTop: 40 }} 
+        />
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
