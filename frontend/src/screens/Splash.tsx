@@ -14,6 +14,7 @@ export default function Splash({ navigation }: { navigation: any }) {
   return (
     <SafeAreaView className='flex-1'>
       <StatusBar barStyle="light-content" />
+      
       <LinearGradient
         colors={['#1EACE3', '#152F6C']}
         className='flex-1'
@@ -37,7 +38,7 @@ export default function Splash({ navigation }: { navigation: any }) {
         <ActivityIndicator 
           size={70} 
           color="#ffffff" 
-          style={{ marginTop: 40 }} 
+          className='mt-10'
         />
       </LinearGradient>
     </SafeAreaView>

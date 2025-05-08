@@ -1,67 +1,35 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import logo from '../../assets/arte-introdutoria.png';
+import Login from '../../assets/arte-introdutoria.png';
 
 export default function Welcome({ navigation }: { navigation: any }) {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView className="flex-1">
       <StatusBar barStyle="dark-content" />
-      <LinearGradient
-        colors={['#C2EBFF', '#6ACDFF']}
-        style={{ flex: 1 }}
-      >
-        <View style={{ 
-          flex: 1, 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          paddingHorizontal: 24,
-          paddingTop: Platform.OS === 'ios' ? 20 : 0
-        }}>
-          <Image
-            source={logo}
-            style={{ 
-              width: 276, 
-              height: 211, 
-              marginBottom: 64,
-              resizeMode: 'contain'
-            }}
-          />
+      
+      <LinearGradient colors={['#C2EBFF', '#6ACDFF']} className="flex-1">
+        <View className="flex-1 justify-center items-center px-18" style={{paddingTop: Platform.OS === 'ios' ? 20 : 0}}>
+        
+        <Image
+          source={Login}
+          style={{ width: 276, height: 211, resizeMode: 'contain' }}
+        />
 
           {/* Título */}
-          <Text style={{ 
-            fontSize: 20,
-            fontWeight: '600',
-            color: '#2F2F2F',
-            textAlign: 'center',
-            marginBottom: 48,
-            fontFamily: 'Inter_600SemiBold'
-          }}>
+          <Text className="text-2xl font-semibold text-[#2F2F2F] text-center mb-4 font-['Inter_600SemiBold']">
             Bem-vindo ao SPACEFY!
           </Text>
 
           {/* Descrição */}
-          <Text style={{ 
-            fontSize: 13,
-            color: '#2F2F2F',
-            textAlign: 'center',
-            marginBottom: 40,
-            width: '80%',
-            fontFamily: 'Inter_400Regular'
-          }}>
+          <Text className="text-base text-[#2F2F2F] text-center w-4/5 font-['Inter_400Regular']">
             Antes de começar a utilizar a plataforma, entre com o seu login preenchendo as informações necessárias.
           </Text>
 
           {/* Botão "Entrar" */}
           <TouchableOpacity
+            className="bg-[#1486B8] py-3 px-10 rounded-lg mb-4 mt-16 w-1/2 items-center shadow-md"
             style={{
-              backgroundColor: '#1486B8',
-              paddingVertical: 12,
-              paddingHorizontal: 40,
-              borderRadius: 8,
-              marginBottom: 16,
-              width: '50%',
-              alignItems: 'center',
               shadowColor: '#000',
               shadowOffset: {
                 width: 0,
@@ -73,27 +41,15 @@ export default function Welcome({ navigation }: { navigation: any }) {
             }}
             onPress={() => navigation.navigate('Login')}
           >
-            <Text style={{ 
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: 15,
-              fontFamily: 'Inter_600SemiBold'
-            }}>
+            <Text className="text-white font-bold text-[15px] font-['Inter_600SemiBold']">
               Entrar
             </Text>
           </TouchableOpacity>
 
           {/* Botão "Registrar" */}
           <TouchableOpacity
+            className="bg-white border border-[#1486B8] py-3 px-10 rounded-lg w-1/2 items-center shadow-md"
             style={{
-              backgroundColor: 'white',
-              borderWidth: 1,
-              borderColor: '#1486B8',
-              paddingVertical: 12,
-              paddingHorizontal: 40,
-              borderRadius: 8,
-              width: '50%',
-              alignItems: 'center',
               shadowColor: '#000',
               shadowOffset: {
                 width: 0,
@@ -105,12 +61,7 @@ export default function Welcome({ navigation }: { navigation: any }) {
             }}
             onPress={() => navigation.navigate('Register')}
           >
-            <Text style={{ 
-              color: '#1486B8',
-              fontWeight: 'bold',
-              fontSize: 15,
-              fontFamily: 'Inter_600SemiBold'
-            }}>
+            <Text className="text-[#1486B8] font-bold text-[15px] font-['Inter_600SemiBold']">
               Registrar
             </Text>
           </TouchableOpacity>
