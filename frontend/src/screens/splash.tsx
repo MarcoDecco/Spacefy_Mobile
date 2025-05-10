@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
+import { splashStyles as styles } from '../styles/splash.styles';
 
 export default function Splash() {
   const navigation = useNavigation<NavigationProps>();
@@ -29,31 +30,31 @@ export default function Splash() {
   }, [navigation]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <StatusBar 
-        style={Platform.OS === 'ios' ? 'dark' : 'light'} 
-        translucent 
-        backgroundColor="transparent" 
+    <View style={styles.container}>
+      <StatusBar
+        style={Platform.OS === 'ios' ? 'dark' : 'light'}
+        translucent
+        backgroundColor="transparent"
       />
       <LinearGradient
         colors={['#1EACE3', '#152F6C']}
-        className="flex-1 items-center justify-center"
-        style={{
-          paddingTop: insets.top,
-          paddingBottom: insets.bottom,
-          // Ajustes específicos para iOS
-          ...(Platform.OS === 'ios' && {
-            paddingTop: Math.max(insets.top, 20), // Garante padding mínimo no iOS
-          }),
-        }}
+        style={[
+          styles.gradient,
+          {
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            ...(Platform.OS === 'ios' && {
+              paddingTop: Math.max(insets.top, 20),
+            }),
+          }
+        ]}
       >
-        {/* Aqui você pode adicionar o logo do Spacefy */}
-        <View className="mb-4">
-          <Text className="text-3xl font-bold text-white">Spacefy</Text>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logoText}>Spacefy</Text>
         </View>
-        <ActivityIndicator 
-          size={Platform.OS === 'ios' ? 'large' : 'large'} 
-          color="#FCFCFC" 
+        <ActivityIndicator
+          size={Platform.OS === 'ios' ? 'large' : 'large'}
+          color="#FCFCFC"
         />
       </LinearGradient>
     </View>

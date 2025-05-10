@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
+import { welcomeStyles as styles } from '../styles/welcome.styles';
 
 export default function Welcome() {
   const insets = useSafeAreaInsets();
@@ -11,34 +12,33 @@ export default function Welcome() {
   return (
     <LinearGradient
       colors={['#C2EBFF', '#6ACDFF']}
-      className="flex-1 items-center justify-center"
-      style={{ paddingTop: insets.top }}
+      style={[styles.container, { paddingTop: insets.top }]}
     >
-      <View className="w-full items-center">
+      <View style={styles.imageContainer}>
         <Image
           source={require('../../assets/arte-introdutoria.png')}
-          style={{ width: 280, height: 205, resizeMode: 'contain' }}
+          style={styles.image}
         />
       </View>
 
-      <Text className="text-2xl font-bold text-dark-gray mt-16 mb-4 text-center">Bem vindo ao SPACEFY!</Text>
+      <Text style={styles.title}>Bem vindo ao SPACEFY!</Text>
 
-      <Text className="text-lg text-dark-gray text-center mb-12 px-12">
+      <Text style={styles.subtitle}>
         Antes de começar a utilizar a plataforma, entre com o seu login preenchendo as informações necessárias
       </Text>
 
       <TouchableOpacity
-        className="w-3/4 bg-dark-blue rounded-lg py-3 mb-3 shadow"
+        style={styles.loginButton}
         onPress={() => navigation.navigate('Login')}
       >
-        <Text className="text-white text-center font-bold text-base">Login</Text>
+        <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        className="w-3/4 bg-white border-2 border-dark-blue rounded-lg py-3 shadow"
+        style={styles.registerButton}
         onPress={() => navigation.navigate('Register')}
       >
-        <Text className="text-dark-blue text-center font-bold text-base">Criar Conta</Text>
+        <Text style={styles.registerButtonText}>Criar Conta</Text>
       </TouchableOpacity>
 
     </LinearGradient>

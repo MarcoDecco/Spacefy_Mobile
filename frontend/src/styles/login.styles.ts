@@ -1,0 +1,95 @@
+import { StyleSheet } from 'react-native';
+
+export const loginStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  cardContainer: {
+    width: '91.67%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 64,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  profileImageContainer: {
+    marginTop: -64,
+    marginBottom: 16,
+    borderRadius: 35,
+    backgroundColor: '#FFFFFF',
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 4,
+  },
+  profileImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 8,
+  },
+  label: {
+    color: '#333333',
+    fontWeight: '600',
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingHorizontal: 8,
+    paddingBottom: 4,
+    marginBottom: 16,
+    color: '#333333',
+  },
+  loginButton: {
+    width: '100%',
+    backgroundColor: '#3B82F6',
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  registerText: {
+    color: '#333333',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  registerLink: {
+    color: '#3B82F6',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textDecorationLine: 'underline',
+  },
+}); 
