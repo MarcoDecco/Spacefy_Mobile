@@ -47,6 +47,16 @@ const PromoCard: React.FC<PromoCardProps> = ({
     setActiveIndex(newIndex);
   };
 
+  const handleMomentumScrollEnd = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    const roundedIndex = Math.round(index);
+    
+    if (roundedIndex !== activeIndex) {
+      scrollToIndex(roundedIndex);
+    }
+  };
+
   useEffect(() => {
     if (images.length <= 1 || isAutoPlayPaused || !isFocused) return;
     const timer = setInterval(() => {
@@ -69,10 +79,14 @@ const PromoCard: React.FC<PromoCardProps> = ({
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
             ref={scrollRef}
             scrollEventThrottle={16}
             onTouchStart={() => setIsAutoPlayPaused(true)}
             onTouchEnd={() => setIsAutoPlayPaused(false)}
+            decelerationRate="fast"
+            snapToInterval={CARD_WIDTH}
+            snapToAlignment="center"
           >
             {images.map((img, index) => (
               <Image

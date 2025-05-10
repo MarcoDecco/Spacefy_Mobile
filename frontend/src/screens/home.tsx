@@ -3,7 +3,7 @@ import { ScrollView, View, Text, FlatList } from "react-native";
 import SearchBar from "../components/SearchBar";
 import Card from "../components/Card";
 import PromoCard from "../components/PromoCard";
-import { homeStyles as styles } from '../styles/home.styles';
+import { homeStyles as styles, CARD_WIDTH } from '../styles/home.styles';
 import Constants from 'expo-constants';
 
 export default function Home() {
@@ -94,6 +94,9 @@ export default function Home() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScroll}
+            snapToInterval={CARD_WIDTH + 16}
+            snapToAlignment="center"
+            decelerationRate="fast"
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
                 <Card 
@@ -120,6 +123,9 @@ export default function Home() {
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.horizontalScroll}
+            snapToInterval={CARD_WIDTH + 16}
+            snapToAlignment="center"
+            decelerationRate="fast"
             renderItem={({ item }) => (
               <View style={styles.cardWrapper}>
                 <PromoCard 

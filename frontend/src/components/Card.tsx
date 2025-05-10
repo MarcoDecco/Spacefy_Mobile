@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/home.styles';
 import { useIsFocused } from '@react-navigation/native';
@@ -36,6 +36,16 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
     setActiveIndex(newIndex);
   };
 
+  const handleMomentumScrollEnd = (event: any) => {
+    const slideSize = event.nativeEvent.layoutMeasurement.width;
+    const index = event.nativeEvent.contentOffset.x / slideSize;
+    const roundedIndex = Math.round(index);
+    
+    if (roundedIndex !== activeIndex) {
+      scrollToIndex(roundedIndex);
+    }
+  };
+
   useEffect(() => {
     if (images.length <= 1 || isAutoPlayPaused || !isFocused) return;
     const timer = setInterval(() => {
@@ -54,10 +64,14 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
             ref={scrollRef}
             scrollEventThrottle={16}
             onTouchStart={() => setIsAutoPlayPaused(true)}
             onTouchEnd={() => setIsAutoPlayPaused(false)}
+            decelerationRate="fast"
+            snapToInterval={CARD_WIDTH}
+            snapToAlignment="center"
           >
             {images.map((img, index) => (
               <Image
