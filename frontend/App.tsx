@@ -1,6 +1,11 @@
 import './global.css';
 import NavigationContext from '~/navigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
-  return <NavigationContext />;
+  return (
+    <SafeAreaProvider>
+      <NavigationContext />
+    </SafeAreaProvider>
+  );
 }
