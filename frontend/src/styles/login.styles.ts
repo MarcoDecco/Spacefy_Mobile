@@ -56,8 +56,24 @@ export const loginStyles = StyleSheet.create({
     borderBottomColor: '#E0E0E0',
     paddingHorizontal: 8,
     paddingBottom: 4,
-    marginBottom: 16,
+    marginBottom: 12,
     color: '#333333',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 8,
+    paddingBottom: 4,
+    color: '#333333',
+  },
+  eyeIcon: {
+    padding: 8,
   },
   loginButton: {
     width: '100%',

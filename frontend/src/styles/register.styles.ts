@@ -5,6 +5,12 @@ export const registerStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  scrollContent: {
+    flexGrow: 1,
+    width: '100%',
+    paddingBottom: 24,
+    alignItems: 'center',
+  },
   cardContainer: {
     width: '91.67%',
     backgroundColor: '#FFFFFF',
@@ -20,6 +26,7 @@ export const registerStyles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
+    alignSelf: 'center',
   },
   profileImageContainer: {
     marginTop: -64,
@@ -65,6 +72,22 @@ export const registerStyles = StyleSheet.create({
     paddingBottom: 4,
     marginBottom: 12,
     color: '#333333',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingHorizontal: 8,
+    paddingBottom: 4,
+    color: '#333333',
+  },
+  eyeIcon: {
+    padding: 8,
   },
   registerButton: {
     width: '100%',
