@@ -1,27 +1,30 @@
+import { useState } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
+import { globalStyles } from '../styles/globalStyles/globalStyles';
 import { registerStyles as styles } from '../styles/register.styles';
-import { globalStyles } from '../styles/globalStyles';
-import { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../styles/globalStyles/colors';
+import { imageStyles } from '~/styles/globalStyles/imageStyles';
+import { loginStyles } from '~/styles/login.styles';
+import { input } from '~/styles/globalStyles/inputStyles';
+import { buttons } from '~/styles/globalStyles/buttonStyles';
 
 export default function Register() {
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProps>();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <LinearGradient
-      colors={['#6ACDFF', '#1486B8']}
-      style={[styles.container, { paddingTop: insets.top }]}
+      colors={[colors.others[100], colors.others[200]]}
+      style={[styles.container]}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={globalStyles.container}
+        style={[globalStyles.container]}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView
@@ -30,93 +33,97 @@ export default function Register() {
           keyboardShouldPersistTaps="always"
           keyboardDismissMode="none"
         >
-          <View style={styles.cardContainer}>
-            <View style={styles.profileImageContainer}>
-              <Image
-                source={require('../../assets/perfil-login.png')}
-                style={styles.profileImage}
-              />
+          <View style={loginStyles.cardContainer}>
+            <View style={imageStyles.profileImageContainer}>
+              <Image source={require('../../assets/perfil-login.png')} style={imageStyles.profileImage} />
             </View>
-            <Text style={styles.title}>Criar Conta</Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nome</Text>
-              <TextInput
-                style={styles.input}
-                placeholderTextColor="#A0A0A0"
-                placeholder="Nome"
-              />
-              <Text style={styles.label}>Sobrenome</Text>
-              <TextInput
-                style={styles.input}
-                placeholderTextColor="#A0A0A0"
-                placeholder="Sobrenome"
-              />
-              <Text style={styles.label}>E-mail</Text>
-              <TextInput
-                style={styles.input}
-                placeholderTextColor="#A0A0A0"
-                placeholder="E-mail"
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-              <Text style={styles.label}>Senha</Text>
-              <View style={styles.passwordContainer}>
+
+            <View style={input.inputContainerRegister}>
+              <View>
+                <Text style={input.label}>Nome Completo</Text>
                 <TextInput
-                  style={styles.passwordInput}
+                  style={input.input}
                   placeholderTextColor="#A0A0A0"
-                  placeholder="Senha"
-                  secureTextEntry={!showPassword}
+                  placeholder="Digite seu nome"
                 />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off' : 'eye'}
-                    size={24}
-                    color="#A0A0A0"
-                  />
-                </TouchableOpacity>
               </View>
-              <Text style={styles.label}>Confirmar Senha</Text>
-              <View style={styles.passwordContainer}>
+
+              <View>
+                <Text style={input.label}>E-mail</Text>
                 <TextInput
-                  style={styles.passwordInput}
+                  style={input.input}
                   placeholderTextColor="#A0A0A0"
-                  placeholder="Confirmar Senha"
-                  secureTextEntry={!showConfirmPassword}
+                  placeholder="Digite seu e-mail"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                 />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <Ionicons
-                    name={showConfirmPassword ? 'eye-off' : 'eye'}
-                    size={24}
-                    color="#A0A0A0"
-                  />
-                </TouchableOpacity>
               </View>
-              <Text style={styles.label}>Telefone</Text>
-              <TextInput
-                style={styles.input}
-                placeholderTextColor="#A0A0A0"
-                placeholder="Telefone"
-                keyboardType="phone-pad"
-              />
+
+              <View>
+                <Text style={input.label}>Senha</Text>
+                <View style={input.inputContainerPassword}>
+                  <TextInput
+                    style={[input.inputPassword, { flex: 1 }]}
+                    placeholderTextColor="#A0A0A0"
+                    placeholder="Digite sua senha"
+                    secureTextEntry={!showPassword}
+                  />
+
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Ionicons
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="#A0A0A0"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View>
+                <Text style={input.label}>Confirmar Senha</Text>
+                <View style={input.inputContainerPassword}>
+                  <TextInput
+                    style={[input.inputPassword, { flex: 1 }]}
+                    placeholderTextColor="#A0A0A0"
+                    placeholder="Confirme sua senha"
+                    secureTextEntry={!showConfirmPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    <Ionicons
+                      name={showConfirmPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color="#A0A0A0"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View>
+                <Text style={input.label}>Telefone</Text>
+                <TextInput
+                  style={input.input}
+                  placeholderTextColor="#A0A0A0"
+                  placeholder="Digite seu telefone"
+                  keyboardType="phone-pad"
+                />
+              </View>
             </View>
+
             <TouchableOpacity
-              style={styles.registerButton}
+              style={buttons.blueButton}
               onPress={() => navigation.navigate('Login')}
             >
-              <Text style={styles.registerButtonText}>Cadastrar</Text>
+              <Text style={buttons.textBlueButton}>Cadastrar</Text>
             </TouchableOpacity>
+
             <View style={styles.dividerContainer}>
               <View style={styles.divider} />
               <Text style={styles.dividerText}>ou</Text>
               <View style={styles.divider} />
             </View>
+
             <Text style={styles.loginText}>Já possui uma conta?</Text>
+
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text style={styles.loginLink}>Login</Text>
             </TouchableOpacity>

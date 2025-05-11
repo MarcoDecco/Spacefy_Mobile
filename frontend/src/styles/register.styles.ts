@@ -4,132 +4,41 @@ export const registerStyles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
+
   scrollContent: {
     flexGrow: 1,
     width: '100%',
     paddingBottom: 24,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  cardContainer: {
-    width: '91.67%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    alignItems: 'center',
-    marginTop: 40,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-    alignSelf: 'center',
-  },
-  profileImageContainer: {
-    marginTop: -64,
-    marginBottom: 8,
-    borderRadius: 35,
-    backgroundColor: '#FFFFFF',
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 4,
-  },
-  profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 8,
-  },
-  label: {
-    color: '#333333',
-    fontWeight: '600',
-    marginBottom: 4,
-    marginLeft: 4,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingHorizontal: 8,
-    paddingBottom: 4,
-    marginBottom: 12,
-    color: '#333333',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    marginBottom: 12,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 8,
-    paddingBottom: 4,
-    color: '#333333',
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  registerButton: {
-    width: '100%',
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  registerButtonText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
     marginVertical: 8,
   },
+
   divider: {
     flex: 1,
     height: 1,
     backgroundColor: '#E0E0E0',
   },
+
   dividerText: {
     marginHorizontal: 8,
     color: '#333333',
   },
+
   loginText: {
     color: '#333333',
     textAlign: 'center',
     marginTop: 8,
   },
+
   loginLink: {
     color: '#3B82F6',
     textAlign: 'center',

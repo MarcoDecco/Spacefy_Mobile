@@ -85,14 +85,6 @@ export const globalStyles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginVertical: 8,
-  },
   button: {
     height: 48,
     borderRadius: 8,
@@ -107,31 +99,6 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
 });
-
-// Cores que você pode usar em toda a aplicação
-export const colors = {
-  primary: '#007AFF',
-  secondary: '#5856D6',
-  success: '#34C759',
-  danger: '#FF3B30',
-  warning: '#FF9500',
-  info: '#5856D6',
-  light: '#F2F2F7',
-  dark: '#1C1C1E',
-  white: '#FFFFFF',
-  black: '#000000',
-  gray: {
-    100: '#F2F2F7',
-    200: '#E5E5EA',
-    300: '#D1D1D6',
-    400: '#C7C7CC',
-    500: '#AEAEB2',
-    600: '#8E8E93',
-    700: '#636366',
-    800: '#48484A',
-    900: '#3A3A3C',
-  },
-};
 
 // Tamanhos de fonte
 export const typography = {

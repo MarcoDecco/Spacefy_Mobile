@@ -1,108 +1,44 @@
 import { StyleSheet } from 'react-native';
+import { colors } from './globalStyles/colors';
 
 export const loginStyles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
+
   cardContainer: {
-    width: '91.67%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    width: '85%',
+    backgroundColor: colors.white,
+    borderRadius: 15,
     alignItems: 'center',
-    marginTop: 64,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    boxShadow: '2px 6px 10px rgba(0, 0, 0, 0.2)',
   },
+
   profileImageContainer: {
-    marginTop: -64,
-    marginBottom: 16,
-    borderRadius: 35,
-    backgroundColor: '#FFFFFF',
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 4,
+    marginTop: -70,
+    marginBottom: 50,
+    borderRadius: 100,
+    backgroundColor: colors.white,
+    padding: 6,
+    boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.2)',
   },
+
   profileImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 90,
+    height: 90,
   },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 8,
-  },
-  label: {
-    color: '#333333',
-    fontWeight: '600',
-    marginBottom: 4,
-    marginLeft: 4,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    paddingHorizontal: 8,
-    paddingBottom: 4,
-    marginBottom: 12,
-    color: '#333333',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    marginBottom: 12,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingHorizontal: 8,
-    paddingBottom: 4,
-    color: '#333333',
-  },
-  eyeIcon: {
-    padding: 8,
-  },
-  loginButton: {
-    width: '100%',
-    backgroundColor: '#3B82F6',
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+
   registerText: {
-    color: '#333333',
+    color: colors.dark_gray,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 15,
   },
+
   registerLink: {
-    color: '#3B82F6',
+    color: colors.dark_blue,
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,

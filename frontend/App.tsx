@@ -1,7 +1,7 @@
 import NavigationContext from '~/navigation';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { globalStyles } from './src/styles/globalStyles';
+import { globalStyles } from './src/styles/globalStyles/globalStyles';
 
 export default function App() {
   return (

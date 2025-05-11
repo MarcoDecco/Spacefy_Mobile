@@ -1,16 +1,16 @@
-import { View, ActivityIndicator, Text, Platform } from 'react-native';
+import { View, ActivityIndicator, Image, Platform } from 'react-native';
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
 import { splashStyles as styles } from '../styles/splash.styles';
+import { colors } from '../styles/globalStyles/colors';
 
 export default function Splash() {
   const navigation = useNavigation<NavigationProps>();
-  const insets = useSafeAreaInsets();
+
 
   useEffect(() => {
     // Configurações específicas por plataforma
@@ -30,32 +30,16 @@ export default function Splash() {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <StatusBar
-        style={Platform.OS === 'ios' ? 'dark' : 'light'}
-        translucent
-        backgroundColor="transparent"
-      />
+    <View style={{flex: 1}}>
+      <StatusBar style={Platform.OS === 'ios' ? 'dark' : 'light'} translucent backgroundColor="transparent" />
+
       <LinearGradient
-        colors={['#1EACE3', '#152F6C']}
-        style={[
-          styles.gradient,
-          {
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom,
-            ...(Platform.OS === 'ios' && {
-              paddingTop: Math.max(insets.top, 20),
-            }),
-          }
-        ]}
-      >
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Spacefy</Text>
-        </View>
-        <ActivityIndicator
-          size={Platform.OS === 'ios' ? 'large' : 'large'}
-          color="#FCFCFC"
-        />
+        colors={[ colors.splash[100], colors.splash[200] ]}
+        style={[ styles.gradient ]}>
+        
+        <Image source={require('../../assets/logo/logo-spacefy.png')} style={styles.logo} />
+
+        <ActivityIndicator size={50} color="#FCFCFC" />
       </LinearGradient>
     </View>
   );

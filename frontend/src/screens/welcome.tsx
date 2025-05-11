@@ -1,18 +1,18 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
 import { welcomeStyles as styles } from '../styles/welcome.styles';
+import { colors } from '../styles/globalStyles/colors';
+import { buttons } from '../styles/globalStyles/buttonStyles';
 
 export default function Welcome() {
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProps>();
 
   return (
     <LinearGradient
-      colors={['#C2EBFF', '#6ACDFF']}
-      style={[styles.container, { paddingTop: insets.top }]}
+      colors={[ colors.others[100], colors.others[200] ]}
+      style={[styles.container]}
     >
       <View style={styles.imageContainer}>
         <Image
@@ -28,17 +28,17 @@ export default function Welcome() {
       </Text>
 
       <TouchableOpacity
-        style={styles.loginButton}
+        style={buttons.blueButton}
         onPress={() => navigation.navigate('Login')}
       >
-        <Text style={styles.loginButtonText}>Login</Text>
+        <Text style={buttons.textBlueButton}>Login</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.registerButton}
+        style={buttons.whiteButton}
         onPress={() => navigation.navigate('Register')}
       >
-        <Text style={styles.registerButtonText}>Criar Conta</Text>
+        <Text style={buttons.textWhiteButton}>Criar Conta</Text>
       </TouchableOpacity>
 
     </LinearGradient>
