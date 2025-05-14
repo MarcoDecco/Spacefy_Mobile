@@ -6,7 +6,6 @@ export const globalStyles = StyleSheet.create({
   // Containers
   container: {
     flex: 1,
-    width: '100%',
   },
   scrollContent: {
     flexGrow: 1,

@@ -82,6 +82,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
               />
             ))}
           </ScrollView>
+          
           {/* Setas de navegação */}
           <TouchableOpacity
             style={[styles.arrow, styles.arrowLeft]}

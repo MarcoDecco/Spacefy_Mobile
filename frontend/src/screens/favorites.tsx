@@ -3,6 +3,7 @@ import { View, Text, FlatList } from 'react-native';
 import { favoritesStyles as styles } from '../styles/favorites.styles';
 import Card from '../components/Card';
 import SearchBar from '../components/SearchBar';
+import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 const favoriteSpaces = [
   // Exemplo de dados favoritos
@@ -40,12 +41,14 @@ const FavoritesScreen = () => {
   return (
     <View style={styles.container}>
       <SearchBar />
-      <Text style={styles.title}>Favoritos</Text>
+
+      <Text style={pageTexts.title}>Favoritos</Text>
+      
       <FlatList
         data={favoriteSpaces}
         keyExtractor={item => item.id}
         style={styles.list}
-        contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}
+        contentContainerStyle={{ alignItems: 'center', marginTop: 20, paddingBottom: 40 }}
         renderItem={({ item }) => (
           <View style={styles.cardWrapper}>
             <Card

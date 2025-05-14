@@ -4,7 +4,6 @@ export const favoritesStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    paddingHorizontal: 16,
   },
   title: {
     fontSize: 24,

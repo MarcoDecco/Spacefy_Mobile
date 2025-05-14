@@ -11,7 +11,6 @@ import { colors } from '../styles/globalStyles/colors';
 export default function Splash() {
   const navigation = useNavigation<NavigationProps>();
 
-
   useEffect(() => {
     // Configurações específicas por plataforma
     if (Platform.OS === 'android') {

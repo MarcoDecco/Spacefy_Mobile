@@ -3,8 +3,9 @@ import { ScrollView, View, Text, FlatList } from "react-native";
 import SearchBar from "../components/SearchBar";
 import Card from "../components/Card";
 import PromoCard from "../components/PromoCard";
-import { homeStyles as styles, CARD_WIDTH } from '../styles/home.styles';
 import Constants from 'expo-constants';
+import { homeStyles as styles, CARD_WIDTH } from '../styles/home.styles';
+import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 export default function Home() {
   // Dados dos cards em destaque (original inalterado)
@@ -76,17 +77,17 @@ export default function Home() {
   ];
 
   return (
-    <View style={styles.mainContainer}>
+    <>
       <SearchBar />
+      
       <ScrollView 
-        style={styles.contentContainer}
+        style={styles.Container}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.scrollContent}>
+
+        <View>
           {/* Seção Destaques */}
-          <View style={[styles.sectionHeader, { marginTop: 20, marginBottom: 16 }]}>
-            <Text style={styles.sectionTitle}>Espaços em Destaque</Text>
-          </View>
+          <Text style={pageTexts.title}>Espaços em Destaque</Text>
           
           <FlatList
             data={featuredCards}
@@ -112,10 +113,8 @@ export default function Home() {
           />
 
           {/* Seção Promoções */}
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Promoções Imperdíveis</Text>
-            <Text style={styles.sectionSubtitle}>Descontos exclusivos por tempo limitado</Text>
-          </View>
+          <Text style={pageTexts.title}>Promoções Imperdíveis</Text>
+          <Text style={pageTexts.subtitle}>Descontos exclusivos por tempo limitado</Text>
           
           <FlatList
             data={promoCards}
@@ -144,6 +143,6 @@ export default function Home() {
           <View style={styles.bottomSpace} />
         </View>
       </ScrollView>
-    </View>
+    </>
   );
 }

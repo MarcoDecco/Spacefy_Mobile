@@ -3,6 +3,8 @@ import { View, Text, FlatList } from 'react-native';
 import { rentedStyles as styles } from '../styles/rented.styles';
 import Card from '../components/Card';
 import SearchBar from '../components/SearchBar';
+import { pageTexts } from '../styles/globalStyles/pageTexts';
+
 
 const rentedSpaces = [
   // Exemplo de dados alugados
@@ -40,12 +42,14 @@ const RentedScreen = () => {
   return (
     <View style={styles.container}>
       <SearchBar />
-      <Text style={styles.title}>Alugados</Text>
+
+      <Text style={pageTexts.title}>Alugados</Text>
+      
       <FlatList
         data={rentedSpaces}
         keyExtractor={item => item.id}
         style={styles.list}
-        contentContainerStyle={{ alignItems: 'center', paddingBottom: 40 }}
+        contentContainerStyle={{ alignItems: 'center', marginTop: 20, marginBottom: 40 }}
         renderItem={({ item }) => (
           <View style={styles.cardWrapper}>
             <Card

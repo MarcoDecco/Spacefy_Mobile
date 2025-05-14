@@ -3,14 +3,11 @@ import { StyleSheet } from 'react-native';
 export const registerStyles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   scrollContent: {
-    flexGrow: 1,
+    flex: 1,
     width: '100%',
-    paddingBottom: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
