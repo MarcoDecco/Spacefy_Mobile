@@ -4,12 +4,20 @@ import Constants from 'expo-constants';
 // instanciando a altura da Status Bar do dispositivo
 const statusBarHeight = Constants.statusBarHeight
 
+// Altura total da SearchBar (StatusBar + margem + altura do container)
+export const SEARCH_BAR_HEIGHT = statusBarHeight + 20 + 40;
+
 export const searchBarStyles = StyleSheet.create({
     container: {
-        marginTop: statusBarHeight + 20,
+        position: 'absolute',
+        top: statusBarHeight + 20,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
+        backgroundColor: 'transparent',
     },
 
     searchContainer: {

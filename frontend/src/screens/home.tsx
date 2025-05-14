@@ -80,12 +80,8 @@ export default function Home() {
     <>
       <SearchBar />
       
-      <ScrollView 
-        style={styles.Container}
-        showsVerticalScrollIndicator={false}
-      >
-
-        <View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.Container}>
           {/* Seção Destaques */}
           <Text style={pageTexts.title}>Espaços em Destaque</Text>
           

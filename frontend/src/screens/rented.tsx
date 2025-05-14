@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, ScrollView, Text, FlatList } from 'react-native';
 import { rentedStyles as styles } from '../styles/rented.styles';
 import Card from '../components/Card';
 import SearchBar from '../components/SearchBar';
@@ -38,35 +38,35 @@ const rentedSpaces = [
   // Adicione mais itens conforme necessário
 ];
 
-const RentedScreen = () => {
+export default function RentedScreen() {
   return (
     <View style={styles.container}>
       <SearchBar />
 
-      <Text style={pageTexts.title}>Alugados</Text>
-      
-      <FlatList
-        data={rentedSpaces}
-        keyExtractor={item => item.id}
-        style={styles.list}
-        contentContainerStyle={{ alignItems: 'center', marginTop: 20, marginBottom: 40 }}
-        renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
-            <Card
-              images={item.images}
-              title={item.title}
-              address={item.address}
-              price={item.price}
-              rating={item.rating}
-              reviews={item.reviews}
-            />
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.emptyText}>Nenhum espaço alugado encontrado.</Text>}
-        showsVerticalScrollIndicator={false}
-      />
+      <ScrollView>
+        <Text style={pageTexts.title}>Alugados</Text>
+        
+        <FlatList
+          data={rentedSpaces}
+          keyExtractor={item => item.id}
+          style={styles.list}
+          contentContainerStyle={{ alignItems: 'center', marginTop: 20, marginBottom: 40 }}
+          renderItem={({ item }) => (
+            <View style={styles.cardWrapper}>
+              <Card
+                images={item.images}
+                title={item.title}
+                address={item.address}
+                price={item.price}
+                rating={item.rating}
+                reviews={item.reviews}
+              />
+            </View>
+          )}
+          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum espaço alugado encontrado.</Text>}
+          showsVerticalScrollIndicator={false}
+        />
+      </ScrollView>
     </View>
   );
 };
-
-export default RentedScreen;

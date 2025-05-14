@@ -1,9 +1,11 @@
 import { StyleSheet } from 'react-native';
+import { SEARCH_BAR_HEIGHT } from './globalStyles/searchBarStyles';
 
 export const favoritesStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingTop: SEARCH_BAR_HEIGHT,
   },
   title: {
     fontSize: 24,
