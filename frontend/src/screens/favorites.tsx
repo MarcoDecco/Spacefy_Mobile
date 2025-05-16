@@ -42,31 +42,28 @@ export default function FavoritesScreen() {
     <View style={styles.container}>
       <SearchBar />
 
-
-      <ScrollView>
-        <Text style={pageTexts.title}>Favoritos</Text>
-        
-        <FlatList
-          data={favoriteSpaces}
-          keyExtractor={item => item.id}
-          style={styles.list}
-          contentContainerStyle={{ alignItems: 'center', marginTop: 20, paddingBottom: 40 }}
-          renderItem={({ item }) => (
-            <View style={styles.cardWrapper}>
-              <Card
-                images={item.images}
-                title={item.title}
-                address={item.address}
-                price={item.price}
-                rating={item.rating}
-                reviews={item.reviews}
-              />
-            </View>
-          )}
-          ListEmptyComponent={<Text style={styles.emptyText}>Nenhum espaço favorito encontrado.</Text>}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+      <Text style={pageTexts.title}>Favoritos</Text>
+      
+      <FlatList
+        data={favoriteSpaces}
+        keyExtractor={item => item.id}
+        style={styles.list}
+        contentContainerStyle={{ alignItems: 'center', marginTop: 20, paddingBottom: 40 }}
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <Card
+              images={item.images}
+              title={item.title}
+              address={item.address}
+              price={item.price}
+              rating={item.rating}
+              reviews={item.reviews}
+            />
+          </View>
+        )}
+        ListEmptyComponent={<Text style={styles.emptyText}>Nenhum espaço favorito encontrado.</Text>}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };

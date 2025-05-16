@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, FlatList } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import SearchBar from "../components/SearchBar";
 import Card from "../components/Card";
 import PromoCard from "../components/PromoCard";
@@ -39,106 +39,119 @@ export default function Home() {
     }
   ];
 
-  // Novos dados para promoções (adicionado sem alterar o existente)
+  // Dados dos cards em promoção
   const promoCards = [
     {
-      id: 'p1',
-      images: [require('../../assets/espaco.jpg')],
-      title: 'Espaço Verão - Promoção',
-      address: 'Praia de Ipanema, 50',
-      price: 'R$ 1.200',
-      originalPrice: 'R$ 2.000',
-      rating: 4.5,
-      reviews: 15,
-      discount: '40% OFF'
+      id: '1',
+      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
+      title: 'Espaço Luxuoso, São Paulo',
+      address: 'Av. Brigadeiro Faria Lima, 1500',
+      price: 'R$ 2.800',
+      originalPrice: 'R$ 3.500',
+      rating: 4.9,
+      reviews: 45,
+      discount: '-20%'
     },
     {
-      id: 'p2',
+      id: '2',
       images: [require('../../assets/espaco.jpg')],
-      title: 'Salão Primavera',
-      address: 'Av. Brasil, 1000',
-      price: 'R$ 1.500',
-      originalPrice: 'R$ 2.500',
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
       rating: 4.7,
-      reviews: 22,
-      discount: '35% OFF'
+      reviews: 28,
+      discount: '-15%'
     },
     {
-      id: 'p3',
-      images: [require('../../assets/espaco.jpg')],
-      title: 'Galpão Criativo',
-      address: 'Rua da Liberdade, 300',
-      price: 'R$ 1.800',
-      originalPrice: 'R$ 3.000',
-      rating: 4.6,
-      reviews: 19,
-      discount: '40% OFF'
+      id: '3',
+      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
+      title: 'Espaço Premium, Belo Horizonte',
+      address: 'Av. Afonso Pena, 1000',
+      price: 'R$ 2.200',
+      originalPrice: 'R$ 2.800',
+      rating: 4.8,
+      reviews: 32,
+      discount: '-25%'
     }
   ];
+
+  const renderFeaturedSection = () => (
+    <View>
+      <Text style={pageTexts.title}>Espaços em Destaque</Text>
+      <FlatList
+        data={featuredCards}
+        keyExtractor={item => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.horizontalScroll}
+        snapToInterval={CARD_WIDTH + 16}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <Card 
+              images={item.images}
+              title={item.title}
+              address={item.address}
+              price={item.price}
+              rating={item.rating}
+              reviews={item.reviews}
+            />
+          </View>
+        )}
+      />
+    </View>
+  );
+
+  const renderPromoSection = () => (
+    <View>
+      <Text style={pageTexts.title}>Promoções Imperdíveis</Text>
+      <Text style={pageTexts.subtitle}>Descontos exclusivos por tempo limitado</Text>
+      <FlatList
+        data={promoCards}
+        keyExtractor={item => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.horizontalScroll}
+        snapToInterval={CARD_WIDTH + 16}
+        snapToAlignment="center"
+        decelerationRate="fast"
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <PromoCard 
+              images={item.images}
+              title={item.title}
+              address={item.address}
+              price={item.price}
+              originalPrice={item.originalPrice}
+              rating={item.rating}
+              reviews={item.reviews}
+              discount={item.discount}
+            />
+          </View>
+        )}
+      />
+    </View>
+  );
 
   return (
     <>
       <SearchBar />
-      
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.Container}>
-          {/* Seção Destaques */}
-          <Text style={pageTexts.title}>Espaços em Destaque</Text>
-          
-          <FlatList
-            data={featuredCards}
-            keyExtractor={item => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
-            snapToInterval={CARD_WIDTH + 16}
-            snapToAlignment="center"
-            decelerationRate="fast"
-            renderItem={({ item }) => (
-              <View style={styles.cardWrapper}>
-                <Card 
-                  images={item.images}
-                  title={item.title}
-                  address={item.address}
-                  price={item.price}
-                  rating={item.rating}
-                  reviews={item.reviews}
-                />
-              </View>
-            )}
-          />
-
-          {/* Seção Promoções */}
-          <Text style={pageTexts.title}>Promoções Imperdíveis</Text>
-          <Text style={pageTexts.subtitle}>Descontos exclusivos por tempo limitado</Text>
-          
-          <FlatList
-            data={promoCards}
-            keyExtractor={item => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
-            snapToInterval={CARD_WIDTH + 16}
-            snapToAlignment="center"
-            decelerationRate="fast"
-            renderItem={({ item }) => (
-              <View style={styles.cardWrapper}>
-                <PromoCard 
-                  images={item.images}
-                  title={item.title}
-                  address={item.address}
-                  price={item.price}
-                  originalPrice={item.originalPrice}
-                  rating={item.rating}
-                  reviews={item.reviews}
-                  discount={item.discount}
-                />
-              </View>
-            )}
-          />
-          <View style={styles.bottomSpace} />
-        </View>
-      </ScrollView>
+      <View style={styles.Container}>
+        <FlatList
+          data={[1]} // Dados fictícios pois só precisamos renderizar uma vez
+          keyExtractor={() => '1'}
+          showsVerticalScrollIndicator={false}
+          renderItem={() => (
+            <>
+              {renderFeaturedSection()}
+              {renderPromoSection()}
+              <View style={styles.bottomSpace} />
+            </>
+          )}
+        />
+      </View>
     </>
   );
 }

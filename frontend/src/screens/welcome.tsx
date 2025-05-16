@@ -1,18 +1,15 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../navigation/types';
 import { welcomeStyles as styles } from '../styles/welcome.styles';
 import { colors } from '../styles/globalStyles/colors';
-import { buttons } from '../styles/globalStyles/buttonStyles';
+import { containers } from '../styles/globalStyles/containerStyles';
+import Button from '../components/button';
 
 export default function Welcome() {
-  const navigation = useNavigation<NavigationProps>();
-
   return (
     <LinearGradient
       colors={[ colors.others[100], colors.others[200] ]}
-      style={[styles.container]}
+      style={[containers.container2]}
     >
       <View style={styles.imageContainer}>
         <Image
@@ -27,19 +24,17 @@ export default function Welcome() {
         Antes de começar a utilizar a plataforma, entre com o seu login preenchendo as informações necessárias
       </Text>
 
-      <TouchableOpacity
-        style={buttons.blueButton}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={buttons.textBlueButton}>Login</Text>
-      </TouchableOpacity>
+      <Button 
+        text="Login"
+        navigateTo="Login"
+        color="blue"
+      />
 
-      <TouchableOpacity
-        style={buttons.whiteButton}
-        onPress={() => navigation.navigate('Register')}
-      >
-        <Text style={buttons.textWhiteButton}>Criar Conta</Text>
-      </TouchableOpacity>
+      <Button 
+        text="Criar Conta"
+        navigateTo="Register"
+        color="white"
+      />
 
     </LinearGradient>
   );

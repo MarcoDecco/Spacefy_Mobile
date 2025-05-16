@@ -1,9 +1,8 @@
-import { View, ActivityIndicator, Image, Platform } from 'react-native';
+import { ActivityIndicator, Image, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
-import { LinearGradient } from 'expo-linear-gradient';
-import { StatusBar } from 'expo-status-bar';
 import * as NavigationBar from 'expo-navigation-bar';
 import { splashStyles as styles } from '../styles/splash.styles';
 import { colors } from '../styles/globalStyles/colors';
@@ -29,9 +28,6 @@ export default function Splash() {
   }, [navigation]);
 
   return (
-    <View style={{flex: 1}}>
-      <StatusBar style={Platform.OS === 'ios' ? 'dark' : 'light'} translucent backgroundColor="transparent" />
-
       <LinearGradient
         colors={[ colors.splash[100], colors.splash[200] ]}
         style={[ styles.gradient ]}>
@@ -40,6 +36,5 @@ export default function Splash() {
 
         <ActivityIndicator size={50} color="#FCFCFC" />
       </LinearGradient>
-    </View>
   );
 }

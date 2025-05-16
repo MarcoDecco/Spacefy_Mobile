@@ -10,7 +10,7 @@ import { colors } from '../styles/globalStyles/colors';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
 import { loginStyles } from '~/styles/login.styles';
 import { input } from '~/styles/globalStyles/inputStyles';
-import { buttons } from '~/styles/globalStyles/buttonStyles';
+import Button from '../components/button';
 
 export default function Register() {
   const navigation = useNavigation<NavigationProps>();
@@ -110,12 +110,11 @@ export default function Register() {
               </View>
             </View>
 
-            <TouchableOpacity
-              style={buttons.blueButton}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Text style={buttons.textBlueButton}>Cadastrar</Text>
-            </TouchableOpacity>
+            <Button 
+              text="Cadastrar"
+              navigateTo="Login"
+              color="blue"
+            />
 
             <View style={styles.dividerContainer}>
               <View style={styles.divider} />

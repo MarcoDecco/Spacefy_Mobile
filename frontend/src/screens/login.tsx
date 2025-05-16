@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { loginStyles as styles } from '../styles/login.styles';
 import { colors } from '~/styles/globalStyles/colors';
 import { input } from '~/styles/globalStyles/inputStyles';
-import { buttons } from '~/styles/globalStyles/buttonStyles';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
+import Button from '../components/button';
 
 export default function Login({ navigation }: any) {
   const [showPassword, setShowPassword] = useState(false);
@@ -60,12 +60,11 @@ export default function Login({ navigation }: any) {
           </View>
         </View>
 
-        <TouchableOpacity
-          style={buttons.blueButton}
-          onPress={() => navigation.navigate('MainApp')}
-        >
-          <Text style={buttons.textBlueButton}>Entrar</Text>
-        </TouchableOpacity>
+        <Button 
+          text="Entrar"
+          navigateTo="MainApp"
+          color="blue"
+        />
 
         <Text style={styles.registerText}>Não possui uma conta?</Text>
 
