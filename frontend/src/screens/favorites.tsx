@@ -41,14 +41,11 @@ export default function FavoritesScreen() {
   return (
     <View style={styles.container}>
       <SearchBar />
-
-      <Text style={pageTexts.title}>Favoritos</Text>
       
       <FlatList
         data={favoriteSpaces}
         keyExtractor={item => item.id}
-        style={styles.list}
-        contentContainerStyle={{ alignItems: 'center', marginTop: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ alignItems: 'center', marginTop: 130}}
         renderItem={({ item }) => (
           <View style={styles.cardWrapper}>
             <Card

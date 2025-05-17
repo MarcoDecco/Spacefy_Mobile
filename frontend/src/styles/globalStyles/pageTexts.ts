@@ -1,9 +1,7 @@
 import { StyleSheet } from 'react-native';
-
 export const pageTexts = StyleSheet.create({
     
   title: {
-    marginTop: 40,
     marginLeft: 20,
     fontSize: 22,
     fontWeight: 'bold',

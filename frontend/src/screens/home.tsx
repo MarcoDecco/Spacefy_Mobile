@@ -135,22 +135,21 @@ export default function Home() {
   );
 
   return (
-    <>
-      {/* <SearchBar /> */}
-      <View style={styles.Container}>
-        <FlatList
-          data={[1]} // Dados fictícios pois só precisamos renderizar uma vez
-          keyExtractor={() => '1'}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <>
-              {renderFeaturedSection()}
-              {renderPromoSection()}
-              <View style={styles.bottomSpace} />
-            </>
-          )}
-        />
-      </View>
-    </>
+    <View style={styles.Container}>
+      <SearchBar />
+
+      <FlatList
+        data={[1]} // Dados fictícios pois só precisamos renderizar uma vez
+        keyExtractor={() => '1'}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 130 }}
+        renderItem={() => (
+          <>
+            {renderFeaturedSection()}
+            {renderPromoSection()}
+          </>
+        )}
+      />
+    </View>
   );
 }

@@ -6,7 +6,7 @@ import { colors } from './colors';
 const statusBarHeight = Constants.statusBarHeight
 
 // Altura total da SearchBar (StatusBar + margem + altura do container)
-export const SEARCH_BAR_HEIGHT = statusBarHeight + 20 + 40;
+export const SEARCH_BAR_HEIGHT = statusBarHeight + 60;
 
 export const searchBarStyles = StyleSheet.create({
     container: {

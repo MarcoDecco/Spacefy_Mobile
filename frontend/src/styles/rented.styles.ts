@@ -1,12 +1,12 @@
 import { StyleSheet } from 'react-native';
-import { SEARCH_BAR_HEIGHT } from './globalStyles/searchBarStyles';
+import { colors } from './globalStyles/colors';
 
 export const rentedStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingTop: SEARCH_BAR_HEIGHT,
+    backgroundColor: colors.light_gray,
   },
+
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -15,12 +15,15 @@ export const rentedStyles = StyleSheet.create({
     marginLeft: 4,
     marginTop: 16,
   },
+
   list: {
     flex: 1,
   },
+
   cardWrapper: {
     marginBottom: 18,
   },
+  
   emptyText: {
     textAlign: 'center',
     color: '#888',
