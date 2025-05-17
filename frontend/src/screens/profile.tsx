@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { profileStyles as styles } from '../styles/profile.styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import espacoImg from '../../assets/mansao.png';
 
 type RootStackParamList = {
   Welcome: undefined;
@@ -114,6 +115,20 @@ export default function Profile() {
         style={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {/* Banner promocional */}
+        <View style={styles.bannerContainer}>
+          <View style={{ flex: 2 }}>
+            <Text style={styles.bannerTitle}>Anuncie seu Espaço na Spacefy</Text>
+            <Text style={styles.bannerSubtitle}>
+              Veja fica mais fácil anunciar o seu local para aluguel.
+            </Text>
+            <TouchableOpacity style={styles.bannerButton}>
+              <Text style={styles.bannerButtonText}>Anunciar Espaço</Text>
+            </TouchableOpacity>
+          </View>
+          <Image source={espacoImg} style={styles.bannerImage} resizeMode="contain" />
+        </View>
+
         {/* Menu de opções */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Minha Conta</Text>

@@ -154,4 +154,41 @@ export const profileStyles = StyleSheet.create({
     color: '#DC2626',
     marginLeft: 8,
   },
+  bannerContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#1EACE3',
+    borderRadius: 20,
+    margin: 20,
+    padding: 20,
+    alignItems: 'center',
+  },
+  bannerTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  bannerSubtitle: {
+    color: '#fff',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  bannerButton: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignSelf: 'flex-start',
+  },
+  bannerButtonText: {
+    color: '#1EACE3',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  bannerImage: {
+    width: 80,
+    height: 80,
+    marginLeft: 16,
+    flex: 1,
+  },
 }); 
