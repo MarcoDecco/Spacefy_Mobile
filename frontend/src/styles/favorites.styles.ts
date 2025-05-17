@@ -1,12 +1,10 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './globalStyles/colors';
+import { SEARCH_BAR_HEIGHT } from './globalStyles/searchBarStyles';
 
 export const favoritesStyles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< HEAD
-    backgroundColor: colors.light_gray,
-=======
     backgroundColor: '#f5f5f5',
     paddingTop: SEARCH_BAR_HEIGHT,
   },
@@ -27,7 +25,6 @@ export const favoritesStyles = StyleSheet.create({
   },
   cardWrapper: {
     marginBottom: 18,
->>>>>>> aeccf6b8d5b720be6b1952298e57fdb3bd867d25
   },
 
   // Verificar a necessidade de utilizar o Título
@@ -48,7 +45,6 @@ export const favoritesStyles = StyleSheet.create({
     marginTop: 40,
   },
   
-  cardWrapper: {
-    marginBottom: 18,
-  },
+
+  
 }); 

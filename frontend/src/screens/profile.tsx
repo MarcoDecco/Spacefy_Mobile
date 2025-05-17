@@ -5,10 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { profileStyles as styles } from '../styles/profile.styles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-<<<<<<< HEAD
 import espacoImg from '../../assets/mansao.png';
-=======
->>>>>>> aeccf6b8d5b720be6b1952298e57fdb3bd867d25
 
 type RootStackParamList = {
   Welcome: undefined;

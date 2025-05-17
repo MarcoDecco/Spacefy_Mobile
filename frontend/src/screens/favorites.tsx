@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, FlatList, ScrollView } from 'react-native';
 import { favoritesStyles as styles } from '../styles/favorites.styles';
-import Card from '../components/Card';
-import SearchBar from '../components/SearchBar';
+import Card from '../components/card';
+import SearchBar from '../components/searchBar';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 const favoriteSpaces = [

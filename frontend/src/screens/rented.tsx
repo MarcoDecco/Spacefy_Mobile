@@ -1,15 +1,8 @@
 import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { rentedStyles as styles } from '../styles/rented.styles';
-<<<<<<< HEAD
 import Card from '../components/card';
 import SearchBar from '../components/searchBar';
-=======
-import Card from '../components/Card';
-import SearchBar from '../components/SearchBar';
-import { pageTexts } from '../styles/globalStyles/pageTexts';
-
->>>>>>> aeccf6b8d5b720be6b1952298e57fdb3bd867d25
 
 const rentedSpaces = [
   // Exemplo de dados alugados
