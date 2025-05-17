@@ -7,6 +7,10 @@ export const favoritesStyles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     paddingTop: SEARCH_BAR_HEIGHT,
   },
+  titleContainer: {
+    paddingHorizontal: 16,
+    marginTop: 16,
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',

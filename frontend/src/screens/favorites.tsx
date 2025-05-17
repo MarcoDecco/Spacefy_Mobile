@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, FlatList, ScrollView } from 'react-native';
 import { favoritesStyles as styles } from '../styles/favorites.styles';
-import Card from '../components/card';
-import SearchBar from '../components/searchBar';
+import Card from '../components/Card';
+import SearchBar from '../components/SearchBar';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 const favoriteSpaces = [
@@ -42,8 +42,6 @@ export default function FavoritesScreen() {
     <View style={styles.container}>
       <SearchBar />
 
-      <Text style={pageTexts.title}>Favoritos</Text>
-      
       <FlatList
         data={favoriteSpaces}
         keyExtractor={item => item.id}

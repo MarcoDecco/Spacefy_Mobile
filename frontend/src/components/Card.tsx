@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/home.styles';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -18,6 +19,7 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ images, title, address, price, rating, reviews }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
 
@@ -140,8 +142,22 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
             <Text style={styles.address} numberOfLines={1}>{address}</Text>
           </View>
-          <TouchableOpacity>
-            <Feather name="heart" size={20} color="#888" />
+          <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
+            {isFavorite ? (
+              <MaterialIcons 
+                name="favorite" 
+                size={20} 
+                color="#FF0000" 
+                style={styles.heartIcon}
+              />
+            ) : (
+              <Feather 
+                name="heart" 
+                size={20} 
+                color="#888" 
+                style={styles.heartIcon}
+              />
+            )}
           </TouchableOpacity>
         </View>
         <View style={styles.priceContainer}>
@@ -300,6 +316,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  heartIcon: {
+    transform: [{ scale: 1.1 }]
   },
 });
 

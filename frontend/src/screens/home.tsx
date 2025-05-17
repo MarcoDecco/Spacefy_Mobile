@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, FlatList } from "react-native";
-import SearchBar from "../components/searchBar";
-import Card from "../components/card";
-import PromoCard from "../components/promoCard";
+import SearchBar from "../components/SearchBar";
+import Card from "../components/Card";
+import PromoCard from "../components/PromoCard";
 import { homeStyles as styles, CARD_WIDTH } from '../styles/home.styles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
@@ -135,22 +135,20 @@ export default function Home() {
   );
 
   return (
-    <>
-      {/* <SearchBar /> */}
-      <View style={styles.Container}>
-        <FlatList
-          data={[1]} // Dados fictícios pois só precisamos renderizar uma vez
-          keyExtractor={() => '1'}
-          showsVerticalScrollIndicator={false}
-          renderItem={() => (
-            <>
-              {renderFeaturedSection()}
-              {renderPromoSection()}
-              <View style={styles.bottomSpace} />
-            </>
-          )}
-        />
-      </View>
-    </>
+    <View style={styles.Container}>
+      <SearchBar />
+      <FlatList
+        data={[1]} // Dados fictícios pois só precisamos renderizar uma vez
+        keyExtractor={() => '1'}
+        showsVerticalScrollIndicator={false}
+        renderItem={() => (
+          <>
+            {renderFeaturedSection()}
+            {renderPromoSection()}
+            <View style={styles.bottomSpace} />
+          </>
+        )}
+      />
+    </View>
   );
 }

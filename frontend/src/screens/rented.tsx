@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, ScrollView, Text, FlatList } from 'react-native';
 import { rentedStyles as styles } from '../styles/rented.styles';
-import Card from '../components/card';
-import SearchBar from '../components/searchBar';
+import Card from '../components/Card';
+import SearchBar from '../components/SearchBar';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 
@@ -42,8 +42,6 @@ export default function RentedScreen() {
   return (
     <View style={styles.container}>
       <SearchBar />
-
-      <Text style={pageTexts.title}>Alugados</Text>
       
       <FlatList
         data={rentedSpaces}
