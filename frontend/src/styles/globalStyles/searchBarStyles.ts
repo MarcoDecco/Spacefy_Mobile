@@ -11,14 +11,11 @@ export const SEARCH_BAR_HEIGHT = statusBarHeight + 20 + 40;
 export const searchBarStyles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         zIndex: 1000,
         flexDirection: 'row',
         alignItems: 'flex-end',
         gap: 8,
-        paddingBottom: 8,
+        paddingBottom: 15,
         backgroundColor: 'rgba(245, 245, 245, 0.8)', // Fundo com 95% de opacidade
     },
 
@@ -42,7 +39,7 @@ export const searchBarStyles = StyleSheet.create({
     },
 
     searchButton: {
-        backgroundColor: '#1EACE3',
+        backgroundColor: colors.blue,
         padding: 6,
         borderRadius: 100,
     },

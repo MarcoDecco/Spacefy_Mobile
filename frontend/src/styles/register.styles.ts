@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { colors } from './globalStyles/colors';
 
 export const registerStyles = StyleSheet.create({
   container: {
@@ -37,7 +38,7 @@ export const registerStyles = StyleSheet.create({
   },
 
   loginLink: {
-    color: '#3B82F6',
+    color: colors.dark_blue,
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,

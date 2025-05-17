@@ -10,7 +10,7 @@ export const loginStyles = StyleSheet.create({
 
   cardContainer: {
     width: '85%',
-    backgroundColor: colors.white,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 15,
     alignItems: 'center',
     padding: 24,

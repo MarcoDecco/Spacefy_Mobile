@@ -6,12 +6,19 @@ import Rented from '../screens/rented';
 import Favorites from "../screens/favorites";
 import Chat from "../screens/chat";
 import Profile from "../screens/profile";
+import { colors } from "~/styles/globalStyles/colors";
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation() {
     return(
-        <Tab.Navigator screenOptions={{headerShown: false}}>
+        <Tab.Navigator 
+            screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: colors.blue,
+                tabBarInactiveTintColor: '#A0A0A0',
+            }}
+        >
             <Tab.Screen
                 name="Home"
                 component={Home}

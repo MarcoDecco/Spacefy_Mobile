@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Feather, Ionicons } from '@expo/vector-icons'
 import { View, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { searchBarStyles as styles } from '../styles/globalStyles/searchBarStyles';
 
 export default function Search() {

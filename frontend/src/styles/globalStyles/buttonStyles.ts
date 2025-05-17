@@ -15,7 +15,7 @@ export const buttons = StyleSheet.create({
         color: colors.white,
         textAlign: 'center',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 18,
     },
 
     whiteButton: {
@@ -32,6 +32,6 @@ export const buttons = StyleSheet.create({
         color: colors.dark_blue,
         textAlign: 'center',
         fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: 18,
     },
 })
