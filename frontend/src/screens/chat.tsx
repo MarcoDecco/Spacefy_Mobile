@@ -1,11 +1,12 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text } from 'react-native'
+import { chatStyles as styles } from '../styles/chatStyles';
 
 export default function Chat() {
   return (
     <>
-      <SafeAreaView className="flex-1 items-center justify-center">
-        <Text className="text-3xl text-green-800">Chat</Text>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.text}>Chat</Text>
       </SafeAreaView>
     </>
   );
