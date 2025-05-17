@@ -59,12 +59,14 @@ export const profileStyles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginTop: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 40,
+    width: '100%',
   },
   statItem: {
     alignItems: 'center',
+    minWidth: 80,
   },
   statValue: {
     fontSize: 20,

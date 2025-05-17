@@ -3,6 +3,15 @@ import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { profileStyles as styles } from '../styles/profile.styles';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Welcome: undefined;
+  // ... other screens
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type MenuItem = {
   id: string;
@@ -12,6 +21,8 @@ type MenuItem = {
 };
 
 export default function Profile() {
+  const navigation = useNavigation<NavigationProp>();
+
   // Dados do usuário (simulados)
   const user = {
     name: 'João Silva',
@@ -56,6 +67,14 @@ export default function Profile() {
       onPress: () => console.log('Configurações')
     }
   ];
+
+  const handleLogout = () => {
+    // Aqui você pode adicionar lógica de limpeza de dados do usuário se necessário
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Welcome' }],
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -120,7 +139,7 @@ export default function Profile() {
         {/* Botão de Logout */}
         <TouchableOpacity
           style={styles.logoutButton}
-          onPress={() => console.log('Logout')}
+          onPress={handleLogout}
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={24} color="#DC2626" />
