@@ -21,11 +21,14 @@ export const registerStyles = StyleSheet.create({
   },
   
   loginLink: {
-    color: colors.dark_blue,
+    color: colors.blue,
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
     textDecorationLine: 'underline',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: -0.2, height: 0.2 },
+    textShadowRadius: 0.5,
   },
 
   dividerContainer: {

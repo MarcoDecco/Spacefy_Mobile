@@ -8,8 +8,8 @@ import { colors } from '../styles/globalStyles/colors';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
 import { loginStyles } from '~/styles/loginStyles';
 import Button from '../components/button';
-import BaseInput from '../components/inputs/BaseInput';
-import PasswordInput from '../components/inputs/PasswordInput';
+import BaseInput from '../components/inputs/baseInput';
+import PasswordInput from '../components/inputs/passwordInput';
 
 export default function Register() {
   const navigation = useNavigation<NavigationProps>();

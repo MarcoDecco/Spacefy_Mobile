@@ -1,6 +1,6 @@
 import { TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { buttons } from '~/styles/globalStyles/buttonStyles';
+import { buttons } from '~/styles/componentStyles/buttonStyles';
 
 // Tipo para as propriedades de navegação
 type NavigationProps = {

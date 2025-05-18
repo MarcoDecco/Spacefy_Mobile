@@ -4,8 +4,8 @@ import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
 import Button from '../components/button';
-import BaseInput from '../components/inputs/BaseInput';
-import PasswordInput from '../components/inputs/PasswordInput';
+import BaseInput from '../components/inputs/baseInput';
+import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
 
 export default function Login({ navigation }: any) {
