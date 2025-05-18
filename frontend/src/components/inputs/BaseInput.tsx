@@ -25,6 +25,7 @@ export default function BaseInput({ label, required = false, error, containerSty
             />
         </View>
 
+        {/* Error message */}
         {error && (
             <View style={inputStyles.errorContainer}>
             <Text style={inputStyles.errorText}>{error}</Text>

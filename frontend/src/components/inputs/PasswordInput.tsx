@@ -41,6 +41,7 @@ export default function PasswordInput({ label, required, error, containerStyle, 
         </TouchableOpacity>
       </View>
 
+      {/* Error message */}
       {error && (
         <View style={inputStyles.errorContainer}>
           <Text style={inputStyles.errorText}>{error}</Text>
