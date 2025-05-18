@@ -26,9 +26,6 @@ export const registerStyles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     textDecorationLine: 'underline',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: -0.2, height: 0.2 },
-    textShadowRadius: 0.5,
   },
 
   dividerContainer: {
@@ -36,6 +33,7 @@ export const registerStyles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginVertical: 8,
+    paddingHorizontal: 32,
   },
   
   divider: {
