@@ -13,35 +13,36 @@ export const registerStyles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    marginVertical: 8,
-  },
-
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0',
-  },
-
-  dividerText: {
-    marginHorizontal: 8,
-    color: '#333333',
-  },
-
+  
   loginText: {
-    color: '#333333',
+    color: colors.dark_gray,
     textAlign: 'center',
     marginTop: 8,
   },
-
+  
   loginLink: {
     color: colors.dark_blue,
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
     textDecorationLine: 'underline',
+  },
+
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 8,
+  },
+  
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.gray,
+  },
+  
+  dividerText: {
+    marginHorizontal: 8,
+    color: colors.dark_gray,
   },
 }); 

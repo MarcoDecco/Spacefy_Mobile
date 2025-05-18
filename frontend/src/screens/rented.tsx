@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList } from 'react-native';
-import { rentedStyles as styles } from '../styles/rented.styles';
+import { rentedStyles as styles } from '../styles/rentedStyles';
 import Card from '../components/card';
 import SearchBar from '../components/searchBar';
 

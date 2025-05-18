@@ -34,7 +34,7 @@ export const loginStyles = StyleSheet.create({
   registerText: {
     color: colors.dark_gray,
     textAlign: 'center',
-    marginTop: 15,
+    marginTop: 6,
   },
 
   registerLink: {
@@ -43,5 +43,24 @@ export const loginStyles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     textDecorationLine: 'underline',
+  },
+
+  dividerContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginVertical: 8,
+  },
+
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.gray,
+  },
+
+  dividerText: {
+    marginHorizontal: 8,
+    color: colors.dark_gray,
   },
 }); 

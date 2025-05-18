@@ -1,5 +1,5 @@
 import { View, Text, FlatList } from 'react-native';
-import { favoritesStyles as styles } from '../styles/favorites.styles';
+import { favoritesStyles as styles } from '../styles/favoritesStyles';
 import Card from '../components/card';
 import SearchBar from '../components/searchBar';
 

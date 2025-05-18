@@ -5,8 +5,10 @@ export const colors = {
     white: '#FCFCFC',
     dark_yellow: '#F0D500',
     light_gray: '#f5f5f5',
+    gray: '#B0B0B0',
     dark_gray: '#2F2F2F',
     black: '#000000',
+    error: '#FF0000',
 
     splash: {
         100: '#1EACE3',

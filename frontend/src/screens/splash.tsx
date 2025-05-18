@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
 import * as NavigationBar from 'expo-navigation-bar';
-import { splashStyles as styles } from '../styles/splash.styles';
+import { splashStyles as styles } from '../styles/splashStyles';
 import { colors } from '../styles/globalStyles/colors';
 
 export default function Splash() {

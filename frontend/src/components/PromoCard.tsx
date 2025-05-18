@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { CARD_WIDTH } from '../styles/home.styles';
+import { CARD_WIDTH } from '../styles/homeStyles';
 import { useIsFocused } from '@react-navigation/native';
 
 const CARD_HEIGHT = 340;

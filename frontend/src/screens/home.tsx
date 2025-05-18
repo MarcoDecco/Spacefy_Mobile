@@ -3,7 +3,7 @@ import { View, Text, FlatList } from "react-native";
 import SearchBar from "../components/searchBar";
 import Card from "../components/card";
 import PromoCard from "../components/promoCard";
-import { homeStyles as styles, CARD_WIDTH } from '../styles/home.styles';
+import { homeStyles as styles, CARD_WIDTH } from '../styles/homeStyles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 export default function Home() {

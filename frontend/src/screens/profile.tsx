@@ -1,6 +1,6 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { profileStyles as styles } from '../styles/profile.styles';
+import { profileStyles as styles } from '../styles/profileStyles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import espacoImg from '../../assets/mansao.png';

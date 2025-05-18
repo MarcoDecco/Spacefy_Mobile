@@ -7,41 +7,39 @@ export default function Search() {
     const [text, setText] = useState('');
 
     return (
-        <>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.container}>
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder='Faça sua pesquisa aqui...'
-                            value={text}
-                            onChangeText={setText}
-                            returnKeyType='search'
-                            autoCorrect={false}
-                        />
-
-                        <TouchableOpacity 
-                            onPress={() => {
-                                Keyboard.dismiss();
-                                console.log('Pesquisar');
-                            }} 
-                            style={styles.searchButton}
-                        >
-                            <Feather name="search" size={22} color="white" />
-                        </TouchableOpacity>
-                    </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder='Faça sua pesquisa aqui...'
+                        value={text}
+                        onChangeText={setText}
+                        returnKeyType='search'
+                        autoCorrect={false}
+                    />
 
                     <TouchableOpacity 
                         onPress={() => {
                             Keyboard.dismiss();
-                            console.log('Filtro');
+                            console.log('Pesquisar');
                         }} 
-                        style={styles.filterButton}
+                        style={styles.searchButton}
                     >
-                        <Ionicons name="filter" size={30} color="#333" />
+                        <Feather name="search" size={22} color="white" />
                     </TouchableOpacity>
                 </View>
-            </TouchableWithoutFeedback>
-        </>
+
+                <TouchableOpacity 
+                    onPress={() => {
+                        Keyboard.dismiss();
+                        console.log('Filtro');
+                    }} 
+                    style={styles.filterButton}
+                >
+                    <Ionicons name="filter" size={30} color="#333" />
+                </TouchableOpacity>
+            </View>
+        </TouchableWithoutFeedback>
     );
 }

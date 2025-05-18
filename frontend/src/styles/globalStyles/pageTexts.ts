@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
-export const pageTexts = StyleSheet.create({
-    
+import { colors } from './colors';
+
+export const pageTexts = StyleSheet.create({ 
   title: {
     marginLeft: 20,
     fontSize: 22,
@@ -14,5 +15,11 @@ export const pageTexts = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
+
+  labelInput: {
+    color: colors.dark_gray,
+    fontSize: 18,
+    fontWeight: '600',
+  }
 
 });

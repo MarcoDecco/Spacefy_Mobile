@@ -1,16 +1,14 @@
-import { View, Text, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { loginStyles as styles } from '../styles/login.styles';
+import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
-import { input } from '~/styles/globalStyles/inputStyles';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
 import Button from '../components/button';
+import BaseInput from '../components/inputs/BaseInput';
+import PasswordInput from '../components/inputs/PasswordInput';
+import { inputStyles } from '~/styles/componentStyles/inputStyles';
 
 export default function Login({ navigation }: any) {
-  const [showPassword, setShowPassword] = useState(false);
-
   return (
     <LinearGradient
       colors={[colors.others[100], colors.others[200]]}
@@ -24,47 +22,32 @@ export default function Login({ navigation }: any) {
           />
         </View>
 
-        <View style={input.inputContainer}>
-          <View>
-            <Text style={input.label}>E-mail</Text>
-            <TextInput
-              placeholder="Digite seu e-mail"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#A0A0A0"
-              style={input.input}
-            />
-          </View>
+        <BaseInput
+          label="E-mail"
+          placeholder="Digite seu e-mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          required
+        />
 
-          <View>
-            <Text style={input.label}>Senha</Text>
-            <View style={input.inputContainerPassword}>
-              <TextInput
-                placeholder="Digite sua senha"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                placeholderTextColor="#A0A0A0"
-                style={[input.inputPassword, { flex: 1 }]}
-              />
-
-              <TouchableOpacity 
-                onPress={() => setShowPassword(!showPassword)}
-              > 
-                <Ionicons 
-                  name={showPassword ? "eye-off" : "eye"} 
-                  size={20} 
-                  color="#A0A0A0"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        <PasswordInput
+          label="Senha"
+          placeholder="Digite sua senha"
+          required
+          containerStyle={ inputStyles.marginBottom }
+        />
 
         <Button 
           text="Entrar"
           navigateTo="MainApp"
           color="blue"
         />
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>ou</Text>
+          <View style={styles.divider} />
+        </View>
 
         <Text style={styles.registerText}>Não possui uma conta?</Text>
 

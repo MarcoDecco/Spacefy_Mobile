@@ -1,6 +1,6 @@
 import { View, Text, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { welcomeStyles as styles } from '../styles/welcome.styles';
+import { welcomeStyles as styles } from '../styles/welcomeStyles';
 import { colors } from '../styles/globalStyles/colors';
 import { containers } from '../styles/globalStyles/containerStyles';
 import Button from '../components/button';
