@@ -1,137 +1,134 @@
-import { StyleSheet, Dimensions } from 'react-native';
-
-const { width: windowWidth } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
+import { colors } from './globalStyles/colors';
 
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.light_gray,
   },
+
   header: {
-    backgroundColor: '#1EACE3',
+    backgroundColor: colors.blue,
     paddingTop: 60,
     paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    boxShadow: '0px 4px 6px 0px rgba(0, 0, 0, 0.20)',
   },
+
   profileInfo: {
     alignItems: 'center',
     paddingHorizontal: 20,
   },
+
   avatarContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     padding: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    boxShadow: '0px 4px 6px 0px rgba(0, 0, 0, 0.20)',
   },
+
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 60,
+    borderRadius: 100,
   },
+
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
     marginTop: 16,
   },
+
   email: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 4,
   },
+
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginTop: 20,
     paddingHorizontal: 40,
     width: '100%',
   },
+  
   statItem: {
     alignItems: 'center',
     minWidth: 80,
   },
+
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
   },
+
   statLabel: {
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.9)',
     marginTop: 2,
   },
+
   content: {
     flex: 1,
     paddingTop: 20,
   },
+  
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 20,
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    boxShadow: '0px 4px 6px 0px rgba(0, 0, 0, 0.15)',
   },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#222',
+    color: colors.black,
     marginBottom: 15,
   },
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.light_gray,
   },
+
   menuItemLast: {
     borderBottomWidth: 0,
   },
+
   menuIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.light_gray,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
+
   menuText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.black,
     flex: 1,
   },
+
   menuArrow: {
     color: '#999',
   },
+
   logoutButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 20,
     marginHorizontal: 20,
     marginBottom: 30,
@@ -139,52 +136,52 @@ export const profileStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    boxShadow: '0px 4px 6px 0px rgba(0, 0, 0, 0.15)',
   },
+
   logoutText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#DC2626',
     marginLeft: 8,
   },
+  
   bannerContainer: {
     flexDirection: 'row',
-    backgroundColor: '#1EACE3',
+    backgroundColor: colors.blue,
     borderRadius: 20,
     margin: 20,
     padding: 20,
     alignItems: 'center',
   },
+
   bannerTitle: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
+
   bannerSubtitle: {
-    color: '#fff',
-    fontSize: 14,
+    color: colors.white,
+    fontSize: 14, 
     marginBottom: 16,
   },
+
   bannerButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignSelf: 'flex-start',
   },
+
   bannerButtonText: {
-    color: '#1EACE3',
+    color: colors.blue,
     fontWeight: 'bold',
     fontSize: 16,
   },
+
   bannerImage: {
     width: 80,
     height: 80,

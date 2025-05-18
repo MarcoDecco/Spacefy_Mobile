@@ -1,5 +1,3 @@
-//Tela de Perfil
-import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { profileStyles as styles } from '../styles/profile.styles';

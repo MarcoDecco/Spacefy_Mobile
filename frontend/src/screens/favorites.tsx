@@ -1,9 +1,7 @@
-import React from 'react';
-import { View, Text, FlatList, ScrollView } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { favoritesStyles as styles } from '../styles/favorites.styles';
 import Card from '../components/card';
 import SearchBar from '../components/searchBar';
-import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 const favoriteSpaces = [
   // Exemplo de dados favoritos
