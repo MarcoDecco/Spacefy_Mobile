@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Image, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
 import { useIsFocused } from '@react-navigation/native';
 import { cardStyles as styles } from '../styles/componentStyles/cardStyles';
-
-const CARD_HEIGHT = 340;
+import { colors } from '~/styles/globalStyles/colors';
 
 interface CardProps {
   images: any[];
@@ -58,10 +57,10 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
   }, [activeIndex, isAutoPlayPaused, images.length, isFocused]);
 
   return (
-    <View style={[styles.card, { width: CARD_WIDTH, height: CARD_HEIGHT }]}> 
+    <View style={[ styles.card, { width: CARD_WIDTH }]}> 
       {/* Carrossel de Imagens */}
       {images.length > 1 ? (
-        <View style={styles.carouselContainer}>
+        <View>
           <ScrollView
             horizontal
             pagingEnabled
@@ -80,7 +79,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
               <Image
                 key={index}
                 source={img}
-                style={[styles.image, { width: CARD_WIDTH, height: 180 }]}
+                style={{ width: CARD_WIDTH, height: 180 }}
                 resizeMode="cover"
               />
             ))}
@@ -107,6 +106,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
           >
             <Feather name="chevron-right" size={24} color="white" />
           </TouchableOpacity>
+
           {/* Dots */}
           <View style={styles.dotsContainer}>
             {images.map((_, index) => (
@@ -124,6 +124,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
               </TouchableOpacity>
             ))}
           </View>
+
           {/* Contador de fotos */}
           <View style={styles.counter}>
             <Text style={styles.counterText}>{activeIndex + 1}/{images.length}</Text>
@@ -132,10 +133,11 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
       ) : (
         <Image
           source={images[0]}
-          style={[styles.image, { width: CARD_WIDTH, height: 180 }]}
+          style={{ width: CARD_WIDTH, height: 180 }}
           resizeMode="cover"
         />
       )}
+
       {/* Conteúdo do Card */}
       <View style={styles.content}>
         <View style={styles.header}>
@@ -143,35 +145,35 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
             <Text style={styles.address} numberOfLines={1}>{address}</Text>
           </View>
+
           <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
             {isFavorite ? (
               <MaterialIcons 
                 name="favorite" 
-                size={20} 
-                color="#FF0000" 
+                size={21} 
+                color={colors.blue} 
               />
             ) : (
-              <Feather 
-                name="heart" 
-                size={20} 
+              <MaterialIcons 
+                name="favorite-outline" 
+                size={22} 
                 color="#888" 
               />
             )}
           </TouchableOpacity>
         </View>
+
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>{price}</Text>
-          <Text style={styles.priceHour}>por hora</Text>
-        </View>
-        <View style={styles.footer}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
+            <Text style={styles.price}>{price}</Text>
+            <Text style={styles.priceHour}>por hora</Text>
+          </View>
+
           <View style={styles.ratingRow}>
-            <Feather name="star" size={18} color="#F59E0B" />
+            <MaterialIcons name="star" size={18} color="#F59E0B" />
             <Text style={styles.rating}>{rating.toFixed(2)}</Text>
             <Text style={styles.reviews}>({reviews} avaliações)</Text>
           </View>
-          <TouchableOpacity style={styles.seeMoreButton}>
-            <Text style={styles.seeMoreText}>Ver mais</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </View>

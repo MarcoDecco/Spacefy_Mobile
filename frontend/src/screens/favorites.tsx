@@ -1,64 +1,62 @@
-import { View, Text, FlatList } from 'react-native';
-import { favoritesStyles as styles } from '../styles/favoritesStyles';
-import Card from '../components/card';
-import SearchBar from '../components/searchBar';
+import { View, Text, FlatList } from "react-native";
+import { CardList } from "../components/cardList";
+import Card from "../components/card";
+import { useCards } from "../hooks/useCards";
+import { BaseCard } from "../types/card";
+import { homeStyles as styles } from '../styles/homeStyles';
+import SearchBar from "../components/searchBar";
+import { pageTexts } from '../styles/globalStyles/pageTexts';
 
-const favoriteSpaces = [
-  // Exemplo de dados favoritos
-  {
-    id: '1',
-    images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-    title: 'Espaço Elegante, Rio de Janeiro',
-    address: 'Av. Atlântica, 200',
-    price: 'R$ 3.500',
-    rating: 4.9,
-    reviews: 32
-  },
-  {
-    id: '2',
-    images: [require('../../assets/espaco.jpg')],
-    title: 'Porto Belo, Muriaé - MG',
-    address: 'Rua Leonídio Valentim Ferreira',
-    price: 'R$ 2.000',
-    rating: 4.8,
-    reviews: 24
-  },
-  {
-    id: '3',
-    images: [require('../../assets/espaco.jpg')],
-    title: 'Salão Premium, São Paulo',
-    address: 'Av. Paulista, 1000',
-    price: 'R$ 4.200',
-    rating: 4.7,
-    reviews: 18
-  },
-  // Adicione mais itens conforme necessário
-];
+export default function Favorites() {
+  const { cards: favoriteCards, loading } = useCards('favorites');
 
-export default function FavoritesScreen() {
+  const renderCard = (item: BaseCard) => (
+    <Card 
+      images={item.images}
+      title={item.title}
+      address={item.address}
+      price={item.price}
+      rating={item.rating}
+      reviews={item.reviews}
+    />
+  );
+
+  const EmptyComponent = () => (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 }}>
+      <Text style={[pageTexts.subtitle, { textAlign: 'center' }]}>
+        Você ainda não tem espaços favoritos.
+      </Text>
+      <Text style={[pageTexts.subtitle, { textAlign: 'center', marginTop: 8 }]}>
+        Explore os espaços disponíveis e adicione seus favoritos!
+      </Text>
+    </View>
+  );
+
   return (
-    <View style={styles.container}>
+    <View style={styles.Container}>
       <SearchBar />
-
       <FlatList
-        data={favoriteSpaces}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ alignItems: 'center', marginTop: 130}}
-        renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
-            <Card
-              images={item.images}
-              title={item.title}
-              address={item.address}
-              price={item.price}
-              rating={item.rating}
-              reviews={item.reviews}
-            />
-          </View>
-        )}
-        ListEmptyComponent={<Text style={styles.emptyText}>Nenhum espaço favorito encontrado.</Text>}
+        data={[1]}
+        keyExtractor={() => '1'}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 130 }}
+        renderItem={() => (
+          <CardList
+            data={favoriteCards}
+            renderCard={renderCard}
+            title="Meus Favoritos"
+            horizontal={false}
+            style={{ alignItems: 'center' }}
+            contentContainerStyle={{ 
+              padding: 16,
+              width: '100%',
+              maxWidth: 400,
+              alignSelf: 'center'
+            }}
+            ListEmptyComponent={loading ? null : EmptyComponent}
+          />
+        )}
       />
     </View>
   );
-};
+}
