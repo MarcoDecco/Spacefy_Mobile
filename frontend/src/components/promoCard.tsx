@@ -3,11 +3,13 @@ import { View, Image, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { colors } from '~/styles/globalStyles/colors';
 import { cardStyles as styles } from '~/styles/componentStyles/cardStyles';
+import { NavigationProps } from '../navigation/types';
 
 interface PromoCardProps {
+  id: string;
   images: any[];
   title: string;
   address: string;
@@ -18,12 +20,13 @@ interface PromoCardProps {
   discount: string;
 }
 
-const PromoCard: React.FC<PromoCardProps> = ({ images, title, address, price, originalPrice, rating, reviews, discount }) => {
+const PromoCard: React.FC<PromoCardProps> = ({ id, images, title, address, price, originalPrice, rating, reviews, discount }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
+  const navigation = useNavigation<NavigationProps>();
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -58,8 +61,34 @@ const PromoCard: React.FC<PromoCardProps> = ({ images, title, address, price, or
     return () => clearInterval(timer);
   }, [activeIndex, isAutoPlayPaused, images.length, isFocused]);
 
+  const handleCardPress = () => {
+    navigation.navigate('SpaceDetails', {
+      space: {
+        id,
+        images,
+        title,
+        address,
+        price,
+        rating,
+        reviews,
+        description: 'Este é um espaço incrível para seu evento. Com localização privilegiada e todas as comodidades necessárias para garantir o sucesso do seu evento.',
+        amenities: [
+          'Estacionamento',
+          'Wi-Fi',
+          'Ar condicionado',
+          'Cozinha',
+          'Banheiros'
+        ]
+      }
+    });
+  };
+
   return (
-    <View style={[styles.card, { width: CARD_WIDTH }]}> 
+    <TouchableOpacity
+      style={[styles.card, { width: CARD_WIDTH }]}
+      onPress={handleCardPress}
+      activeOpacity={0.9}
+    > 
       {/* Tag de desconto */}
       <View style={styles.discountTag}>
         <Text style={styles.discountText}>{discount}</Text>
@@ -182,7 +211,7 @@ const PromoCard: React.FC<PromoCardProps> = ({ images, title, address, price, or
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

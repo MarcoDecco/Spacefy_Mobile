@@ -21,15 +21,7 @@ export default function StackNavigation() {
         name="SpaceDetails"
         component={SpaceDetails}
         options={{
-          headerShown: true,
-          title: 'Detalhes do Espaço',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#000',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
         }}
       />
     </Stack.Navigator>
