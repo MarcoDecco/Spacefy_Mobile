@@ -8,7 +8,8 @@ const statusBarHeight = Constants.statusBarHeight;
 export const spaceDetailsStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
+    marginTop: statusBarHeight,
   },
   statusBarGradient: {
     position: 'absolute',

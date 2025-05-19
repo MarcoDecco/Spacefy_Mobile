@@ -16,7 +16,7 @@ export const searchBarStyles = StyleSheet.create({
         alignItems: 'flex-end',
         gap: 8,
         paddingBottom: 15,
-        backgroundColor: 'rgba(245, 245, 245, 0.8)', // Fundo com 95% de opacidade
+        backgroundColor: colors.light_gray, // Fundo com 95% de opacidade
     },
 
     searchContainer: {
