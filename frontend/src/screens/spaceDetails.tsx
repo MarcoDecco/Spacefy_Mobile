@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Constants from 'expo-constants';
-
-const { width: windowWidth } = Dimensions.get('window');
-const statusBarHeight = Constants.statusBarHeight;
+import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
 
 interface SpaceDetailsProps {
   route: {
@@ -35,6 +33,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showFullDescription, setShowFullDescription] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const [checkInDate, setCheckInDate] = useState(new Date());
   const [checkOutDate, setCheckOutDate] = useState(new Date());
@@ -52,6 +51,57 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>('checkInTime');
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+
+  // Estados para avaliações
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      user: 'Ricardo Fernandes',
+      rating: 5,
+      text: 'Experiência incrível! O espaço para festas superou todas as expectativas – amplo, bem organizado e exatamente como descrito. A estrutura é perfeita para eventos, com iluminação, som e conforto impecáveis. A comunicação com o anfitrião foi rápida e eficiente. Recomendo muito!',
+      expanded: false,
+    },
+    {
+      id: 2,
+      user: 'Maria Souza',
+      rating: 4,
+      text: 'Pode melhorar em alguns pontos, mas no geral foi uma ótima experiência. O espaço é bem localizado e o anfitrião foi muito prestativo.',
+      expanded: false,
+    },
+  ]);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+
+  const MAX_DESCRIPTION_LENGTH = 150;
+  const shouldShowMoreButton = space.description && space.description.length > MAX_DESCRIPTION_LENGTH;
+  const displayDescription = showFullDescription
+    ? space.description
+    : space.description?.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
+
+  const MAX_REVIEW_LENGTH = 120;
+  const toggleReview = (id: number) => {
+    setReviews(reviews.map(r =>
+      r.id === id ? { ...r, expanded: !r.expanded } : r
+    ));
+  };
+  const renderReview = (review: any) => (
+    <View key={review.id} style={{ backgroundColor: '#fff', borderRadius: 8, padding: 12, marginBottom: 12, elevation: 2 }}>
+      <Text style={{ fontWeight: 'bold' }}>{review.user}</Text>
+      <Text style={{ color: '#888', fontSize: 12 }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</Text>
+      <Text>
+        {review.expanded || review.text.length <= MAX_REVIEW_LENGTH
+          ? review.text
+          : review.text.substring(0, MAX_REVIEW_LENGTH) + '...'}
+      </Text>
+      {review.text.length > MAX_REVIEW_LENGTH && (
+        <TouchableOpacity onPress={() => toggleReview(review.id)}>
+          <Text style={{ color: '#1976d2', fontWeight: 'bold' }}>
+            {review.expanded ? 'Mostrar menos' : 'Mostrar mais'} &gt;
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -114,9 +164,11 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   };
 
   const handleRent = () => {
-    // Aqui você implementará a lógica de aluguel
     setConfirmModalVisible(true);
-    // Se quiser, pode adicionar lógica de envio para backend aqui
+    // Fecha o modal após 2 segundos
+    setTimeout(() => {
+      setConfirmModalVisible(false);
+    }, 2000);
   };
 
   // Função para abrir o modal de horário
@@ -285,7 +337,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
           {space.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Descrição</Text>
-              <Text style={styles.description}>{space.description}</Text>
+              <Text style={styles.description}>{displayDescription}</Text>
+              {shouldShowMoreButton && (
+                <TouchableOpacity
+                  onPress={() => setShowFullDescription(!showFullDescription)}
+                  style={styles.moreButton}
+                >
+                  <Text style={styles.moreButtonText}>
+                    {showFullDescription ? 'Ver menos' : 'Ver mais'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -300,44 +362,110 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               ))}
             </View>
           )}
+        </View>
 
-          <View style={styles.bookingCard}>
-            <View style={styles.row}>
-              {/* Check-in */}
-              <View style={styles.column}>
-                <Text style={styles.label}>Check-in</Text>
-                <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkInDate', 'date')}>
-                  <Text style={styles.valueText}>{checkInDate.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-                <Text style={styles.label}>Hora:</Text>
-                <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkInTime')}>
-                  <Text style={styles.valueText}>{checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.verticalDivider} />
-              {/* Check-out */}
-              <View style={styles.column}>
-                <Text style={styles.label}>Check-out</Text>
-                <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkOutDate', 'date')}>
-                  <Text style={styles.valueText}>{checkOutDate.toLocaleDateString()}</Text>
-                </TouchableOpacity>
-                <Text style={styles.label}>Hora:</Text>
-                <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkOutTime')}>
-                  <Text style={styles.valueText}>{checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-                </TouchableOpacity>
-              </View>
+        <View style={styles.bookingCard}>
+          <View style={styles.row}>
+            {/* Check-in */}
+            <View style={styles.column}>
+              <Text style={styles.label}>Check-in</Text>
+              <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkInDate', 'date')}>
+                <Text style={styles.valueText}>{checkInDate.toLocaleDateString()}</Text>
+              </TouchableOpacity>
+              <Text style={styles.label}>Hora:</Text>
+              <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkInTime')}>
+                <Text style={styles.valueText}>{checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.horizontalDivider} />
-            <View style={styles.totalRow}>
-              <View>
-                <Text style={styles.label}>Total:</Text>
-                <Text style={styles.totalValue}>{calcularTotal()}</Text>
-              </View>
-              <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
-                <Text style={styles.rentButtonText}>Alugar</Text>
+            <View style={styles.verticalDivider} />
+            {/* Check-out */}
+            <View style={styles.column}>
+              <Text style={styles.label}>Check-out</Text>
+              <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkOutDate', 'date')}>
+                <Text style={styles.valueText}>{checkOutDate.toLocaleDateString()}</Text>
+              </TouchableOpacity>
+              <Text style={styles.label}>Hora:</Text>
+              <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkOutTime')}>
+                <Text style={styles.valueText}>{checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
               </TouchableOpacity>
             </View>
           </View>
+          <View style={styles.horizontalDivider} />
+          <View style={styles.totalRow}>
+            <View>
+              <Text style={styles.label}>Total:</Text>
+              <Text style={styles.totalValue}>{calcularTotal()}</Text>
+            </View>
+            <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
+              <Text style={styles.rentButtonText}>Alugar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Avaliações e comentários */}
+        <View style={{ marginBottom: 24, paddingHorizontal: 16 }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Avaliações do local</Text>
+          <FlatList
+            data={reviews}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={{
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                padding: 14,
+                marginRight: 12,
+                borderWidth: 1,
+                borderColor: '#e0e0e0',
+                minWidth: 240,
+                maxWidth: 280,
+                elevation: 2,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 3,
+              }}>
+                {renderReview(item)}
+              </View>
+            )}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 8 }}
+            contentContainerStyle={{ paddingHorizontal: 0 }}
+          />
+        </View>
+
+        <View style={{ marginBottom: 24, paddingHorizontal: 16, alignItems: 'center' }}>
+          <Text style={{ color: '#1976d2', fontWeight: 'bold', fontSize: 16, marginBottom: 8, textAlign: 'center' }}>Avalie este local</Text>
+          <View style={{ flexDirection: 'row', marginBottom: 12, justifyContent: 'center' }}>
+            {[1, 2, 3, 4, 5].map(star => (
+              <TouchableOpacity key={star} onPress={() => setNewRating(star)}>
+                <Text style={{ fontSize: 28, color: newRating >= star ? '#FFD700' : '#ccc' }}>★</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={{ color: '#1976d2', fontWeight: 'bold', fontSize: 16, marginBottom: 8, textAlign: 'center' }}>Adicione um comentário</Text>
+          <TextInput
+            style={{ backgroundColor: '#fff', borderRadius: 8, minHeight: 60, padding: 8, borderWidth: 1, borderColor: '#ccc', marginBottom: 12, width: '100%' }}
+            multiline
+            value={newComment}
+            onChangeText={setNewComment}
+            placeholder="Digite seu comentário..."
+          />
+          <TouchableOpacity
+            style={{ backgroundColor: '#1976d2', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 24, alignItems: 'center', alignSelf: 'center' }}
+            onPress={() => {
+              if (newRating && newComment) {
+                setReviews([
+                  { id: Date.now(), user: 'Você', rating: newRating, text: newComment, expanded: false },
+                  ...reviews,
+                ]);
+                setNewRating(0);
+                setNewComment('');
+              }
+            }}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>Comentar</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Modal do calendário customizado */}
@@ -389,9 +517,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
           mode={pickerMode}
           date={
             pickerTarget === 'checkInDate' ? checkInDate :
-            pickerTarget === 'checkOutDate' ? checkOutDate :
-            pickerTarget === 'checkInTime' ? checkInTime :
-            checkOutTime
+              pickerTarget === 'checkOutDate' ? checkOutDate :
+                pickerTarget === 'checkInTime' ? checkInTime :
+                  checkOutTime
           }
           minimumDate={pickerTarget === 'checkOutDate' ? checkInDate : new Date()}
           onConfirm={handlePickerConfirm}
@@ -433,322 +561,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         <Modal
           visible={confirmModalVisible}
           transparent
-          animationType="fade"
+          animationType="none"
           onRequestClose={() => setConfirmModalVisible(false)}
         >
-          <TouchableWithoutFeedback onPress={() => setConfirmModalVisible(false)}>
-            <View style={styles.calendarOverlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.confirmModal}>
-                  <Text style={styles.confirmTitle}>Sua reserva foi feita!</Text>
-                  <TouchableOpacity style={styles.confirmButton} onPress={() => setConfirmModalVisible(false)}>
-                    <Text style={styles.confirmButtonText}>OK</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
+          <View style={styles.confirmModalContainer}>
+            <View style={styles.confirmModal}>
+              <MaterialIcons name="check-circle" size={24} color={colors.blue} />
+              <Text style={styles.confirmTitle}>Reserva confirmada!</Text>
             </View>
-          </TouchableWithoutFeedback>
+          </View>
         </Modal>
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  statusBarGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: statusBarHeight + 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    zIndex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  imageContainer: {
-    height: 300,
-    position: 'relative',
-  },
-  image: {
-    width: windowWidth,
-    height: 300,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    padding: 8,
-    borderRadius: 20,
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    padding: 8,
-    borderRadius: 20,
-  },
-  dotsContainer: {
-    position: 'absolute',
-    bottom: 10,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 3,
-  },
-  dotActive: {
-    backgroundColor: colors.white,
-  },
-  dotInactive: {
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  counter: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  counterText: {
-    color: colors.white,
-    fontSize: 12,
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.black,
-    marginBottom: 8,
-  },
-  address: {
-    fontSize: 16,
-    color: colors.gray,
-    marginBottom: 16,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  rating: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.black,
-    marginLeft: 4,
-  },
-  reviews: {
-    fontSize: 14,
-    color: colors.gray,
-    marginLeft: 4,
-  },
-  price: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.blue,
-    marginBottom: 24,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.black,
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: colors.gray,
-    lineHeight: 24,
-  },
-  amenityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  amenityText: {
-    fontSize: 16,
-    color: colors.gray,
-    marginLeft: 8,
-  },
-  bookingCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  column: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  verticalDivider: {
-    width: 1,
-    backgroundColor: '#eee',
-    marginHorizontal: 12,
-  },
-  horizontalDivider: {
-    height: 1,
-    backgroundColor: '#eee',
-    marginVertical: 12,
-  },
-  label: {
-    fontWeight: 'bold',
-    color: '#444',
-    marginBottom: 4,
-    fontSize: 15,
-  },
-  valueBox: {
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  valueText: {
-    fontSize: 18,
-    color: '#222',
-    fontWeight: 'bold',
-  },
-  totalRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#222',
-    marginTop: 2,
-  },
-  rentButton: {
-    backgroundColor: colors.blue,
-    paddingVertical: 10,
-    paddingHorizontal: 28,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  rentButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  calendarOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  calendarModal: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    width: 340,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
-  timeModal: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    width: 220,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    alignItems: 'center',
-  },
-  timeModalTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
-    color: colors.blue,
-    marginBottom: 12,
-  },
-  timeItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 4,
-    alignItems: 'center',
-  },
-  timeItemText: {
-    fontSize: 18,
-    color: '#222',
-  },
-  confirmModal: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    width: 260,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    alignItems: 'center',
-  },
-  confirmTitle: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    color: colors.blue,
-    marginBottom: 18,
-    textAlign: 'center',
-  },
-  confirmButton: {
-    backgroundColor: colors.blue,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 32,
-    marginTop: 8,
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-}); 
+} 

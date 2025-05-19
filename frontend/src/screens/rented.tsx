@@ -11,7 +11,8 @@ export default function Rented() {
   const { cards: rentedCards, loading } = useCards('rented');
 
   const renderCard = (item: BaseCard) => (
-    <Card 
+    <Card
+      id={item.id}
       images={item.images}
       title={item.title}
       address={item.address}
