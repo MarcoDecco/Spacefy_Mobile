@@ -1,5 +1,5 @@
 import { View, FlatList, ViewStyle, Text } from 'react-native';
-import { CardType, PromoCard } from '../types/card';
+import { CardType } from '../types/card';
 import { CARD_WIDTH } from '../styles/homeStyles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 
@@ -23,8 +23,9 @@ export const CardList = <T extends CardType>({data, renderCard, title, subtitle,
 
   return (
     <View style={style}>
-      {title && <Text style={pageTexts.title}>{title}</Text>}
-      {subtitle && <Text style={pageTexts.subtitle}>{subtitle}</Text>}
+      {title && <Text style={ pageTexts.titleCardList }>{title}</Text>}
+      {subtitle && <Text style={pageTexts.subtitleCardList}>{subtitle}</Text>}
+      
       <FlatList
         data={data}
         keyExtractor={item => item.id}

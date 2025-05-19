@@ -10,6 +10,9 @@ import { BaseCard, PromoCard as PromoCardType } from "../types/card";
 export default function Home() {
   const { cards: featuredCards } = useCards('featured');
   const { cards: promoCards } = useCards('promo');
+  const { cards: quadraCards } = useCards('quadra');
+  const { cards: auditorioCards } = useCards('auditorio');
+  const { cards: eventSpaceCards } = useCards('eventSpace');
 
   const renderFeaturedCard = (item: BaseCard) => (
     <Card 
@@ -50,11 +53,30 @@ export default function Home() {
               renderCard={renderFeaturedCard}
               title="Espaços em Destaque"
             />
+
             <CardList<PromoCardType>
               data={promoCards as PromoCardType[]}
               renderCard={renderPromoCard}
               title="Promoções Imperdíveis"
               subtitle="Descontos exclusivos por tempo limitado"
+            />
+
+            <CardList<BaseCard>
+              data={quadraCards as BaseCard[]}
+              renderCard={renderFeaturedCard}
+              title="As melhores quadras"
+            />
+
+            <CardList<BaseCard>
+              data={auditorioCards as BaseCard[]}
+              renderCard={renderFeaturedCard}
+              title="Os auditórios mais qualificados"
+            />
+
+            <CardList<BaseCard>
+              data={eventSpaceCards as BaseCard[]}
+              renderCard={renderFeaturedCard}
+              title="Espaços para eventos"
             />
           </>
         )}

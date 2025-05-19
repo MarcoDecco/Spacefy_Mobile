@@ -21,7 +21,18 @@ const mockData = {
       price: 'R$ 3.500',
       rating: 4.9,
       reviews: 32
-    }
+    },
+    {
+      id: '3',
+      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg'),require('../../assets/espaco.jpg')
+
+      ],
+      title: 'Espaço Elegante, Rio de Janeiro',
+      address: 'Av. Atlântica, 200',
+      price: 'R$ 3.500',
+      rating: 4.9,
+      reviews: 32
+    },
   ],
   promo: [
     {
@@ -37,7 +48,101 @@ const mockData = {
     },
     {
       id: '2',
-      images: [require('../../assets/espaco.jpg')],
+      images: [require('../../assets/espaco.jpg'  )],
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
+      rating: 4.7,
+      reviews: 28,
+      discount: '-15%'
+    }
+  ],
+  quadra: [
+    {
+      id: '1',
+      images: [require('../../assets/quadra-01.jpg'), require('../../assets/quadra-01.jpg')],
+      title: 'Espaço Luxuoso, São Paulo',
+      address: 'Av. Brigadeiro Faria Lima, 1500',
+      price: 'R$ 2.800',
+      originalPrice: 'R$ 3.500',
+      rating: 4.9,
+      reviews: 45,
+      discount: '-20%'
+    },
+    {
+      id: '2',
+      images: [require('../../assets/quadra-02.jpg'), require('../../assets/quadra-02.jpg'), require('../../assets/quadra-02.jpg')],
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
+      rating: 4.7,
+      reviews: 28,
+      discount: '-15%'
+    }
+  ],
+  auditorio: [
+    {
+      id: '1',
+      images: [require('../../assets/auditorio-01.jpg'), require('../../assets/auditorio-01.jpg')],
+      title: 'Espaço Luxuoso, São Paulo',
+      address: 'Av. Brigadeiro Faria Lima, 1500',
+      price: 'R$ 2.800',
+      originalPrice: 'R$ 3.500',
+      rating: 4.9,
+      reviews: 45,
+      discount: '-20%'
+    },
+    {
+      id: '2',
+      images: [require('../../assets/auditorio-02.jpg'), require('../../assets/auditorio-02.jpg'), require('../../assets/auditorio-02.jpg')],
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
+      rating: 4.7,
+      reviews: 28,
+      discount: '-15%'
+    },
+    {
+      id: '3',
+      images: [require('../../assets/auditorio-03.jpg'), require('../../assets/auditorio-03.jpg'), require('../../assets/auditorio-03.jpg')],
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
+      rating: 4.7,
+      reviews: 28,
+      discount: '-15%'
+    }
+  ],
+  eventSpace: [
+    {
+      id: '1',
+      images: [require('../../assets/espaco-evento-01.jpg'), require('../../assets/espaco-evento-01.jpg')],
+      title: 'Espaço Luxuoso, São Paulo',
+      address: 'Av. Brigadeiro Faria Lima, 1500',
+      price: 'R$ 2.800',
+      originalPrice: 'R$ 3.500',
+      rating: 4.9,
+      reviews: 45,
+      discount: '-20%'
+    },
+    {
+      id: '2',
+      images: [require('../../assets/espaco-evento-02.jpg'), require('../../assets/espaco-evento-02.jpg'), require('../../assets/espaco-evento-02.jpg')],
+      title: 'Salão Moderno, Rio de Janeiro',
+      address: 'Rua Visconde de Pirajá, 500',
+      price: 'R$ 1.900',
+      originalPrice: 'R$ 2.400',
+      rating: 4.7,
+      reviews: 28,
+      discount: '-15%'
+    },
+    {
+      id: '3',
+      images: [require('../../assets/espaco-evento-03.jpg'), require('../../assets/espaco-evento-03.jpg'), require('../../assets/espaco-evento-03.jpg')],
       title: 'Salão Moderno, Rio de Janeiro',
       address: 'Rua Visconde de Pirajá, 500',
       price: 'R$ 1.900',
@@ -116,7 +221,7 @@ const mockData = {
   ]
 };
 
-export const useCards = (type: 'featured' | 'promo' | 'rented' | 'favorites') => {
+export const useCards = (type: 'featured' | 'promo' | 'quadra' | 'auditorio' | 'eventSpace' | 'rented' | 'favorites') => {
   const [cards, setCards] = useState<CardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

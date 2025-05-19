@@ -23,10 +23,10 @@ export default function Rented() {
 
   const EmptyComponent = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 }}>
-      <Text style={[pageTexts.subtitle, { textAlign: 'center' }]}>
+      <Text style={[pageTexts.title, { textAlign: 'center' }]}>
         Você ainda não tem espaços alugados.
       </Text>
-      <Text style={[pageTexts.subtitle, { textAlign: 'center', marginTop: 8 }]}>
+      <Text style={[pageTexts.title, { textAlign: 'center', marginTop: 8 }]}>
         Explore os espaços disponíveis e faça seu primeiro aluguel!
       </Text>
     </View>
@@ -35,6 +35,7 @@ export default function Rented() {
   return (
     <View style={styles.Container}>
       <SearchBar />
+
       <FlatList
         data={[1]}
         keyExtractor={() => '1'}
@@ -47,12 +48,6 @@ export default function Rented() {
             title="Meus Aluguéis"
             horizontal={false}
             style={{ alignItems: 'center' }}
-            contentContainerStyle={{ 
-              padding: 16,
-              width: '100%',
-              maxWidth: 400,
-              alignSelf: 'center'
-            }}
             ListEmptyComponent={loading ? null : EmptyComponent}
           />
         )}

@@ -2,14 +2,21 @@ import { StyleSheet } from 'react-native';
 import { colors } from './colors';
 
 export const pageTexts = StyleSheet.create({ 
-  title: {
+  titleCardList: {
     marginLeft: 20,
-    fontSize: 22,
+    marginTop: 10,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#222',
   },
 
-  subtitle: {
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#222',
+  },
+
+  subtitleCardList: {
     marginLeft: 20, 
     fontSize: 14,
     color: '#666',
@@ -20,6 +27,5 @@ export const pageTexts = StyleSheet.create({
     color: colors.dark_gray,
     fontSize: 18,
     fontWeight: '600',
-  }
-
+  },
 });
