@@ -3,11 +3,13 @@ import { View, Image, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
-import { useIsFocused } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { cardStyles as styles } from '../styles/componentStyles/cardStyles';
 import { colors } from '~/styles/globalStyles/colors';
+import { NavigationProps } from '../navigation/types';
 
 interface CardProps {
+  id: string;
   images: any[];
   title: string;
   address: string;
@@ -16,12 +18,13 @@ interface CardProps {
   reviews: number;
 }
 
-const Card: React.FC<CardProps> = ({ images, title, address, price, rating, reviews }) => {
+const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, reviews }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
+  const navigation = useNavigation<NavigationProps>();
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -42,7 +45,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
     const slideSize = event.nativeEvent.layoutMeasurement.width;
     const index = event.nativeEvent.contentOffset.x / slideSize;
     const roundedIndex = Math.round(index);
-    
+
     if (roundedIndex !== activeIndex) {
       scrollToIndex(roundedIndex);
     }
@@ -56,8 +59,34 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
     return () => clearInterval(timer);
   }, [activeIndex, isAutoPlayPaused, images.length, isFocused]);
 
+  const handleCardPress = () => {
+    navigation.navigate('SpaceDetails', {
+      space: {
+        id,
+        images,
+        title,
+        address,
+        price,
+        rating,
+        reviews,
+        description: 'Este é um espaço incrível para seu evento. Com localização privilegiada e todas as comodidades necessárias para garantir o sucesso do seu evento.',
+        amenities: [
+          'Estacionamento',
+          'Wi-Fi',
+          'Ar condicionado',
+          'Cozinha',
+          'Banheiros'
+        ]
+      }
+    });
+  };
+
   return (
-    <View style={[ styles.card, { width: CARD_WIDTH }]}> 
+    <TouchableOpacity
+      style={[styles.card, { width: CARD_WIDTH }]}
+      onPress={handleCardPress}
+      activeOpacity={0.9}
+    >
       {/* Carrossel de Imagens */}
       {images.length > 1 ? (
         <View>
@@ -84,7 +113,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
               />
             ))}
           </ScrollView>
-          
+
           {/* Setas de navegação */}
           <TouchableOpacity
             style={[styles.arrow, styles.arrowLeft]}
@@ -110,24 +139,21 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
           {/* Dots */}
           <View style={styles.dotsContainer}>
             {images.map((_, index) => (
-              <TouchableOpacity
+              <View
                 key={index}
-                onPress={() => {
-                  setIsAutoPlayPaused(true);
-                  scrollToIndex(index);
-                  setTimeout(() => setIsAutoPlayPaused(false), 5000);
-                }}
-              >
-                <View
-                  style={[styles.dot, activeIndex === index ? styles.dotActive : styles.dotInactive]}
-                />
-              </TouchableOpacity>
+                style={[
+                  styles.dot,
+                  index === activeIndex ? styles.dotActive : styles.dotInactive
+                ]}
+              />
             ))}
           </View>
 
-          {/* Contador de fotos */}
+          {/* Contador de imagens */}
           <View style={styles.counter}>
-            <Text style={styles.counterText}>{activeIndex + 1}/{images.length}</Text>
+            <Text style={styles.counterText}>
+              {activeIndex + 1}/{images.length}
+            </Text>
           </View>
         </View>
       ) : (
@@ -138,7 +164,6 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
         />
       )}
 
-      {/* Conteúdo do Card */}
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
@@ -148,16 +173,16 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
 
           <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
             {isFavorite ? (
-              <MaterialIcons 
-                name="favorite" 
-                size={21} 
-                color={colors.blue} 
+              <MaterialIcons
+                name="favorite"
+                size={21}
+                color={colors.blue}
               />
             ) : (
-              <MaterialIcons 
-                name="favorite-outline" 
-                size={22} 
-                color="#888" 
+              <MaterialIcons
+                name="favorite-outline"
+                size={22}
+                color="#888"
               />
             )}
           </TouchableOpacity>
@@ -176,7 +201,7 @@ const Card: React.FC<CardProps> = ({ images, title, address, price, rating, revi
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
