@@ -1,9 +1,11 @@
-import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { profileStyles as styles } from '../styles/profileStyles';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import espacoImg from '../../assets/mansao.png';
+import { useState } from 'react';
+import { colors } from '../styles/globalStyles/colors';
 
 type RootStackParamList = {
   Welcome: undefined;
@@ -21,6 +23,7 @@ type MenuItem = {
 
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Dados do usuário (simulados)
   const user = {
@@ -33,6 +36,31 @@ export default function Profile() {
       avaliacoes: 15
     }
   };
+
+  // Dados simulados de notificações
+  const notifications = [
+    {
+      id: '1',
+      title: 'Nova reserva confirmada',
+      message: 'Sua reserva para o espaço "Casa na Praia" foi confirmada',
+      time: '5 min atrás',
+      read: false
+    },
+    {
+      id: '2',
+      title: 'Lembrete de pagamento',
+      message: 'Não se esqueça de realizar o pagamento da sua próxima reserva',
+      time: '1 hora atrás',
+      read: true
+    },
+    {
+      id: '3',
+      title: 'Avaliação recebida',
+      message: 'Você recebeu uma nova avaliação do seu espaço',
+      time: '2 horas atrás',
+      read: true
+    }
+  ];
 
   const menuItems: MenuItem[] = [
     {
@@ -79,6 +107,23 @@ export default function Profile() {
     <View style={styles.container}>
       {/* Header com informações do perfil */}
       <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <View style={styles.notificationIconContainer}>
+            <TouchableOpacity 
+              onPress={() => setShowNotifications(true)}
+              style={styles.notificationButton}
+            >
+              <Ionicons name="notifications-outline" size={24} color={colors.white} />
+              {notifications.filter(n => !n.read).length > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {notifications.filter(n => !n.read).length}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
         <View style={styles.profileInfo}>
           <View style={styles.avatarContainer}>
             <Image
@@ -107,6 +152,53 @@ export default function Profile() {
           </View>
         </View>
       </View>
+
+      {/* Modal de Notificações */}
+      <Modal
+        visible={showNotifications}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowNotifications(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowNotifications(false)}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            style={styles.notificationModal}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.notificationHeader}>
+              <Text style={styles.notificationTitle}>Notificações</Text>
+              <TouchableOpacity 
+                onPress={() => setShowNotifications(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={colors.black} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.notificationList}>
+              {notifications.map((notification) => (
+                <TouchableOpacity 
+                  key={notification.id}
+                  style={[
+                    styles.notificationItem,
+                    !notification.read && styles.unreadNotification
+                  ]}
+                >
+                  <View style={styles.notificationContent}>
+                    <Text style={styles.notificationItemTitle}>{notification.title}</Text>
+                    <Text style={styles.notificationItemMessage}>{notification.message}</Text>
+                    <Text style={styles.notificationItemTime}>{notification.time}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Conteúdo */}
       <ScrollView 
