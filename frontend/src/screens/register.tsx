@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
@@ -10,9 +10,57 @@ import { loginStyles } from '~/styles/loginStyles';
 import Button from '../components/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
+import { useState } from 'react';
+import { authService } from '../services/authService';
 
 export default function Register() {
   const navigation = useNavigation<NavigationProps>();
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    email: '',
+    password: '',
+    telephone: '',
+    role: 'usuario'
+  });
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    // Validações
+    if (!formData.name || !formData.surname || !formData.email || !formData.password || !formData.telephone) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (formData.password !== confirmPassword) {
+      Alert.alert('Erro', 'As senhas não coincidem');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authService.register(formData);
+      
+      Alert.alert(
+        'Sucesso',
+        'Cadastro realizado com sucesso!',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login')
+          }
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert(
+        'Erro ao cadastrar',
+        error?.response?.data?.mensagem || 'Ocorreu um erro ao realizar o cadastro'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <LinearGradient
@@ -37,9 +85,19 @@ export default function Register() {
             </View>
 
             <BaseInput
-              label="Nome Completo"
+              label="Nome"
               placeholder="Digite seu nome"
               required
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+            />
+
+            <BaseInput
+              label="Sobrenome"
+              placeholder="Digite seu sobrenome"
+              required
+              value={formData.surname}
+              onChangeText={(text) => setFormData({ ...formData, surname: text })}
             />
 
             <BaseInput
@@ -48,18 +106,24 @@ export default function Register() {
               keyboardType="email-address"
               autoCapitalize="none"
               required
+              value={formData.email}
+              onChangeText={(text) => setFormData({ ...formData, email: text })}
             />
 
             <PasswordInput
               label="Senha"
               placeholder="Digite sua senha"
               required
+              value={formData.password}
+              onChangeText={(text) => setFormData({ ...formData, password: text })}
             />
 
             <PasswordInput
               label="Confirmar Senha"
               placeholder="Confirme sua senha"
               required
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
             />
 
             <BaseInput
@@ -67,11 +131,13 @@ export default function Register() {
               placeholder="Digite seu telefone"
               keyboardType="phone-pad"
               required
+              value={formData.telephone}
+              onChangeText={(text) => setFormData({ ...formData, telephone: text })}
             />
 
             <Button 
-              text="Cadastrar"
-              navigateTo="Login"
+              text={loading ? "Cadastrando..." : "Cadastrar"}
+              onPress={handleRegister}
               color="blue"
             />
 

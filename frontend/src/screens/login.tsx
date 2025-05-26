@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
@@ -7,8 +7,34 @@ import Button from '../components/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
+import { useState } from 'react';
+import { authService } from '../services/authService';
 
 export default function Login({ navigation }: any) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authService.login(email, password);
+      navigation.navigate('MainApp');
+    } catch (error: any) {
+      Alert.alert(
+        'Erro ao fazer login',
+        error?.response?.data?.message || 'Ocorreu um erro ao fazer login'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <LinearGradient
       colors={[colors.others[100], colors.others[200]]}
@@ -28,18 +54,22 @@ export default function Login({ navigation }: any) {
           keyboardType="email-address"
           autoCapitalize="none"
           required
+          value={email}
+          onChangeText={setEmail}
         />
 
         <PasswordInput
           label="Senha"
           placeholder="Digite sua senha"
           required
-          containerStyle={ inputStyles.marginBottom }
+          containerStyle={inputStyles.marginBottom}
+          value={password}
+          onChangeText={setPassword}
         />
 
         <Button 
-          text="Entrar"
-          navigateTo="MainApp"
+          text={loading ? "Carregando..." : "Entrar"}
+          onPress={handleLogin}
           color="blue"
         />
 
