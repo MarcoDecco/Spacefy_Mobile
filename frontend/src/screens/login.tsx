@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
@@ -7,8 +7,23 @@ import Button from '../components/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
+import React, { useState } from 'react';
+import {authService }from '../services/authService'; // Importe seu serviço de autenticação
 
 export default function Login({ navigation }: any) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // Função para autenticar o usuário
+  const handleLogin = async () => {
+    try {
+      await authService.login(email, password);
+      navigation.navigate('MainApp');
+    } catch (error: any) {
+      Alert.alert('Erro', error?.message || 'Falha ao fazer login');
+    }
+  };
+
   return (
     <LinearGradient
       colors={[colors.others[100], colors.others[200]]}
@@ -28,6 +43,8 @@ export default function Login({ navigation }: any) {
           keyboardType="email-address"
           autoCapitalize="none"
           required
+          value={email}
+          onChangeText={setEmail}
         />
 
         <PasswordInput
@@ -35,11 +52,13 @@ export default function Login({ navigation }: any) {
           placeholder="Digite sua senha"
           required
           containerStyle={ inputStyles.marginBottom }
+          value={password}
+          onChangeText={setPassword}
         />
 
         <Button 
           text="Entrar"
-          navigateTo="MainApp"
+          onPress={handleLogin} // Use a função de login
           color="blue"
         />
 
@@ -57,4 +76,4 @@ export default function Login({ navigation }: any) {
       </View>
     </LinearGradient>
   );
-} 
+}
