@@ -3,28 +3,26 @@
     "name": "frontend",
     "slug": "frontend",
     "version": "1.0.0",
-
     "web": {
       "favicon": "./assets/icone-da-logo.png"
     },
-
     "experiments": {
       "tsconfigPaths": true
     },
-
-    "plugins": [],
-
+    "plugins": [
+      "expo-sqlite"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icone-da-logo.png",
-
     "userInterfaceStyle": "light",
-
     "splash": {
       "image": "./assets/icone-da-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
