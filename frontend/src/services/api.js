@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '@env';
+
+const API_URL = process.env.API_URL;
 
 const api = axios.create({
     baseURL: API_URL,
@@ -15,4 +16,4 @@ api.interceptors.request.use(async (config) => {
     return config;
 });
 
-export default api; 
+export default api;

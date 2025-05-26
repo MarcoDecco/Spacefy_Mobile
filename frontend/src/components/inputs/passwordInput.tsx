@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TextInputProps, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, TextInput, TouchableOpacity, Text, TextInputProps } from 'react-native';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
 import { pageTexts } from '~/styles/globalStyles/pageTexts';
 
@@ -11,8 +10,16 @@ interface PasswordInputProps extends TextInputProps {
   containerStyle?: object;
 }
 
-export default function PasswordInput({ label, required, error, containerStyle, ...props }: PasswordInputProps) {
-  const [showPassword, setShowPassword] = useState(false);
+export default function PasswordInput({
+  label,
+  required = false,
+  error,
+  containerStyle,
+  value,
+  onChangeText,
+  ...props
+}: PasswordInputProps) {
+  const [secure, setSecure] = useState(true);
 
   return (
     <View style={[inputStyles.container, containerStyle]}>
@@ -25,19 +32,15 @@ export default function PasswordInput({ label, required, error, containerStyle, 
         <TextInput
           style={inputStyles.input}
           placeholderTextColor="#A0A0A0"
-          secureTextEntry={!showPassword}
-          autoCapitalize="none"
+          secureTextEntry={secure}
+          value={value}
+          onChangeText={onChangeText}
           {...props}
         />
-        <TouchableOpacity
-          style={inputStyles.iconContainer}
-          onPress={() => setShowPassword(!showPassword)}
-        >
-          <Ionicons
-            name={showPassword ? 'eye-off' : 'eye'}
-            size={20}
-            color="#A0A0A0"
-          />
+        <TouchableOpacity onPress={() => setSecure(!secure)}>
+          <Text style={{ marginLeft: 8 }}>
+            {secure ? 'Mostrar' : 'Ocultar'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -49,4 +52,4 @@ export default function PasswordInput({ label, required, error, containerStyle, 
       )}
     </View>
   );
-} 
+}
