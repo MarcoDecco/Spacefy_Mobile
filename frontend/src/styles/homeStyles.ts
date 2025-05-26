@@ -5,9 +5,13 @@ const { width: windowWidth } = Dimensions.get('window');
 export const CARD_WIDTH = windowWidth * 0.8;
 
 export const homeStyles = StyleSheet.create({
-  Container: {
+  container: {
     flex: 1,
     backgroundColor: colors.light_gray,
+  },
+  
+  contentContainer: {
+    paddingTop: 130,
   },
   
   horizontalScroll: {

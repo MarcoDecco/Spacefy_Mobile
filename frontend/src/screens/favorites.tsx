@@ -6,12 +6,15 @@ import { BaseCard } from "../types/card";
 import { homeStyles as styles } from '../styles/homeStyles';
 import SearchBar from "../components/searchBar";
 import { pageTexts } from '../styles/globalStyles/pageTexts';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function Favorites() {
   const { cards: favoriteCards, loading } = useCards('favorites');
+  const { theme } = useTheme();
 
   const renderCard = (item: BaseCard) => (
     <Card 
+      id={item.id}
       images={item.images}
       title={item.title}
       address={item.address}
@@ -23,17 +26,17 @@ export default function Favorites() {
 
   const EmptyComponent = () => (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 }}>
-      <Text style={[pageTexts.subtitle, { textAlign: 'center' }]}>
+      <Text style={[pageTexts.title, { textAlign: 'center', color: theme.text }]}>
         Você ainda não tem espaços favoritos.
       </Text>
-      <Text style={[pageTexts.subtitle, { textAlign: 'center', marginTop: 8 }]}>
+      <Text style={[pageTexts.title, { textAlign: 'center', marginTop: 8, color: theme.text }]}>
         Explore os espaços disponíveis e adicione seus favoritos!
       </Text>
     </View>
   );
 
   return (
-    <View style={styles.Container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SearchBar />
       <FlatList
         data={[1]}

@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from '@expo/vector-icons'
+import { useTheme } from '../contexts/ThemeContext';
 
 import Home from '../screens/home';
 import Rented from '../screens/rented';
@@ -11,12 +12,22 @@ import { colors } from "~/styles/globalStyles/colors";
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation() {
+    const { theme } = useTheme();
+
     return(
         <Tab.Navigator 
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.blue,
-                tabBarInactiveTintColor: '#A0A0A0',
+                tabBarInactiveTintColor: theme.gray,
+                tabBarStyle: {
+                    backgroundColor: theme.background,
+                    borderTopColor: theme.border,
+                    borderTopWidth: 1,
+                },
+                tabBarLabelStyle: {
+                    color: theme.text,
+                }
             }}
         >
             <Tab.Screen

@@ -5,6 +5,7 @@ import Welcome from '../screens/welcome';
 import Login from '../screens/login';
 import Register from '../screens/register';
 import SpaceDetails from '../screens/spaceDetails';
+import Settings from '../screens/settings';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -20,6 +21,13 @@ export default function StackNavigation() {
       <Stack.Screen
         name="SpaceDetails"
         component={SpaceDetails}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={Settings}
         options={{
           headerShown: false
         }}

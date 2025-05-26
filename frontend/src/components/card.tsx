@@ -7,6 +7,7 @@ import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { cardStyles as styles } from '../styles/componentStyles/cardStyles';
 import { colors } from '~/styles/globalStyles/colors';
 import { NavigationProps } from '../navigation/types';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CardProps {
   id: string;
@@ -25,6 +26,7 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProps>();
+  const { theme, isDarkMode } = useTheme();
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -83,7 +85,15 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
 
   return (
     <TouchableOpacity
-      style={[styles.card, { width: CARD_WIDTH }]}
+      style={[
+        styles.card, 
+        { 
+          width: CARD_WIDTH,
+          backgroundColor: isDarkMode ? theme.background : colors.white,
+          borderWidth: isDarkMode ? 1 : 0,
+          borderColor: colors.blue
+        }
+      ]}
       onPress={handleCardPress}
       activeOpacity={0.9}
     >
@@ -167,8 +177,8 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.title} numberOfLines={1}>{title}</Text>
-            <Text style={styles.address} numberOfLines={1}>{address}</Text>
+            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>{title}</Text>
+            <Text style={[styles.address, { color: theme.gray }]} numberOfLines={1}>{address}</Text>
           </View>
 
           <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
@@ -182,7 +192,7 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
               <MaterialIcons
                 name="favorite-outline"
                 size={22}
-                color="#888"
+                color={theme.gray}
               />
             )}
           </TouchableOpacity>
@@ -190,14 +200,14 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
 
         <View style={styles.priceContainer}>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-            <Text style={styles.price}>{price}</Text>
-            <Text style={styles.priceHour}>por hora</Text>
+            <Text style={[styles.price, { color: theme.text }]}>{price}</Text>
+            <Text style={[styles.priceHour, { color: theme.gray }]}>por hora</Text>
           </View>
 
           <View style={styles.ratingRow}>
             <MaterialIcons name="star" size={18} color="#F59E0B" />
-            <Text style={styles.rating}>{rating.toFixed(2)}</Text>
-            <Text style={styles.reviews}>({reviews} avaliações)</Text>
+            <Text style={[styles.rating, { color: theme.text }]}>{rating.toFixed(2)}</Text>
+            <Text style={[styles.reviews, { color: theme.gray }]}>({reviews} avaliações)</Text>
           </View>
         </View>
       </View>

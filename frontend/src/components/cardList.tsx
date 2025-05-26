@@ -2,6 +2,7 @@ import { View, FlatList, ViewStyle, Text } from 'react-native';
 import { CardType } from '../types/card';
 import { CARD_WIDTH } from '../styles/homeStyles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CardListProps<T extends CardType> {
   data: T[];
@@ -15,6 +16,8 @@ interface CardListProps<T extends CardType> {
 }
 
 export const CardList = <T extends CardType>({data, renderCard, title, subtitle, horizontal = true, style, contentContainerStyle, ListEmptyComponent }: CardListProps<T>) => {
+  const { theme } = useTheme();
+
   const renderItem = ({ item }: { item: T }) => (
     <View style={{ marginHorizontal: 8 }}>
       {renderCard(item)}
@@ -23,8 +26,8 @@ export const CardList = <T extends CardType>({data, renderCard, title, subtitle,
 
   return (
     <View style={style}>
-      {title && <Text style={ pageTexts.titleCardList }>{title}</Text>}
-      {subtitle && <Text style={pageTexts.subtitleCardList}>{subtitle}</Text>}
+      {title && <Text style={[pageTexts.titleCardList, { color: theme.text }]}>{title}</Text>}
+      {subtitle && <Text style={[pageTexts.subtitleCardList, { color: theme.text }]}>{subtitle}</Text>}
       
       <FlatList
         data={data}

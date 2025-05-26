@@ -7,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SpaceDetailsProps {
   route: {
@@ -30,6 +31,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const { space } = route.params;
   const navigation = useNavigation();
   const isFocused = useIsFocused();
+  const { theme, isDarkMode } = useTheme();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -85,17 +87,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     ));
   };
   const renderReview = (review: any) => (
-    <View key={review.id} style={{ backgroundColor: '#fff', borderRadius: 8, padding: 12, marginBottom: 12, elevation: 2 }}>
-      <Text style={{ fontWeight: 'bold' }}>{review.user}</Text>
-      <Text style={{ color: '#888', fontSize: 12 }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</Text>
-      <Text>
+    <View key={review.id} style={[styles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
+      <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
+      <Text style={[styles.reviewRating, isDarkMode && { color: theme.text }]}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</Text>
+      <Text style={[styles.reviewText, isDarkMode && { color: theme.text }]}>
         {review.expanded || review.text.length <= MAX_REVIEW_LENGTH
           ? review.text
           : review.text.substring(0, MAX_REVIEW_LENGTH) + '...'}
       </Text>
       {review.text.length > MAX_REVIEW_LENGTH && (
         <TouchableOpacity onPress={() => toggleReview(review.id)}>
-          <Text style={{ color: '#1976d2', fontWeight: 'bold' }}>
+          <Text style={[styles.reviewMoreButton, isDarkMode && { color: theme.blue }]}>
             {review.expanded ? 'Mostrar menos' : 'Mostrar mais'} &gt;
           </Text>
         </TouchableOpacity>
@@ -234,15 +236,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
       <StatusBar
-        barStyle="light-content"
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
         backgroundColor="transparent"
         translucent
       />
       <View style={styles.statusBarGradient} />
       <ScrollView
-        style={styles.container}
+        style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.imageContainer}>
@@ -251,327 +253,258 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Feather name="arrow-left" size={24} color="white" />
+            <MaterialIcons name="arrow-back" size={24} color={colors.white} />
           </TouchableOpacity>
 
-          {/* Carrossel de Imagens */}
-          {space.images.length > 1 ? (
-            <View>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleScroll}
-                onMomentumScrollEnd={handleMomentumScrollEnd}
-                ref={scrollRef}
-                scrollEventThrottle={16}
-                onTouchStart={() => setIsAutoPlayPaused(true)}
-                onTouchEnd={() => setIsAutoPlayPaused(false)}
-                decelerationRate="fast"
-                snapToInterval={windowWidth}
-                snapToAlignment="center"
-              >
-                {space.images.map((image, index) => (
-                  <Image
-                    key={index}
-                    source={image}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
-                ))}
-              </ScrollView>
-
-              {/* Dots */}
-              <View style={styles.dotsContainer}>
-                {space.images.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      index === activeIndex ? styles.dotActive : styles.dotInactive
-                    ]}
-                  />
-                ))}
-              </View>
-
-              {/* Contador de imagens */}
-              <View style={styles.counter}>
-                <Text style={styles.counterText}>
-                  {activeIndex + 1}/{space.images.length}
-                </Text>
-              </View>
-
-              {/* Botão de favoritar */}
-              <TouchableOpacity
-                style={styles.favoriteButton}
-                onPress={() => setIsFavorite(!isFavorite)}
-              >
-                <MaterialIcons
-                  name={isFavorite ? "favorite" : "favorite-outline"}
-                  size={24}
-                  color={isFavorite ? colors.blue : "white"}
-                />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <Image
-              source={space.images[0]}
-              style={styles.image}
-              resizeMode="cover"
+          {/* Botão de favorito */}
+          <TouchableOpacity
+            style={styles.favoriteButton}
+            onPress={() => setIsFavorite(!isFavorite)}
+          >
+            <MaterialIcons
+              name={isFavorite ? "favorite" : "favorite-border"}
+              size={24}
+              color={isFavorite ? "#FF3B30" : colors.white}
             />
-          )}
+          </TouchableOpacity>
+
+          {/* Carrossel de imagens */}
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
+            scrollEventThrottle={16}
+            onTouchStart={() => setIsAutoPlayPaused(true)}
+            onTouchEnd={() => setIsAutoPlayPaused(false)}
+          >
+            {space.images.map((image, index) => (
+              <Image
+                key={index}
+                source={image}
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
+
+          {/* Indicadores de página */}
+          <View style={styles.dotsContainer}>
+            {space.images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  index === activeIndex ? styles.dotActive : styles.dotInactive
+                ]}
+              />
+            ))}
+          </View>
+
+          {/* Contador de imagens */}
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>
+              {activeIndex + 1}/{space.images.length}
+            </Text>
+          </View>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>{space.title}</Text>
-          <Text style={styles.address}>{space.address}</Text>
+          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
+          <Text style={[styles.address, isDarkMode && { color: theme.text }]}>{space.address}</Text>
 
           <View style={styles.ratingContainer}>
-            <MaterialIcons name="star" size={20} color="#F59E0B" />
-            <Text style={styles.rating}>{space.rating.toFixed(1)}</Text>
-            <Text style={styles.reviews}>({space.reviews} avaliações)</Text>
+            <MaterialIcons name="star" size={20} color={colors.blue} />
+            <Text style={[styles.rating, isDarkMode && { color: theme.text }]}>{space.rating}</Text>
+            <Text style={[styles.reviews, isDarkMode && { color: theme.text }]}>({space.reviews} avaliações)</Text>
           </View>
 
-          <Text style={styles.price}>{space.price} por hora</Text>
+          <Text style={styles.price}>{space.price}</Text>
 
-          {space.description && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Descrição</Text>
-              <Text style={styles.description}>{displayDescription}</Text>
-              {shouldShowMoreButton && (
-                <TouchableOpacity
-                  onPress={() => setShowFullDescription(!showFullDescription)}
-                  style={styles.moreButton}
-                >
-                  <Text style={styles.moreButtonText}>
-                    {showFullDescription ? 'Ver menos' : 'Ver mais'}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+          {/* Descrição */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
+            <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
+              {displayDescription}
+            </Text>
+            {shouldShowMoreButton && (
+              <TouchableOpacity
+                style={styles.moreButton}
+                onPress={() => setShowFullDescription(!showFullDescription)}
+              >
+                <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
+                  {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
+          {/* Comodidades */}
           {space.amenities && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Comodidades</Text>
+              <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Comodidades</Text>
               {space.amenities.map((amenity, index) => (
                 <View key={index} style={styles.amenityItem}>
                   <MaterialIcons name="check-circle" size={20} color={colors.blue} />
-                  <Text style={styles.amenityText}>{amenity}</Text>
+                  <Text style={[styles.amenityText, isDarkMode && { color: theme.text }]}>{amenity}</Text>
                 </View>
               ))}
             </View>
           )}
-        </View>
 
-        <View style={styles.bookingCard}>
-          <View style={styles.row}>
-            {/* Check-in */}
-            <View style={styles.column}>
-              <Text style={styles.label}>Check-in</Text>
-              <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkInDate', 'date')}>
-                <Text style={styles.valueText}>{checkInDate.toLocaleDateString()}</Text>
-              </TouchableOpacity>
-              <Text style={styles.label}>Hora:</Text>
-              <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkInTime')}>
-                <Text style={styles.valueText}>{checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-              </TouchableOpacity>
+          {/* Card de reserva */}
+          <View style={[styles.bookingCard, isDarkMode && { backgroundColor: theme.card }]}>
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Check-in</Text>
+                <TouchableOpacity
+                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
+                  onPress={() => openPicker('checkInDate', 'date')}
+                >
+                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
+                    {checkInDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
+                  onPress={() => openTimeModal('checkInTime')}
+                >
+                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
+                    {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={[styles.verticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+
+              <View style={styles.column}>
+                <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Check-out</Text>
+                <TouchableOpacity
+                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
+                  onPress={() => openPicker('checkOutDate', 'date')}
+                >
+                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
+                    {checkOutDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
+                  onPress={() => openTimeModal('checkOutTime')}
+                >
+                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
+                    {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.verticalDivider} />
-            {/* Check-out */}
-            <View style={styles.column}>
-              <Text style={styles.label}>Check-out</Text>
-              <TouchableOpacity style={styles.valueBox} onPress={() => openPicker('checkOutDate', 'date')}>
-                <Text style={styles.valueText}>{checkOutDate.toLocaleDateString()}</Text>
-              </TouchableOpacity>
-              <Text style={styles.label}>Hora:</Text>
-              <TouchableOpacity style={styles.valueBox} onPress={() => openTimeModal('checkOutTime')}>
-                <Text style={styles.valueText}>{checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-              </TouchableOpacity>
+
+            <View style={[styles.horizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+
+            <View style={styles.totalRow}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Total</Text>
+              <Text style={[styles.totalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
             </View>
-          </View>
-          <View style={styles.horizontalDivider} />
-          <View style={styles.totalRow}>
-            <View>
-              <Text style={styles.label}>Total:</Text>
-              <Text style={styles.totalValue}>{calcularTotal()}</Text>
-            </View>
+
             <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
               <Text style={styles.rentButtonText}>Alugar</Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Avaliações e comentários */}
-        <View style={{ marginBottom: 24, paddingHorizontal: 16 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>Avaliações do local</Text>
-          <FlatList
-            data={reviews}
-            keyExtractor={item => item.id.toString()}
-            renderItem={({ item }) => (
-              <View style={{
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                padding: 14,
-                marginRight: 12,
-                borderWidth: 1,
-                borderColor: '#e0e0e0',
-                minWidth: 240,
-                maxWidth: 280,
-                elevation: 2,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 3,
-              }}>
-                {renderReview(item)}
-              </View>
-            )}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={{ marginBottom: 8 }}
-            contentContainerStyle={{ paddingHorizontal: 0 }}
-          />
-        </View>
-
-        <View style={{ marginBottom: 24, paddingHorizontal: 16, alignItems: 'center' }}>
-          <Text style={{ color: '#1976d2', fontWeight: 'bold', fontSize: 16, marginBottom: 8, textAlign: 'center' }}>Avalie este local</Text>
-          <View style={{ flexDirection: 'row', marginBottom: 12, justifyContent: 'center' }}>
-            {[1, 2, 3, 4, 5].map(star => (
-              <TouchableOpacity key={star} onPress={() => setNewRating(star)}>
-                <Text style={{ fontSize: 28, color: newRating >= star ? '#FFD700' : '#ccc' }}>★</Text>
-              </TouchableOpacity>
-            ))}
+          {/* Avaliações */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações</Text>
+            {reviews.map(renderReview)}
           </View>
-          <Text style={{ color: '#1976d2', fontWeight: 'bold', fontSize: 16, marginBottom: 8, textAlign: 'center' }}>Adicione um comentário</Text>
-          <TextInput
-            style={{ backgroundColor: '#fff', borderRadius: 8, minHeight: 60, padding: 8, borderWidth: 1, borderColor: '#ccc', marginBottom: 12, width: '100%' }}
-            multiline
-            value={newComment}
-            onChangeText={setNewComment}
-            placeholder="Digite seu comentário..."
-          />
-          <TouchableOpacity
-            style={{ backgroundColor: '#1976d2', borderRadius: 6, paddingVertical: 8, paddingHorizontal: 24, alignItems: 'center', alignSelf: 'center' }}
-            onPress={() => {
-              if (newRating && newComment) {
-                setReviews([
-                  { id: Date.now(), user: 'Você', rating: newRating, text: newComment, expanded: false },
-                  ...reviews,
-                ]);
-                setNewRating(0);
-                setNewComment('');
-              }
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>Comentar</Text>
-          </TouchableOpacity>
         </View>
-
-        {/* Modal do calendário customizado */}
-        <Modal
-          visible={calendarVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setCalendarVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setCalendarVisible(false)}>
-            <View style={styles.calendarOverlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.calendarModal}>
-                  <Calendar
-                    onDayPress={handleCalendarSelect}
-                    markedDates={{
-                      [(calendarTarget === 'checkInDate' ? checkInDate : checkOutDate).toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue }
-                    }}
-                    minDate={calendarTarget === 'checkOutDate' ? checkInDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
-                    theme={{
-                      backgroundColor: '#fff',
-                      calendarBackground: '#fff',
-                      textSectionTitleColor: '#222',
-                      selectedDayBackgroundColor: colors.blue,
-                      selectedDayTextColor: '#fff',
-                      todayTextColor: colors.blue,
-                      dayTextColor: '#222',
-                      textDisabledColor: '#ccc',
-                      arrowColor: colors.blue,
-                      monthTextColor: colors.blue,
-                      indicatorColor: colors.blue,
-                      textDayFontWeight: 'bold',
-                      textMonthFontWeight: 'bold',
-                      textDayHeaderFontWeight: 'bold',
-                      textDayFontSize: 16,
-                      textMonthFontSize: 18,
-                      textDayHeaderFontSize: 14,
-                    }}
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-
-        {/* DateTimePickerModal para horários */}
-        <DateTimePickerModal
-          isVisible={pickerVisible}
-          mode={pickerMode}
-          date={
-            pickerTarget === 'checkInDate' ? checkInDate :
-              pickerTarget === 'checkOutDate' ? checkOutDate :
-                pickerTarget === 'checkInTime' ? checkInTime :
-                  checkOutTime
-          }
-          minimumDate={pickerTarget === 'checkOutDate' ? checkInDate : new Date()}
-          onConfirm={handlePickerConfirm}
-          onCancel={() => setPickerVisible(false)}
-          locale="pt-BR"
-          confirmTextIOS="Confirmar"
-          cancelTextIOS="Cancelar"
-        />
-
-        {/* Modal customizado para horários */}
-        <Modal
-          visible={timeModalVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => setTimeModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setTimeModalVisible(false)}>
-            <View style={styles.calendarOverlay}>
-              <TouchableWithoutFeedback>
-                <View style={styles.timeModal}>
-                  <Text style={styles.timeModalTitle}>Selecione o horário</Text>
-                  <FlatList
-                    data={timeList}
-                    keyExtractor={item => item}
-                    style={{ maxHeight: 320 }}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity style={styles.timeItem} onPress={() => handleTimeSelect(item)}>
-                        <Text style={styles.timeItemText}>{item}</Text>
-                      </TouchableOpacity>
-                    )}
-                    showsVerticalScrollIndicator={false}
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-
-        <Modal
-          visible={confirmModalVisible}
-          transparent
-          animationType="none"
-          onRequestClose={() => setConfirmModalVisible(false)}
-        >
-          <View style={styles.confirmModalContainer}>
-            <View style={styles.confirmModal}>
-              <MaterialIcons name="check-circle" size={24} color={colors.blue} />
-              <Text style={styles.confirmTitle}>Reserva confirmada!</Text>
-            </View>
-          </View>
-        </Modal>
       </ScrollView>
+
+      {/* Modal do Calendário */}
+      <Modal
+        visible={calendarVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setCalendarVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setCalendarVisible(false)}>
+          <View style={styles.calendarOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.calendarModal, isDarkMode && { backgroundColor: theme.card }]}>
+                <Calendar
+                  onDayPress={handleCalendarSelect}
+                  markedDates={{
+                    [checkInDate.toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue },
+                    [checkOutDate.toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue }
+                  }}
+                  theme={{
+                    backgroundColor: isDarkMode ? theme.card : colors.white,
+                    calendarBackground: isDarkMode ? theme.card : colors.white,
+                    textSectionTitleColor: isDarkMode ? theme.text : colors.black,
+                    selectedDayBackgroundColor: colors.blue,
+                    selectedDayTextColor: colors.white,
+                    todayTextColor: colors.blue,
+                    dayTextColor: isDarkMode ? theme.text : colors.black,
+                    textDisabledColor: isDarkMode ? theme.border : colors.gray,
+                    monthTextColor: isDarkMode ? theme.text : colors.black,
+                    arrowColor: colors.blue,
+                  }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Modal de Horário */}
+      <Modal
+        visible={timeModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setTimeModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setTimeModalVisible(false)}>
+          <View style={styles.calendarOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.calendarModal, isDarkMode && { backgroundColor: theme.card }]}>
+                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
+                  Selecione o horário
+                </Text>
+                <FlatList
+                  data={timeList}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={[styles.timeItem, isDarkMode && { backgroundColor: theme.background }]}
+                      onPress={() => handleTimeSelect(item)}
+                    >
+                      <Text style={[styles.timeText, isDarkMode && { color: theme.text }]}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                  numColumns={3}
+                  contentContainerStyle={styles.timeList}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Modal de Confirmação */}
+      <Modal
+        visible={confirmModalVisible}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.calendarOverlay}>
+          <View style={[styles.confirmModal, isDarkMode && { backgroundColor: theme.card }]}>
+            <MaterialIcons name="check-circle" size={48} color={colors.blue} />
+            <Text style={[styles.confirmText, isDarkMode && { color: theme.text }]}>
+              Reserva realizada com sucesso!
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 } 

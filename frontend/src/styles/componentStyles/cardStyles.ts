@@ -3,7 +3,6 @@ import { colors } from '../globalStyles/colors';
 
 export const cardStyles = StyleSheet.create({
   card: {
-    backgroundColor: colors.white,
     borderRadius: 18,
     shadowColor: colors.black,
     shadowOffset: { width: 0, height: 4 },
@@ -105,12 +104,10 @@ export const cardStyles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#222',
   },
 
   address: {
     fontSize: 13,
-    color: '#888',
   },
 
   priceContainer: {
@@ -122,19 +119,16 @@ export const cardStyles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#222',
   },
 
   originalPrice: {
     fontSize: 14,
-    color: '#888',
     textDecorationLine: 'line-through',
     marginLeft: 4,
   },
 
   priceHour: {
     fontSize: 14,
-    color: '#888',
     marginLeft: 4,
   },
 
@@ -152,13 +146,11 @@ export const cardStyles = StyleSheet.create({
   rating: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#222',
     marginLeft: 2,
   },
 
   reviews: {
     fontSize: 13,
-    color: '#888',
     marginLeft: 4,
   },
 });

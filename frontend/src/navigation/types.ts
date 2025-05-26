@@ -21,6 +21,7 @@ export type RootStackParamList = {
   Register: undefined;
   MainApp: undefined;
   SpaceDetails: SpaceDetailsParams;
+  Settings: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

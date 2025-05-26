@@ -10,6 +10,12 @@ export const colors = {
     black: '#000000',
     error: '#FF0000',
 
+    // Propriedades do tema
+    background: '#FCFCFC',
+    text: '#000000',
+    card: '#FCFCFC',
+    border: '#f5f5f5',
+
     splash: {
         100: '#1EACE3',
         200: '#152F6C',
