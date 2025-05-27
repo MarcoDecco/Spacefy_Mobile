@@ -31,6 +31,26 @@ export async function runMigrations(): Promise<void> {
       currentVersion = 1;
     }
 
+    // Migração para criar tabela de favoritos (versão 1 -> 2)
+    if (currentVersion === 1) {
+      // Cria a tabela de favoritos
+      // Esta tabela armazena os espaços favoritados pelos usuários
+      await db.executeSql(`
+        CREATE TABLE IF NOT EXISTS favorites (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          spaceId TEXT NOT NULL,
+          userId TEXT NOT NULL,
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          lastViewed DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(spaceId, userId)
+        )
+      `);
+
+      // Atualiza a versão do banco para 2
+      await db.executeSql(`PRAGMA user_version = 2`);
+      currentVersion = 2;
+    }
+
     // Log de sucesso após todas as migrações
     console.log('Migrações executadas com sucesso');
   } catch (error) {
