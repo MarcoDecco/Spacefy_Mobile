@@ -1,44 +1,42 @@
-import dbPromise from './database';
+import Database from './database';
 
-export async function runMigrations() {
-  const db = await dbPromise;
+/**
+ * Função responsável por executar as migrações do banco de dados
+ * As migrações são executadas em ordem sequencial, baseadas na versão atual do banco
+ * Cada migração atualiza a versão do banco após sua execução bem-sucedida
+ * 
+ * @throws {Error} Se houver erro durante a execução das migrações
+ */
+export async function runMigrations(): Promise<void> {
+  // Obtém a instância única do banco de dados
+  const db = Database.getInstance();
+  // Inicializa a conexão com o banco
+  await db.initialize();
 
-  const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-  let currentVersion = result?.user_version ?? 0;
+  try {
+    // Consulta a versão atual do banco de dados
+    // O PRAGMA user_version é usado para controlar as migrações
+    const result = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+    let currentVersion = result?.user_version ?? 0;
 
-  // Versão 1: Criar tabela de favoritos
-  if (currentVersion === 0) {
-    await db.execAsync(`
-      PRAGMA journal_mode = WAL;
+    // Migração inicial (versão 0 -> 1)
+    if (currentVersion === 0) {
+      // Configura o modo WAL (Write-Ahead Logging)
+      // Este modo melhora a performance e a concorrência do banco
+      await db.executeSql('PRAGMA journal_mode = WAL');
 
-      CREATE TABLE IF NOT EXISTS favorites (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        spaceId TEXT NOT NULL UNIQUE,
-        name TEXT NOT NULL,
-        description TEXT,
-        imageUrl TEXT,
-        createdAt TEXT NOT NULL
-      );
-    `);
-    currentVersion = 1;
-    await db.execAsync(`PRAGMA user_version = ${currentVersion}`);
+      // Atualiza a versão do banco para 1
+      // Isso indica que a migração inicial foi concluída
+      await db.executeSql(`PRAGMA user_version = 1`);
+      currentVersion = 1;
+    }
+
+    // Log de sucesso após todas as migrações
+    console.log('Migrações executadas com sucesso');
+  } catch (error) {
+    // Log detalhado em caso de erro
+    console.error('Erro ao executar migrações:', error);
+    // Propaga o erro para ser tratado pelo chamador
+    throw error;
   }
-
-  // Versão 2: Adicionar coluna de categoria (exemplo de uma futura alteração)
-  if (currentVersion === 1) {
-    await db.execAsync(`
-      ALTER TABLE favorites ADD COLUMN category TEXT;
-    `);
-    currentVersion = 2;
-    await db.execAsync(`PRAGMA user_version = ${currentVersion}`);
-  }
-
-  // Adicionar mais versões conforme necessário
-  // if (currentVersion === 2) {
-  //   await db.execAsync(`
-  //     ALTER TABLE favorites ADD COLUMN nova_coluna TEXT;
-  //   `);
-  //   currentVersion = 3;
-  //   await db.execAsync(`PRAGMA user_version = ${currentVersion}`);
-  // }
 } 
