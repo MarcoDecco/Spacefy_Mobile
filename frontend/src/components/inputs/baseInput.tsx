@@ -9,28 +9,38 @@ interface BaseInputProps extends TextInputProps {
   containerStyle?: object;
 }
 
-export default function BaseInput({ label, required = false, error, containerStyle, ...props }: BaseInputProps) {
+export default function BaseInput({
+  label,
+  required = false,
+  error,
+  containerStyle,
+  value,
+  onChangeText,
+  ...props
+}: BaseInputProps) {
   return (
     <View style={[inputStyles.container, containerStyle]}>
-        <View style={inputStyles.labelContainer}>
-            <Text style={pageTexts.labelInput}>{label}</Text>
-            {required && <Text style={inputStyles.required}>*</Text>}
-        </View>
+      <View style={inputStyles.labelContainer}>
+        <Text style={pageTexts.labelInput}>{label}</Text>
+        {required && <Text style={inputStyles.required}>*</Text>}
+      </View>
 
-        <View style={inputStyles.inputContainer}>
-            <TextInput
-                style={inputStyles.input}
-                placeholderTextColor="#A0A0A0"
-                {...props}
-            />
-        </View>
+      <View style={inputStyles.inputContainer}>
+        <TextInput
+          style={inputStyles.input}
+          placeholderTextColor="#A0A0A0"
+          value={value}
+          onChangeText={onChangeText}
+          {...props}
+        />
+      </View>
 
-        {/* Error message */}
-        {error && (
-            <View style={inputStyles.errorContainer}>
-            <Text style={inputStyles.errorText}>{error}</Text>
-            </View>
-        )}
+      {/* Error message */}
+      {error && (
+        <View style={inputStyles.errorContainer}>
+          <Text style={inputStyles.errorText}>{error}</Text>
+        </View>
+      )}
     </View>
   );
-} 
+}
