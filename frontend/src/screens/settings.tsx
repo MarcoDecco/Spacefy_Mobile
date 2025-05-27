@@ -54,6 +54,7 @@ export default function Settings() {
       return;
     }
     // Aqui você implementaria a lógica de mudança de senha
+    
     Alert.alert('Sucesso', 'Senha alterada com sucesso!');
     setShowPasswordModal(false);
     setCurrentPassword('');

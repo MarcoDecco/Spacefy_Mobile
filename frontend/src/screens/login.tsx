@@ -7,20 +7,31 @@ import Button from '../components/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
-import React, { useState } from 'react';
-import {authService }from '../services/authService'; // Importe seu serviço de autenticação
+import { useState } from 'react';
+import { authService } from '../services/authService';
 
 export default function Login({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Função para autenticar o usuário
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos');
+      return;
+    }
+
     try {
+      setLoading(true);
       await authService.login(email, password);
       navigation.navigate('MainApp');
     } catch (error: any) {
-      Alert.alert('Erro', error?.message || 'Falha ao fazer login');
+      Alert.alert(
+        'Erro ao fazer login',
+        error?.response?.data?.message || 'Ocorreu um erro ao fazer login'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,14 +62,14 @@ export default function Login({ navigation }: any) {
           label="Senha"
           placeholder="Digite sua senha"
           required
-          containerStyle={ inputStyles.marginBottom }
+          containerStyle={inputStyles.marginBottom}
           value={password}
           onChangeText={setPassword}
         />
 
         <Button 
-          text="Entrar"
-          onPress={handleLogin} // Use a função de login
+          text={loading ? "Carregando..." : "Entrar"}
+          onPress={handleLogin}
           color="blue"
         />
 
@@ -76,4 +87,4 @@ export default function Login({ navigation }: any) {
       </View>
     </LinearGradient>
   );
-}
+} 
