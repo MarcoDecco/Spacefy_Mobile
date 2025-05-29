@@ -22,6 +22,11 @@ interface SpaceDetailsProps {
         reviews: number;
         description?: string;
         amenities?: string[];
+        type?: string;
+        area?: string;
+        hasWifi?: boolean;
+        capacity?: string;
+        bathrooms?: string;
       }
     }
   }
@@ -223,17 +228,41 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       checkOutTime.getMinutes(),
       0, 0
     );
+
+    // Verifica se a data de check-out é posterior ao check-in
+    if (checkOut <= checkIn) {
+      return 'R$ 0,00';
+    }
+
     // Diferença em milissegundos
     const diffMs = checkOut.getTime() - checkIn.getTime();
-    // Diferença em horas
-    const diffHoras = Math.max(diffMs / (1000 * 60 * 60), 0);
-    // Preço por hora (convertendo para número)
-    const precoPorHora = Number(space.price.replace(/[^0-9,.-]+/g, '').replace(',', '.'));
-    // Total
+    // Diferença em horas (arredondando para cima)
+    const diffHoras = Math.ceil(diffMs / (1000 * 60 * 60));
+    
+    // Extrai o valor numérico do preço do espaço (remove R$, espaços e converte vírgula para ponto)
+    const precoPorHora = parseFloat(space.price.replace(/[R$\s.]/g, '').replace(',', '.'));
+    
+    // Calcula o total
     const total = diffHoras * precoPorHora;
-    // Formatar para moeda brasileira
-    return total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // Formata para moeda brasileira
+    return total.toLocaleString('pt-BR', { 
+      style: 'currency', 
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
+
+  // Dados dinâmicos para facilitar integração futura com API
+  const aluguel = space.price || 'R$1250,00';
+  const tipo = space.type || 'Salão de Festas';
+  const metragem = space.area || '2500 m²';
+  const wifi = space.hasWifi !== undefined ? (space.hasWifi ? 'Sim' : 'Não') : 'Sim';
+  const capacidade = space.capacity || '250 Pessoas';
+  const banheiros = space.bathrooms || '6 Banheiros';
+
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
@@ -243,54 +272,40 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         translucent
       />
       <View style={styles.statusBarGradient} />
+      {/* Botão de voltar fixo */}
+      <TouchableOpacity
+        style={styles.backButtonFixed}
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialIcons name="arrow-back" size={24} color={colors.white} />
+      </TouchableOpacity>
       <ScrollView
         style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Carrossel de imagens */}
         <View style={styles.imageContainer}>
-          {/* Botão de voltar */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color={colors.white} />
-          </TouchableOpacity>
-
-          {/* Botão de favorito */}
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            onPress={() => setIsFavorite(!isFavorite)}
-          >
-            <MaterialIcons
-              name={isFavorite ? "favorite" : "favorite-border"}
-              size={24}
-              color={isFavorite ? "#FF3B30" : colors.white}
-            />
-          </TouchableOpacity>
-
-          {/* Carrossel de imagens */}
           <ScrollView
-            ref={scrollRef}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             onMomentumScrollEnd={handleMomentumScrollEnd}
+            ref={scrollRef}
             scrollEventThrottle={16}
             onTouchStart={() => setIsAutoPlayPaused(true)}
             onTouchEnd={() => setIsAutoPlayPaused(false)}
           >
-            {space.images.map((image, index) => (
+            {space.images.map((img, index) => (
               <Image
                 key={index}
-                source={image}
+                source={img}
                 style={styles.image}
                 resizeMode="cover"
               />
             ))}
           </ScrollView>
-
-          {/* Indicadores de página */}
+          {/* Dots de navegação */}
           <View style={styles.dotsContainer}>
             {space.images.map((_, index) => (
               <View
@@ -302,7 +317,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               />
             ))}
           </View>
-
           {/* Contador de imagens */}
           <View style={styles.counter}>
             <Text style={styles.counterText}>
@@ -310,19 +324,183 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             </Text>
           </View>
         </View>
-
+          
         <View style={styles.content}>
-          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
-          <Text style={[styles.address, isDarkMode && { color: theme.text }]}>{space.address}</Text>
-
-          <View style={styles.ratingContainer}>
-            <MaterialIcons name="star" size={20} color={colors.blue} />
-            <Text style={[styles.rating, isDarkMode && { color: theme.text }]}>{space.rating}</Text>
-            <Text style={[styles.reviews, isDarkMode && { color: theme.text }]}>({space.reviews} avaliações)</Text>
+          {/* Nome, endereço e favorito */}
+          <View style={styles.headerRow}>
+            <View style={styles.headerInfo}>
+              <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
+                  // @ts-ignore
+                  if (typeof window !== 'undefined') {
+                    window.open(url, '_blank');
+                  } else {
+                    // React Native Linking
+                    import('react-native').then(({ Linking }) => Linking.openURL(url));
+                  }
+                }}
+              >
+                <Text style={[styles.headerAddress, isDarkMode && { color: theme.blue }]}>
+                  {space.address}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={() => setIsFavorite(!isFavorite)}
+            >
+              <MaterialIcons
+                name={isFavorite ? "favorite" : "favorite-border"}
+                color={isFavorite ? colors.blue : colors.blue}
+                size={25}
+              />
+            </TouchableOpacity>
           </View>
 
-          <Text style={styles.price}>{space.price}</Text>
+          {/* Avaliação */}
+          <View style={styles.headerRatingRow}>
+            {[1,2,3,4,5].map(i => (
+              <MaterialIcons
+                key={i}
+                name={i <= Math.round(space.rating) ? 'star' : 'star-border'}
+                size={22}
+                color={isDarkMode ? theme.text : colors.black}
+              />
+            ))}
+            <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>({space.reviews})</Text>
+          </View>
 
+          {/* Linha divisória */}
+          <View style={styles.horizontalDivider} />
+
+          {/* Seção de Aluguel, Tipo e Detalhes */}
+          <View style={styles.detailsRow}>
+            {/* Coluna Aluguel e Tipo */}
+            <View style={styles.detailsColLeft}>
+              <Text style={styles.detailsLabel}>Aluguel:</Text>
+
+              <View style={styles.detailsValueRow}>
+                <Text style={styles.detailsValue}>{aluguel}</Text>
+                <Text style={styles.detailsDivider}>/Hora</Text>
+              </View>
+
+              {/* Divisor interno */}
+              <View style={styles.detailsInnerDivider} />
+
+              <Text style={styles.detailsLabel}>Tipo:</Text>
+              <Text style={styles.detailsType}>{tipo}</Text>
+            </View>
+            
+            {/* Coluna Detalhes */}
+            <View style={styles.detailsColRight}>
+              <Text style={[styles.detailsLabel, { marginBottom: 8 }]}>Detalhes:</Text>
+
+              <View style={styles.detailsGrid}>
+                <View style={styles.detailsGridItem}>
+                  <MaterialIcons name="crop-square" size={20} color={colors.gray} style={styles.detailsIcon} />
+                  <Text style={styles.detailsInfoTextNoMargin}>{metragem}</Text>
+                </View>
+
+                <View style={styles.detailsGridItem}>
+                  <Feather name="wifi" size={20} color={colors.gray} style={styles.detailsIcon} />
+                  <Text style={styles.detailsInfoTextNoMargin}>{wifi}</Text>
+                </View>
+
+                <View style={styles.detailsGridItem}>
+                  <MaterialIcons name="groups" size={20} color={colors.gray} style={styles.detailsIcon} />
+                  <Text style={styles.detailsInfoTextNoMargin}>{capacidade}</Text>
+                </View>
+
+                <View style={styles.detailsGridItem}>
+                  <MaterialIcons name="wc" size={20} color={colors.gray} style={styles.detailsIcon} />
+                  <Text style={styles.detailsInfoTextNoMargin}>{banheiros}</Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
+                <Text style={styles.detailsMoreButton}>Ver mais</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.horizontalDivider} />
+          
+          {/* Seção de aluguel do espaço - Layout igual à imagem */}
+          <View style={styles.rentalSection}>
+            <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
+              Está pensando em Alugar este espaço?
+            </Text>
+            <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
+              Informe a data e horário que deseja.
+            </Text>
+            <View style={[styles.rentalCard, isDarkMode && { backgroundColor: theme.card }]}>
+              <View style={styles.rentalRow}>
+                {/* Check-in */}
+                <View style={styles.rentalColumn}>
+                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-in</Text>
+                  <TouchableOpacity
+                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                    onPress={() => openPicker('checkInDate', 'date')}
+                  >
+                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                      {checkInDate.toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
+                  <TouchableOpacity
+                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                    onPress={() => openTimeModal('checkInTime')}
+                  >
+                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                      {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {/* Divisor vertical */}
+                <View style={[styles.rentalVerticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                {/* Check-out */}
+                <View style={styles.rentalColumn}>
+                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-out</Text>
+                  <TouchableOpacity
+                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                    onPress={() => openPicker('checkOutDate', 'date')}
+                  >
+                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                      {checkOutDate.toLocaleDateString()}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
+                  <TouchableOpacity
+                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                    onPress={() => openTimeModal('checkOutTime')}
+                  >
+                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                      {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {/* Linha divisória horizontal */}
+              <View style={[styles.rentalHorizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+              {/* Total e botão */}
+              <View style={styles.rentalTotalRow}>
+                <View>
+                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Total:</Text>
+                  <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
+                </View>
+                <TouchableOpacity 
+                  style={[styles.rentalButton, isDarkMode && { backgroundColor: theme.blue }]} 
+                  onPress={handleRent}
+                >
+                  <Text style={styles.rentalButtonText}>Alugar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.content}>
           {/* Descrição */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
@@ -353,64 +531,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               ))}
             </View>
           )}
-
-          {/* Card de reserva */}
-          <View style={[styles.bookingCard, isDarkMode && { backgroundColor: theme.card }]}>
-            <View style={styles.row}>
-              <View style={styles.column}>
-                <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Check-in</Text>
-                <TouchableOpacity
-                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
-                  onPress={() => openPicker('checkInDate', 'date')}
-                >
-                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
-                    {checkInDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
-                  onPress={() => openTimeModal('checkInTime')}
-                >
-                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
-                    {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={[styles.verticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-
-              <View style={styles.column}>
-                <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Check-out</Text>
-                <TouchableOpacity
-                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
-                  onPress={() => openPicker('checkOutDate', 'date')}
-                >
-                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
-                    {checkOutDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.valueBox, isDarkMode && { backgroundColor: theme.background }]}
-                  onPress={() => openTimeModal('checkOutTime')}
-                >
-                  <Text style={[styles.valueText, isDarkMode && { color: theme.text }]}>
-                    {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={[styles.horizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-
-            <View style={styles.totalRow}>
-              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Total</Text>
-              <Text style={[styles.totalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
-            </View>
-
-            <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
-              <Text style={styles.rentButtonText}>Alugar</Text>
-            </TouchableOpacity>
-          </View>
 
           {/* Avaliações */}
           <View style={styles.section}>
@@ -504,6 +624,43 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             </Text>
           </View>
         </View>
+      </Modal>
+
+      {/* Modal de Detalhes Extras */}
+      <Modal
+        visible={detailsModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDetailsModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
+          <View style={styles.calendarOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.calendarModal, { width: 340, maxHeight: 500 }]}> 
+                <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>
+                  Detalhes de <Text style={{ color: colors.blue }}>{space.title}</Text>
+                </Text>
+
+                {/* Ajustar esse bloco referente aos detalhes do espaço de acordo com a API */}
+                <View style={{ marginBottom: 12 }}>
+                  {space.amenities && space.amenities.map((amenity, index) => (
+                    <Text key={index} style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>
+                      • {amenity}
+                    </Text>
+                  ))}
+                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Área: {space.area}</Text>
+                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Capacidade: {space.capacity}</Text>
+                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Banheiros: {space.bathrooms}</Text>
+                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• WiFi: {space.hasWifi ? 'Sim' : 'Não'}</Text>
+                </View>
+                
+                <TouchableOpacity onPress={() => setDetailsModalVisible(false)} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
+                  <Text style={{ color: colors.blue, fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );
