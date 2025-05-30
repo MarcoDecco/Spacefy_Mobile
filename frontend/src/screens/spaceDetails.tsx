@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput, KeyboardAvoidingView, Platform, Keyboard, Alert } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -7,6 +7,7 @@ import { Calendar } from 'react-native-calendars';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
+import { reviewBoxStyles } from '../styles/reviewBox.style';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface SpaceDetailsProps {
@@ -58,6 +59,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>('checkInTime');
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   // Estados para avaliações
   const [reviews, setReviews] = useState([
@@ -102,7 +104,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
           <MaterialIcons name="account-circle" size={36} color={colors.gray} style={{ marginRight: 8 }} />
         )}
         <View>
-          <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
+      <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
             {[...Array(5)].map((_, index) => (
               <MaterialIcons
@@ -123,7 +125,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       </Text>
       {review.text.length > MAX_REVIEW_LENGTH && (
         <TouchableOpacity onPress={() => toggleReview(review.id)} style={{ flexDirection: 'row' }}>
-          <Text style={[styles.reviewMoreButton, isDarkMode && { color: theme.blue }]}> 
+          <Text style={[styles.reviewMoreButton, isDarkMode && { color: theme.blue }]}>
             {review.expanded ? 'Mostrar menos' : 'Mostrar mais'}
           </Text>
           <Feather
@@ -291,6 +293,71 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
+  // Função para adicionar nova avaliação
+  const handleAddReview = async () => {
+    try {
+      // Validação apenas das estrelas (obrigatório)
+      if (newRating === 0) {
+        Alert.alert(
+          "Avaliação Incompleta",
+          "Por favor, selecione uma avaliação com as estrelas antes de enviar.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      // Estrutura da avaliação para envio à API
+      const reviewData = {
+        spaceId: space.id,
+        rating: newRating,
+        comment: newComment.trim() || null, // Permite comentário vazio
+        // TODO: Adicionar userId quando implementar autenticação
+        // userId: currentUser.id,
+      };
+
+      // TODO: Implementar chamada à API
+      // const response = await api.post('/reviews', reviewData);
+      
+      // Por enquanto, apenas adiciona localmente
+      const newReview = {
+        id: reviews.length + 1,
+        user: 'Você', // TODO: Substituir pelo nome do usuário logado
+        rating: reviewData.rating,
+        text: reviewData.comment || '', // Se não houver comentário, usa string vazia
+        expanded: false,
+        avatar: require('../../assets/perfil-login.png'),
+      };
+
+      setReviews([newReview, ...reviews]);
+      
+      // Limpa o formulário
+      setNewRating(0);
+      setNewComment('');
+
+      // Mostra o modal de sucesso
+      setSuccessModalVisible(true);
+      
+      // Esconde o modal após 1.5 segundos
+      setTimeout(() => {
+        setSuccessModalVisible(false);
+      }, 1500);
+
+    } catch (error) {
+      console.error('Erro ao adicionar avaliação:', error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível enviar sua avaliação. Tente novamente mais tarde.",
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  // Função para limpar o formulário de avaliação
+  const handleClearReview = () => {
+    setNewRating(0);
+    setNewComment('');
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
       <StatusBar
@@ -300,12 +367,12 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       />
       <View style={styles.statusBarGradient} />
       {/* Botão de voltar fixo */}
-      <TouchableOpacity
+          <TouchableOpacity
         style={styles.backButtonFixed}
-        onPress={() => navigation.goBack()}
-      >
-        <MaterialIcons name="arrow-back" size={24} color={colors.white} />
-      </TouchableOpacity>
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={24} color={colors.white} />
+          </TouchableOpacity>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -317,53 +384,53 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Carrossel de imagens */}
+          {/* Carrossel de imagens */}
             <View style={styles.imageContainer}>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleScroll}
-                onMomentumScrollEnd={handleMomentumScrollEnd}
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            onMomentumScrollEnd={handleMomentumScrollEnd}
                 ref={scrollRef}
-                scrollEventThrottle={16}
-                onTouchStart={() => setIsAutoPlayPaused(true)}
-                onTouchEnd={() => setIsAutoPlayPaused(false)}
-              >
+            scrollEventThrottle={16}
+            onTouchStart={() => setIsAutoPlayPaused(true)}
+            onTouchEnd={() => setIsAutoPlayPaused(false)}
+          >
                 {space.images.map((img, index) => (
-                  <Image
-                    key={index}
+              <Image
+                key={index}
                     source={img}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
-                ))}
-              </ScrollView>
+                style={styles.image}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
               {/* Dots de navegação */}
-              <View style={styles.dotsContainer}>
-                {space.images.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      index === activeIndex ? styles.dotActive : styles.dotInactive
-                    ]}
-                  />
-                ))}
-              </View>
-              {/* Contador de imagens */}
-              <View style={styles.counter}>
-                <Text style={styles.counterText}>
-                  {activeIndex + 1}/{space.images.length}
-                </Text>
-              </View>
-            </View>
+          <View style={styles.dotsContainer}>
+            {space.images.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.dot,
+                  index === activeIndex ? styles.dotActive : styles.dotInactive
+                ]}
+              />
+            ))}
+          </View>
+          {/* Contador de imagens */}
+          <View style={styles.counter}>
+            <Text style={styles.counterText}>
+              {activeIndex + 1}/{space.images.length}
+            </Text>
+          </View>
+        </View>
 
-            <View style={styles.content}>
+        <View style={styles.content}>
               {/* Nome, endereço e favorito */}
               <View style={styles.headerRow}>
                 <View style={styles.headerInfo}>
-                  <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
+          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
                   <TouchableOpacity
                     onPress={() => {
                       const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
@@ -470,8 +537,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                       />
                       <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
                     </View>
-                  </View>
-                  
+          </View>
+
                   <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
                     <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
                   </TouchableOpacity>
@@ -557,23 +624,23 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
 
-              {/* Descrição */}
+          {/* Descrição */}
               <View>
-                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
-                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
-                  {displayDescription}
+            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
+            <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
+              {displayDescription}
+            </Text>
+            {shouldShowMoreButton && (
+              <TouchableOpacity
+                style={styles.moreButton}
+                onPress={() => setShowFullDescription(!showFullDescription)}
+              >
+                <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
+                  {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
                 </Text>
-                {shouldShowMoreButton && (
-                  <TouchableOpacity
-                    style={styles.moreButton}
-                    onPress={() => setShowFullDescription(!showFullDescription)}
-                  >
-                    <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
-                      {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+              </TouchableOpacity>
+            )}
+          </View>
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
@@ -593,9 +660,27 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
               {/* Bloco de avaliação do local */}
               <View style={[styles.reviewBox, { marginTop: 24 }, isDarkMode && { backgroundColor: theme.card }]}> 
-                <Text style={[styles.reviewBoxTitle, isDarkMode && { color: theme.text }]}>
-                  Avalie este local também
-                </Text>
+                <View style={styles.reviewBoxHeader}>
+                  <Text style={[styles.reviewBoxTitle, isDarkMode && { color: theme.text }]}>
+                    Avalie este local também
+                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.clearButton,
+                      isDarkMode && { 
+                        backgroundColor: theme.background,
+                        borderColor: theme.border
+                      }
+                    ]}
+                    onPress={handleClearReview}
+                  >
+                    <MaterialIcons
+                      name="delete"
+                      size={20}
+                      color={isDarkMode ? theme.text : colors.gray}
+                    />
+                  </TouchableOpacity>
+                </View>
                 <View style={styles.reviewStarsRow}>
                   {[1,2,3,4,5].map(i => (
                     <TouchableOpacity key={i} onPress={() => setNewRating(i)}>
@@ -623,8 +708,11 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   onChangeText={setNewComment}
                 />
                 <TouchableOpacity
-                  style={[styles.reviewButton, isDarkMode && { backgroundColor: theme.blue }]}
-                  onPress={() => {/* lógica para comentar */}}
+                  style={[
+                    styles.reviewButton,
+                    isDarkMode && { backgroundColor: theme.blue }
+                  ]}
+                  onPress={handleAddReview}
                 >
                   <Text style={styles.reviewButtonText}>COMENTAR</Text>
                 </TouchableOpacity>
@@ -640,7 +728,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                 </Text>
                 <Text style={[styles.rentalSubtitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
                   Clique para ver mais
-                </Text>
+                  </Text>
                 <TouchableOpacity
                   style={[
                     styles.rentalCard,
@@ -661,7 +749,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                     />
                     <Text style={[styles.rentalTitle, { marginBottom: 4 }, isDarkMode && { color: theme.text }]}>
                       Ricardo Penne
-                    </Text>
+                  </Text>
                   </View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                     <View style={{ alignItems: 'center', flex: 1 }}>
@@ -681,9 +769,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                     </View>
                   </View>
                 </TouchableOpacity>
-              </View>
-            </View>
-          </ScrollView>
+          </View>
+        </View>
+      </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
 
@@ -768,6 +856,22 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             <MaterialIcons name="check-circle" size={48} color={colors.blue} />
             <Text style={[styles.confirmText, isDarkMode && { color: theme.text }]}>
               Reserva realizada com sucesso!
+            </Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Sucesso */}
+      <Modal
+        visible={successModalVisible}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.calendarOverlay}>
+          <View style={[styles.successModal, isDarkMode && { backgroundColor: theme.card }]}>
+            <MaterialIcons name="check-circle" size={48} color={colors.blue} />
+            <Text style={[styles.successText, isDarkMode && { color: theme.text }]}>
+              Avaliação enviada com sucesso!
             </Text>
           </View>
         </View>
