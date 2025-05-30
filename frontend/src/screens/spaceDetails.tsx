@@ -548,74 +548,210 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
               
-              {/* Seção de aluguel do espaço - Layout igual à imagem */}
+              {/* Seção de aluguel do espaço */}
               <View style={styles.rentalSection}>
-                <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
-                  Está pensando em Alugar este espaço?
-                </Text>
+                <View style={styles.rentalHeader}>
+                  <MaterialIcons 
+                    name="event-available" 
+                    size={28} 
+                    color={isDarkMode ? theme.blue : colors.blue} 
+                  />
+                  <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
+                    Reserve Este Espaço
+                  </Text>
+                </View>
                 <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
-                  Informe a data e horário que deseja.
+                  Selecione o período desejado para sua reserva
                 </Text>
-                <View style={[styles.rentalCard, isDarkMode && { backgroundColor: theme.card }]}>
-                  <View style={styles.rentalRow}>
-                    {/* Check-in */}
-                    <View style={styles.rentalColumn}>
-                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-in</Text>
+
+                <View style={[styles.rentalCard, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  borderColor: theme.border,
+                  borderWidth: 1
+                }]}>
+                  {/* Data e Hora de Check-in */}
+                  <View style={styles.rentalDateTimeContainer}>
+                    <View style={styles.rentalDateTimeHeader}>
+                      <View style={[styles.rentalIconCircle, isDarkMode && { 
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }]}>
+                        <MaterialIcons 
+                          name="login" 
+                          size={20} 
+                          color={isDarkMode ? theme.blue : colors.blue} 
+                        />
+                      </View>
+                      <Text style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
+                        Check-in
+                      </Text>
+                    </View>
+                    <View style={styles.rentalDateTimeContent}>
                       <TouchableOpacity
-                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        style={[styles.rentalDateTimeBox, isDarkMode && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }]}
                         onPress={() => openPicker('checkInDate', 'date')}
                       >
-                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                          {checkInDate.toLocaleDateString()}
-                        </Text>
+                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1
+                        }]}>
+                          <MaterialIcons 
+                            name="calendar-today" 
+                            size={20} 
+                            color={isDarkMode ? theme.text : colors.gray} 
+                          />
+                        </View>
+                        <View style={styles.rentalDateTimeTextContainer}>
+                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                            Data
+                          </Text>
+                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                            {checkInDate.toLocaleDateString()}
+                          </Text>
+                        </View>
                       </TouchableOpacity>
-                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
                       <TouchableOpacity
-                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        style={[styles.rentalDateTimeBox, isDarkMode && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }]}
                         onPress={() => openTimeModal('checkInTime')}
                       >
-                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                          {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    {/* Divisor vertical */}
-                    <View style={[styles.rentalVerticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-                    {/* Check-out */}
-                    <View style={styles.rentalColumn}>
-                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-out</Text>
-                      <TouchableOpacity
-                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                        onPress={() => openPicker('checkOutDate', 'date')}
-                      >
-                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                          {checkOutDate.toLocaleDateString()}
-                        </Text>
-                      </TouchableOpacity>
-                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
-                      <TouchableOpacity
-                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                        onPress={() => openTimeModal('checkOutTime')}
-                      >
-                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                          {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </Text>
+                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1
+                        }]}>
+                          <MaterialIcons 
+                            name="access-time" 
+                            size={20} 
+                            color={isDarkMode ? theme.text : colors.gray} 
+                          />
+                        </View>
+                        <View style={styles.rentalDateTimeTextContainer}>
+                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                            Hora
+                          </Text>
+                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                            {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </View>
                       </TouchableOpacity>
                     </View>
                   </View>
-                  {/* Linha divisória horizontal */}
-                  <View style={[styles.rentalHorizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-                  {/* Total e botão */}
-                  <View style={styles.rentalTotalRow}>
-                    <View>
-                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Total:</Text>
-                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
+
+                  {/* Divisor */}
+                  <View style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+
+                  {/* Data e Hora de Check-out */}
+                  <View style={styles.rentalDateTimeContainer}>
+                    <View style={styles.rentalDateTimeHeader}>
+                      <View style={[styles.rentalIconCircle, isDarkMode && { 
+                        backgroundColor: theme.background,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }]}>
+                        <MaterialIcons 
+                          name="logout" 
+                          size={20} 
+                          color={isDarkMode ? theme.blue : colors.blue} 
+                        />
+                      </View>
+                      <Text style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
+                        Check-out
+                      </Text>
+                    </View>
+                    <View style={styles.rentalDateTimeContent}>
+                      <TouchableOpacity
+                        style={[styles.rentalDateTimeBox, isDarkMode && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }]}
+                        onPress={() => openPicker('checkOutDate', 'date')}
+                      >
+                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1
+                        }]}>
+                          <MaterialIcons 
+                            name="calendar-today" 
+                            size={20} 
+                            color={isDarkMode ? theme.text : colors.gray} 
+                          />
+                        </View>
+                        <View style={styles.rentalDateTimeTextContainer}>
+                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                            Data
+                          </Text>
+                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                            {checkOutDate.toLocaleDateString()}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.rentalDateTimeBox, isDarkMode && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }]}
+                        onPress={() => openTimeModal('checkOutTime')}
+                      >
+                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1
+                        }]}>
+                          <MaterialIcons 
+                            name="access-time" 
+                            size={20} 
+                            color={isDarkMode ? theme.text : colors.gray} 
+                          />
+                        </View>
+                        <View style={styles.rentalDateTimeTextContainer}>
+                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                            Hora
+                          </Text>
+                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                            {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Divisor */}
+                  <View style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+
+                  {/* Total e Botão */}
+                  <View style={styles.rentalTotalContainer}>
+                    <View style={styles.rentalTotalInfo}>
+                      <Text style={[styles.rentalTotalLabel, isDarkMode && { color: theme.text }]}>
+                        Valor Total
+                      </Text>
+                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>
+                        {calcularTotal()}
+                      </Text>
                     </View>
                     <TouchableOpacity 
-                      style={[styles.rentalButton, isDarkMode && { backgroundColor: theme.blue }]} 
+                      style={[styles.rentalButton, isDarkMode && { 
+                        backgroundColor: theme.blue,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }]} 
                       onPress={handleRent}
                     >
-                      <Text style={styles.rentalButtonText}>Alugar</Text>
+                      <MaterialIcons 
+                        name="check-circle" 
+                        size={20} 
+                        color={colors.white} 
+                        style={{ marginRight: 8 }} 
+                      />
+                      <Text style={styles.rentalButtonText}>Confirmar Reserva</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -690,8 +826,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         color={newRating >= i ? colors.blue : (isDarkMode ? theme.text : colors.gray)}
                       />
                     </TouchableOpacity>
-                  ))}
-                </View>
+              ))}
+            </View>
                 <TextInput
                   style={[
                     styles.reviewInput,
@@ -884,76 +1020,169 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         animationType="fade"
         onRequestClose={() => setDetailsModalVisible(false)}
       >
-        <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
-          <View style={styles.calendarOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={[
-                styles.calendarModal, 
-                { width: 340, maxHeight: 500 },
-                isDarkMode && { backgroundColor: theme.card }
-              ]}> 
-                <Text style={[
-                  styles.sectionTitle, 
-                  { marginBottom: 16 },
-                  isDarkMode && { color: theme.text }
-                ]}>
-                  Comodidades de <Text style={{ color: colors.blue }}>{space.title}</Text>
-                </Text>
+        <View style={styles.calendarOverlay}>
+          <View style={[
+            styles.detailsModal, 
+            isDarkMode && { 
+              backgroundColor: theme.card,
+              borderColor: theme.border,
+              borderWidth: 1
+            }
+          ]}> 
+            {/* Header do Modal */}
+            <View style={[
+              styles.detailsModalHeader,
+              isDarkMode && { 
+                backgroundColor: theme.card, 
+                borderBottomColor: theme.border 
+              }
+            ]}>
+              <Text style={[
+                styles.detailsModalTitle,
+                isDarkMode && { color: theme.text }
+              ]}>
+                Detalhes do Espaço
+              </Text>
+              <TouchableOpacity 
+                onPress={() => setDetailsModalVisible(false)}
+                style={styles.detailsModalCloseButton}
+              >
+                <MaterialIcons 
+                  name="close" 
+                  size={24} 
+                  color={isDarkMode ? theme.text : colors.black} 
+                />
+              </TouchableOpacity>
+            </View>
 
-                {/* Ajustar esse bloco referente aos detalhes do espaço de acordo com a API */}
-                <View style={{ marginBottom: 12 }}>
-                  {space.amenities && space.amenities.map((amenity, index) => (
-                    <Text 
-                      key={index} 
-                      style={[
-                        { fontSize: 16, marginBottom: 8 },
-                        isDarkMode ? { color: theme.text } : { color: colors.black }
-                      ]}
-                    >
-                      • {amenity}
-                    </Text>
-                  ))}
+            {/* Conteúdo Rolável */}
+            <ScrollView 
+              style={styles.detailsModalScrollView}
+              contentContainerStyle={styles.detailsModalContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Imagem do Espaço */}
+              <View style={styles.detailsModalImageContainer}>
+                <Image
+                  source={space.images[0]}
+                  style={[
+                    styles.detailsModalImage,
+                    isDarkMode && {
+                      borderColor: theme.border
+                    }
+                  ]}
+                  resizeMode="cover"
+                />
+                <View style={styles.detailsModalImageOverlay}>
                   <Text style={[
-                    { fontSize: 16, marginBottom: 8 },
-                    isDarkMode ? { color: theme.text } : { color: colors.black }
+                    styles.detailsModalImageTitle,
+                    isDarkMode && { color: theme.text }
                   ]}>
-                    • Área: {space.area}
-                  </Text>
-                  <Text style={[
-                    { fontSize: 16, marginBottom: 8 },
-                    isDarkMode ? { color: theme.text } : { color: colors.black }
-                  ]}>
-                    • Capacidade: {space.capacity}
-                  </Text>
-                  <Text style={[
-                    { fontSize: 16, marginBottom: 8 },
-                    isDarkMode ? { color: theme.text } : { color: colors.black }
-                  ]}>
-                    • Banheiros: {space.bathrooms}
-                  </Text>
-                  <Text style={[
-                    { fontSize: 16, marginBottom: 8 },
-                    isDarkMode ? { color: theme.text } : { color: colors.black }
-                  ]}>
-                    • WiFi: {space.hasWifi ? 'Sim' : 'Não'}
+                    {space.title}
                   </Text>
                 </View>
-                
-                <TouchableOpacity 
-                  onPress={() => setDetailsModalVisible(false)} 
-                  style={{ alignSelf: 'flex-end', marginTop: 8 }}
-                >
-                  <Text style={[
-                    styles.detailsMoreButton,
-                    isDarkMode && { color: theme.blue }
-                  ]}>
-                    Fechar
-                  </Text>
-                </TouchableOpacity>
               </View>
-            </TouchableWithoutFeedback>
+
+              {/* Informações Básicas */}
+              <View style={styles.detailsModalGrid}>
+                {[
+                  { icon: 'crop-square', label: 'Área', value: metragem },
+                  { icon: 'groups', label: 'Capacidade', value: capacidade },
+                  { icon: 'wifi', label: 'WiFi', value: wifi },
+                  { icon: 'wc', label: 'Banheiros', value: banheiros }
+                ].map((item, index) => (
+                  <View key={index} style={[
+                    styles.detailsModalGridItem,
+                    isDarkMode && {
+                      backgroundColor: theme.background,
+                      borderColor: theme.border
+                    }
+                  ]}>
+                    <View style={[
+                      styles.detailsModalIconContainer,
+                      isDarkMode && { 
+                        backgroundColor: theme.card,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }
+                    ]}>
+                      <MaterialIcons 
+                        name={item.icon as any} 
+                        size={24} 
+                        color={isDarkMode ? theme.blue : colors.blue} 
+                      />
+                    </View>
+                    <Text style={[
+                      styles.detailsModalGridLabel,
+                      isDarkMode && { color: theme.text }
+                    ]}>
+                      {item.label}
+                    </Text>
+                    <Text style={[
+                      styles.detailsModalGridValue,
+                      isDarkMode && { color: theme.text }
+                    ]}>
+                      {item.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Comodidades */}
+              <View style={[
+                styles.detailsModalAmenities,
+                isDarkMode && {
+                  borderTopColor: theme.border
+                }
+              ]}>
+                <Text style={[
+                  styles.detailsModalSectionTitle,
+                  isDarkMode && { color: theme.text }
+                ]}>
+                  Comodidades
+                </Text>
+                <View style={styles.detailsModalGrid}>
+                  {space.amenities && space.amenities.map((amenity, index) => (
+                    <View key={index} style={[
+                      styles.detailsModalGridItem,
+                      isDarkMode && {
+                        backgroundColor: theme.background,
+                        borderColor: theme.border
+                      }
+                    ]}>
+                      <View style={[
+                        styles.detailsModalIconContainer,
+                        isDarkMode && { 
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1
+                        }
+                      ]}>
+                        <MaterialIcons 
+                          name="check-circle" 
+                          size={24} 
+                          color={isDarkMode ? theme.blue : colors.blue} 
+                        />
+                      </View>
+                      <Text style={[
+                        styles.detailsModalGridLabel,
+                        isDarkMode && { color: theme.text }
+                      ]}>
+                        Comodidade
+                      </Text>
+                      <Text style={[
+                        styles.detailsModalGridValue,
+                        isDarkMode && { color: theme.text }
+                      ]}>
+                        {amenity}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </SafeAreaView>
   );
