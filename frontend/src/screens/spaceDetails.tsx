@@ -412,48 +412,68 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               <View style={styles.detailsRow}>
                 {/* Coluna Aluguel e Tipo */}
                 <View style={styles.detailsColLeft}>
-                  <Text style={styles.detailsLabel}>Aluguel:</Text>
+                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>Aluguel:</Text>
 
                   <View style={styles.detailsValueRow}>
-                    <Text style={styles.detailsValue}>{aluguel}</Text>
-                    <Text style={styles.detailsDivider}>/Hora</Text>
+                    <Text style={[styles.detailsValue, isDarkMode && { color: theme.text }]}>{aluguel}</Text>
+                    <Text style={[styles.detailsDivider, isDarkMode && { color: theme.text }]}>/Hora</Text>
                   </View>
 
                   {/* Divisor interno */}
-                  <View style={styles.detailsInnerDivider} />
+                  <View style={[styles.detailsInnerDivider, isDarkMode && { backgroundColor: theme.border }]} />
 
-                  <Text style={styles.detailsLabel}>Tipo:</Text>
-                  <Text style={styles.detailsType}>{tipo}</Text>
+                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>Tipo:</Text>
+                  <Text style={[styles.detailsType, isDarkMode && { color: theme.text }]}>{tipo}</Text>
                 </View>
                 
                 {/* Coluna Detalhes */}
                 <View style={styles.detailsColRight}>
-                  <Text style={[styles.detailsLabel, { marginBottom: 8 }]}>Detalhes:</Text>
+                  <Text style={[styles.detailsLabel, { marginBottom: 8 }, isDarkMode && { color: theme.text }]}>Detalhes:</Text>
 
                   <View style={styles.detailsGrid}>
                     <View style={styles.detailsGridItem}>
-                      <MaterialIcons name="crop-square" size={20} color={colors.gray} style={styles.detailsIcon} />
-                      <Text style={styles.detailsInfoTextNoMargin}>{metragem}</Text>
+                      <MaterialIcons 
+                        name="crop-square" 
+                        size={20} 
+                        color={isDarkMode ? theme.text : colors.gray} 
+                        style={styles.detailsIcon} 
+                      />
+                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
                     </View>
 
                     <View style={styles.detailsGridItem}>
-                      <Feather name="wifi" size={20} color={colors.gray} style={styles.detailsIcon} />
-                      <Text style={styles.detailsInfoTextNoMargin}>{wifi}</Text>
+                      <Feather 
+                        name="wifi" 
+                        size={20} 
+                        color={isDarkMode ? theme.text : colors.gray} 
+                        style={styles.detailsIcon} 
+                      />
+                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{wifi}</Text>
                     </View>
 
                     <View style={styles.detailsGridItem}>
-                      <MaterialIcons name="groups" size={20} color={colors.gray} style={styles.detailsIcon} />
-                      <Text style={styles.detailsInfoTextNoMargin}>{capacidade}</Text>
+                      <MaterialIcons 
+                        name="groups" 
+                        size={20} 
+                        color={isDarkMode ? theme.text : colors.gray} 
+                        style={styles.detailsIcon} 
+                      />
+                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
                     </View>
 
                     <View style={styles.detailsGridItem}>
-                      <MaterialIcons name="wc" size={20} color={colors.gray} style={styles.detailsIcon} />
-                      <Text style={styles.detailsInfoTextNoMargin}>{banheiros}</Text>
+                      <MaterialIcons 
+                        name="wc" 
+                        size={20} 
+                        color={isDarkMode ? theme.text : colors.gray} 
+                        style={styles.detailsIcon} 
+                      />
+                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
                     </View>
                   </View>
                   
                   <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
-                    <Text style={styles.detailsMoreButton}>Ver mais</Text>
+                    <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -572,29 +592,38 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               </View>
 
               {/* Bloco de avaliação do local */}
-              <View style={[styles.reviewBox, { marginTop: 24 }]}> 
-                <Text style={styles.reviewBoxTitle}>Avalie este local também</Text>
+              <View style={[styles.reviewBox, { marginTop: 24 }, isDarkMode && { backgroundColor: theme.card }]}> 
+                <Text style={[styles.reviewBoxTitle, isDarkMode && { color: theme.text }]}>
+                  Avalie este local também
+                </Text>
                 <View style={styles.reviewStarsRow}>
                   {[1,2,3,4,5].map(i => (
                     <TouchableOpacity key={i} onPress={() => setNewRating(i)}>
                       <MaterialIcons
                         name={newRating >= i ? 'star' : 'star-border'}
                         size={24}
-                        color={newRating >= i ? colors.blue : colors.gray}
+                        color={newRating >= i ? colors.blue : (isDarkMode ? theme.text : colors.gray)}
                       />
                     </TouchableOpacity>
                   ))}
                 </View>
                 <TextInput
-                  style={styles.reviewInput}
+                  style={[
+                    styles.reviewInput,
+                    isDarkMode && {
+                      backgroundColor: theme.background,
+                      color: theme.text,
+                      borderColor: theme.border
+                    }
+                  ]}
                   placeholder="Digite seu comentário aqui..."
-                  placeholderTextColor={colors.gray}
+                  placeholderTextColor={isDarkMode ? theme.text : colors.gray}
                   multiline
                   value={newComment}
                   onChangeText={setNewComment}
                 />
                 <TouchableOpacity
-                  style={styles.reviewButton}
+                  style={[styles.reviewButton, isDarkMode && { backgroundColor: theme.blue }]}
                   onPress={() => {/* lógica para comentar */}}
                 >
                   <Text style={styles.reviewButtonText}>COMENTAR</Text>
@@ -606,27 +635,22 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
               {/* Bloco de apresentação do locador do espaço */}
               <View style={{ alignItems: 'center', marginBottom: 32 }}>
-                <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.black, textAlign: 'center' }}>
+                <Text style={[styles.sectionTitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
                   Conheça o locador do espaço
                 </Text>
-                <Text style={{ color: colors.gray, fontSize: 14, marginBottom: 16, textAlign: 'center' }}>
+                <Text style={[styles.rentalSubtitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
                   Clique para ver mais
                 </Text>
                 <TouchableOpacity
-                  style={{
-                    backgroundColor: colors.white,
-                    borderRadius: 18,
-                    padding: 24,
-                    width: 320,
-                    alignItems: 'center',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 6,
-                    elevation: 3,
-                    borderWidth: 1,
-                    borderColor: colors.line,
-                  }}
+                  style={[
+                    styles.rentalCard,
+                    {
+                      width: 320,
+                      alignItems: 'center',
+                      padding: 24,
+                    },
+                    isDarkMode && { backgroundColor: theme.card }
+                  ]}
                   activeOpacity={0.85}
                   onPress={() => {/* lógica para abrir detalhes do locador */}}
                 >
@@ -635,25 +659,25 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                       source={require('../../assets/perfil-login.png')}
                       style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#e6f0fa' }}
                     />
-                    <Text style={{ fontWeight: 'bold', fontSize: 20, color: colors.black, marginBottom: 4 }}>
+                    <Text style={[styles.rentalTitle, { marginBottom: 4 }, isDarkMode && { color: theme.text }]}>
                       Ricardo Penne
                     </Text>
                   </View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                     <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>10</Text>
-                      <Text style={{ color: colors.gray, fontSize: 13 }}>avaliações</Text>
+                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>10</Text>
+                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>avaliações</Text>
                     </View>
                     <View style={{ alignItems: 'center', flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>4,8</Text>
-                        <MaterialIcons name="star" size={16} color={colors.gray} style={{ marginLeft: 2 }} />
+                        <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>4,8</Text>
+                        <MaterialIcons name="star" size={16} color={isDarkMode ? theme.text : colors.gray} style={{ marginLeft: 2 }} />
                       </View>
-                      <Text style={{ color: colors.gray, fontSize: 13 }}>estrelas</Text>
+                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>estrelas</Text>
                     </View>
                     <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>4</Text>
-                      <Text style={{ color: colors.gray, fontSize: 13 }}>espaços</Text>
+                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>4</Text>
+                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>espaços</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -759,26 +783,68 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
           <View style={styles.calendarOverlay}>
             <TouchableWithoutFeedback>
-              <View style={[styles.calendarModal, { width: 340, maxHeight: 500 }]}> 
-                <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>
+              <View style={[
+                styles.calendarModal, 
+                { width: 340, maxHeight: 500 },
+                isDarkMode && { backgroundColor: theme.card }
+              ]}> 
+                <Text style={[
+                  styles.sectionTitle, 
+                  { marginBottom: 16 },
+                  isDarkMode && { color: theme.text }
+                ]}>
                   Comodidades de <Text style={{ color: colors.blue }}>{space.title}</Text>
                 </Text>
 
                 {/* Ajustar esse bloco referente aos detalhes do espaço de acordo com a API */}
                 <View style={{ marginBottom: 12 }}>
                   {space.amenities && space.amenities.map((amenity, index) => (
-                    <Text key={index} style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>
+                    <Text 
+                      key={index} 
+                      style={[
+                        { fontSize: 16, marginBottom: 8 },
+                        isDarkMode ? { color: theme.text } : { color: colors.black }
+                      ]}
+                    >
                       • {amenity}
                     </Text>
                   ))}
-                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Área: {space.area}</Text>
-                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Capacidade: {space.capacity}</Text>
-                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• Banheiros: {space.bathrooms}</Text>
-                  <Text style={{ fontSize: 16, color: colors.black, marginBottom: 8 }}>• WiFi: {space.hasWifi ? 'Sim' : 'Não'}</Text>
+                  <Text style={[
+                    { fontSize: 16, marginBottom: 8 },
+                    isDarkMode ? { color: theme.text } : { color: colors.black }
+                  ]}>
+                    • Área: {space.area}
+                  </Text>
+                  <Text style={[
+                    { fontSize: 16, marginBottom: 8 },
+                    isDarkMode ? { color: theme.text } : { color: colors.black }
+                  ]}>
+                    • Capacidade: {space.capacity}
+                  </Text>
+                  <Text style={[
+                    { fontSize: 16, marginBottom: 8 },
+                    isDarkMode ? { color: theme.text } : { color: colors.black }
+                  ]}>
+                    • Banheiros: {space.bathrooms}
+                  </Text>
+                  <Text style={[
+                    { fontSize: 16, marginBottom: 8 },
+                    isDarkMode ? { color: theme.text } : { color: colors.black }
+                  ]}>
+                    • WiFi: {space.hasWifi ? 'Sim' : 'Não'}
+                  </Text>
                 </View>
                 
-                <TouchableOpacity onPress={() => setDetailsModalVisible(false)} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
-                  <Text style={{ color: colors.blue, fontWeight: 'bold', fontSize: 16 }}>Fechar</Text>
+                <TouchableOpacity 
+                  onPress={() => setDetailsModalVisible(false)} 
+                  style={{ alignSelf: 'flex-end', marginTop: 8 }}
+                >
+                  <Text style={[
+                    styles.detailsMoreButton,
+                    isDarkMode && { color: theme.blue }
+                  ]}>
+                    Fechar
+                  </Text>
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
