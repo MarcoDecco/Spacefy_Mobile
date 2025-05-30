@@ -1,16 +1,27 @@
+import { useEffect, useState } from "react";
 import { View, Text, FlatList } from "react-native";
 import { CardList } from "../components/cardList";
 import Card from "../components/card";
-import { useCards } from "../hooks/useCards";
 import { BaseCard } from "../types/card";
 import { homeStyles as styles } from '../styles/homeStyles';
 import SearchBar from "../components/searchBar";
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
+import { userService } from "../services/userService"; // importa o serviço da API
 
 export default function Favorites() {
-  const { cards: favoriteCards, loading } = useCards('favorites');
+  const [favoriteCards, setFavoriteCards] = useState<BaseCard[]>([]);
+  const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    // Substituir pelo método correto de obter o userId logado
+    const userId = "USER_ID_AQUI";
+    userService.getFavoriteSpaces(userId)
+      .then(data => setFavoriteCards(data))
+      .catch(() => setFavoriteCards([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const renderCard = (item: BaseCard) => (
     <Card 
