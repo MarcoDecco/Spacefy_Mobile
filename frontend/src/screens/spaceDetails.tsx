@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -306,270 +306,362 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       >
         <MaterialIcons name="arrow-back" size={24} color={colors.white} />
       </TouchableOpacity>
-      <ScrollView
-        style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
-        {/* Carrossel de imagens */}
-        <View style={styles.imageContainer}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            onMomentumScrollEnd={handleMomentumScrollEnd}
-            ref={scrollRef}
-            scrollEventThrottle={16}
-            onTouchStart={() => setIsAutoPlayPaused(true)}
-            onTouchEnd={() => setIsAutoPlayPaused(false)}
+            style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
-            {space.images.map((img, index) => (
-              <Image
-                key={index}
-                source={img}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
-          {/* Dots de navegação */}
-          <View style={styles.dotsContainer}>
-            {space.images.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === activeIndex ? styles.dotActive : styles.dotInactive
-                ]}
-              />
-            ))}
-          </View>
-          {/* Contador de imagens */}
-          <View style={styles.counter}>
-            <Text style={styles.counterText}>
-              {activeIndex + 1}/{space.images.length}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.content}>
-          {/* Nome, endereço e favorito */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerInfo}>
-          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
-                  // @ts-ignore
-                  if (typeof window !== 'undefined') {
-                    window.open(url, '_blank');
-                  } else {
-                    // React Native Linking
-                    import('react-native').then(({ Linking }) => Linking.openURL(url));
-                  }
-                }}
+            {/* Carrossel de imagens */}
+            <View style={styles.imageContainer}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                onMomentumScrollEnd={handleMomentumScrollEnd}
+                ref={scrollRef}
+                scrollEventThrottle={16}
+                onTouchStart={() => setIsAutoPlayPaused(true)}
+                onTouchEnd={() => setIsAutoPlayPaused(false)}
               >
-                <Text style={[styles.headerAddress, isDarkMode && { color: theme.blue }]}>
-                  {space.address}
+                {space.images.map((img, index) => (
+                  <Image
+                    key={index}
+                    source={img}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                ))}
+              </ScrollView>
+              {/* Dots de navegação */}
+              <View style={styles.dotsContainer}>
+                {space.images.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      index === activeIndex ? styles.dotActive : styles.dotInactive
+                    ]}
+                  />
+                ))}
+              </View>
+              {/* Contador de imagens */}
+              <View style={styles.counter}>
+                <Text style={styles.counterText}>
+                  {activeIndex + 1}/{space.images.length}
                 </Text>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity
-              onPress={() => setIsFavorite(!isFavorite)}
-            >
-              <MaterialIcons
-                name={isFavorite ? "favorite" : "favorite-border"}
-                color={isFavorite ? colors.blue : colors.blue}
-                size={25}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Avaliação */}
-          <View style={styles.headerRatingRow}>
-            {[1,2,3,4,5].map(i => (
-              <MaterialIcons
-                key={i}
-                name={i <= Math.round(space.rating) ? 'star' : 'star-border'}
-                size={22}
-                color={isDarkMode ? theme.text : colors.black}
-              />
-            ))}
-            <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>({space.reviews})</Text>
-          </View>
-
-          {/* Divisor horizontal */}
-          <View style={styles.horizontalDivider} />
-
-          {/* Seção de Aluguel, Tipo e Detalhes */}
-          <View style={styles.detailsRow}>
-            {/* Coluna Aluguel e Tipo */}
-            <View style={styles.detailsColLeft}>
-              <Text style={styles.detailsLabel}>Aluguel:</Text>
-
-              <View style={styles.detailsValueRow}>
-                <Text style={styles.detailsValue}>{aluguel}</Text>
-                <Text style={styles.detailsDivider}>/Hora</Text>
               </View>
-
-              {/* Divisor interno */}
-              <View style={styles.detailsInnerDivider} />
-
-              <Text style={styles.detailsLabel}>Tipo:</Text>
-              <Text style={styles.detailsType}>{tipo}</Text>
             </View>
-            
-            {/* Coluna Detalhes */}
-            <View style={styles.detailsColRight}>
-              <Text style={[styles.detailsLabel, { marginBottom: 8 }]}>Detalhes:</Text>
 
-              <View style={styles.detailsGrid}>
-                <View style={styles.detailsGridItem}>
-                  <MaterialIcons name="crop-square" size={20} color={colors.gray} style={styles.detailsIcon} />
-                  <Text style={styles.detailsInfoTextNoMargin}>{metragem}</Text>
-                </View>
-
-                <View style={styles.detailsGridItem}>
-                  <Feather name="wifi" size={20} color={colors.gray} style={styles.detailsIcon} />
-                  <Text style={styles.detailsInfoTextNoMargin}>{wifi}</Text>
-                </View>
-
-                <View style={styles.detailsGridItem}>
-                  <MaterialIcons name="groups" size={20} color={colors.gray} style={styles.detailsIcon} />
-                  <Text style={styles.detailsInfoTextNoMargin}>{capacidade}</Text>
-                </View>
-
-                <View style={styles.detailsGridItem}>
-                  <MaterialIcons name="wc" size={20} color={colors.gray} style={styles.detailsIcon} />
-                  <Text style={styles.detailsInfoTextNoMargin}>{banheiros}</Text>
-                </View>
-              </View>
-              
-              <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
-                <Text style={styles.detailsMoreButton}>Ver mais</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Divisor horizontal */}
-          <View style={styles.horizontalDivider} />
-          
-          {/* Seção de aluguel do espaço - Layout igual à imagem */}
-          <View style={styles.rentalSection}>
-            <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
-              Está pensando em Alugar este espaço?
-            </Text>
-            <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
-              Informe a data e horário que deseja.
-            </Text>
-            <View style={[styles.rentalCard, isDarkMode && { backgroundColor: theme.card }]}>
-              <View style={styles.rentalRow}>
-                {/* Check-in */}
-                <View style={styles.rentalColumn}>
-                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-in</Text>
+            <View style={styles.content}>
+              {/* Nome, endereço e favorito */}
+              <View style={styles.headerRow}>
+                <View style={styles.headerInfo}>
+                  <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
                   <TouchableOpacity
-                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                    onPress={() => openPicker('checkInDate', 'date')}
+                    onPress={() => {
+                      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
+                      // @ts-ignore
+                      if (typeof window !== 'undefined') {
+                        window.open(url, '_blank');
+                      } else {
+                        // React Native Linking
+                        import('react-native').then(({ Linking }) => Linking.openURL(url));
+                      }
+                    }}
                   >
-                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                      {checkInDate.toLocaleDateString()}
-                    </Text>
-                  </TouchableOpacity>
-                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
-                  <TouchableOpacity
-                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                    onPress={() => openTimeModal('checkInTime')}
-                  >
-                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                      {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <Text style={[styles.headerAddress, isDarkMode && { color: theme.blue }]}>
+                      {space.address}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                {/* Divisor vertical */}
-                <View style={[styles.rentalVerticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-                {/* Check-out */}
-                <View style={styles.rentalColumn}>
-                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-out</Text>
-                  <TouchableOpacity
-                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                    onPress={() => openPicker('checkOutDate', 'date')}
-                  >
-                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                      {checkOutDate.toLocaleDateString()}
-                    </Text>
-                  </TouchableOpacity>
-                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
-                  <TouchableOpacity
-                    style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
-                    onPress={() => openTimeModal('checkOutTime')}
-                  >
-                    <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
-                      {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              {/* Linha divisória horizontal */}
-              <View style={[styles.rentalHorizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
-              {/* Total e botão */}
-              <View style={styles.rentalTotalRow}>
-                <View>
-                  <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Total:</Text>
-                  <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
-                </View>
-                <TouchableOpacity 
-                  style={[styles.rentalButton, isDarkMode && { backgroundColor: theme.blue }]} 
-                  onPress={handleRent}
+                <TouchableOpacity
+                  onPress={() => setIsFavorite(!isFavorite)}
                 >
-                  <Text style={styles.rentalButtonText}>Alugar</Text>
+                  <MaterialIcons
+                    name={isFavorite ? "favorite" : "favorite-border"}
+                    color={isFavorite ? colors.blue : colors.blue}
+                    size={25}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Avaliação */}
+              <View style={styles.headerRatingRow}>
+                {[1,2,3,4,5].map(i => (
+                  <MaterialIcons
+                    key={i}
+                    name={i <= Math.round(space.rating) ? 'star' : 'star-border'}
+                    size={22}
+                    color={isDarkMode ? theme.text : colors.black}
+                  />
+                ))}
+                <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>({space.reviews})</Text>
+              </View>
+
+              {/* Divisor horizontal */}
+              <View style={styles.horizontalDivider} />
+
+              {/* Seção de Aluguel, Tipo e Detalhes */}
+              <View style={styles.detailsRow}>
+                {/* Coluna Aluguel e Tipo */}
+                <View style={styles.detailsColLeft}>
+                  <Text style={styles.detailsLabel}>Aluguel:</Text>
+
+                  <View style={styles.detailsValueRow}>
+                    <Text style={styles.detailsValue}>{aluguel}</Text>
+                    <Text style={styles.detailsDivider}>/Hora</Text>
+                  </View>
+
+                  {/* Divisor interno */}
+                  <View style={styles.detailsInnerDivider} />
+
+                  <Text style={styles.detailsLabel}>Tipo:</Text>
+                  <Text style={styles.detailsType}>{tipo}</Text>
+                </View>
+                
+                {/* Coluna Detalhes */}
+                <View style={styles.detailsColRight}>
+                  <Text style={[styles.detailsLabel, { marginBottom: 8 }]}>Detalhes:</Text>
+
+                  <View style={styles.detailsGrid}>
+                    <View style={styles.detailsGridItem}>
+                      <MaterialIcons name="crop-square" size={20} color={colors.gray} style={styles.detailsIcon} />
+                      <Text style={styles.detailsInfoTextNoMargin}>{metragem}</Text>
+                    </View>
+
+                    <View style={styles.detailsGridItem}>
+                      <Feather name="wifi" size={20} color={colors.gray} style={styles.detailsIcon} />
+                      <Text style={styles.detailsInfoTextNoMargin}>{wifi}</Text>
+                    </View>
+
+                    <View style={styles.detailsGridItem}>
+                      <MaterialIcons name="groups" size={20} color={colors.gray} style={styles.detailsIcon} />
+                      <Text style={styles.detailsInfoTextNoMargin}>{capacidade}</Text>
+                    </View>
+
+                    <View style={styles.detailsGridItem}>
+                      <MaterialIcons name="wc" size={20} color={colors.gray} style={styles.detailsIcon} />
+                      <Text style={styles.detailsInfoTextNoMargin}>{banheiros}</Text>
+                    </View>
+                  </View>
+                  
+                  <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
+                    <Text style={styles.detailsMoreButton}>Ver mais</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Divisor horizontal */}
+              <View style={styles.horizontalDivider} />
+              
+              {/* Seção de aluguel do espaço - Layout igual à imagem */}
+              <View style={styles.rentalSection}>
+                <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
+                  Está pensando em Alugar este espaço?
+                </Text>
+                <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
+                  Informe a data e horário que deseja.
+                </Text>
+                <View style={[styles.rentalCard, isDarkMode && { backgroundColor: theme.card }]}>
+                  <View style={styles.rentalRow}>
+                    {/* Check-in */}
+                    <View style={styles.rentalColumn}>
+                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-in</Text>
+                      <TouchableOpacity
+                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        onPress={() => openPicker('checkInDate', 'date')}
+                      >
+                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                          {checkInDate.toLocaleDateString()}
+                        </Text>
+                      </TouchableOpacity>
+                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
+                      <TouchableOpacity
+                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        onPress={() => openTimeModal('checkInTime')}
+                      >
+                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                          {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    {/* Divisor vertical */}
+                    <View style={[styles.rentalVerticalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                    {/* Check-out */}
+                    <View style={styles.rentalColumn}>
+                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Check-out</Text>
+                      <TouchableOpacity
+                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        onPress={() => openPicker('checkOutDate', 'date')}
+                      >
+                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                          {checkOutDate.toLocaleDateString()}
+                        </Text>
+                      </TouchableOpacity>
+                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Hora:</Text>
+                      <TouchableOpacity
+                        style={[styles.rentalValueBox, isDarkMode && { backgroundColor: theme.background }]}
+                        onPress={() => openTimeModal('checkOutTime')}
+                      >
+                        <Text style={[styles.rentalValueText, isDarkMode && { color: theme.text }]}>
+                          {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  {/* Linha divisória horizontal */}
+                  <View style={[styles.rentalHorizontalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                  {/* Total e botão */}
+                  <View style={styles.rentalTotalRow}>
+                    <View>
+                      <Text style={[styles.rentalLabel, isDarkMode && { color: theme.text }]}>Total:</Text>
+                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>{calcularTotal()}</Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={[styles.rentalButton, isDarkMode && { backgroundColor: theme.blue }]} 
+                      onPress={handleRent}
+                    >
+                      <Text style={styles.rentalButtonText}>Alugar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              {/* Divisor horizontal */}
+              <View style={styles.horizontalDivider} />
+
+              {/* Descrição */}
+              <View>
+                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
+                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
+                  {displayDescription}
+                </Text>
+                {shouldShowMoreButton && (
+                  <TouchableOpacity
+                    style={styles.moreButton}
+                    onPress={() => setShowFullDescription(!showFullDescription)}
+                  >
+                    <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
+                      {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Divisor horizontal */}
+              <View style={styles.horizontalDivider} />
+
+              {/* Avaliações */}
+              <View>
+                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações do Espaço</Text>
+                <FlatList
+                  data={reviews}
+                  keyExtractor={item => item.id.toString()}
+                  renderItem={({ item }) => renderReview(item)}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 16 }}
+                />
+              </View>
+
+              {/* Bloco de avaliação do local */}
+              <View style={[styles.reviewBox, { marginTop: 24 }]}> 
+                <Text style={styles.reviewBoxTitle}>Avalie este local também</Text>
+                <View style={styles.reviewStarsRow}>
+                  {[1,2,3,4,5].map(i => (
+                    <TouchableOpacity key={i} onPress={() => setNewRating(i)}>
+                      <MaterialIcons
+                        name={newRating >= i ? 'star' : 'star-border'}
+                        size={24}
+                        color={newRating >= i ? colors.blue : colors.gray}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TextInput
+                  style={styles.reviewInput}
+                  placeholder="Digite seu comentário aqui..."
+                  placeholderTextColor={colors.gray}
+                  multiline
+                  value={newComment}
+                  onChangeText={setNewComment}
+                />
+                <TouchableOpacity
+                  style={styles.reviewButton}
+                  onPress={() => {/* lógica para comentar */}}
+                >
+                  <Text style={styles.reviewButtonText}>COMENTAR</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Divisor horizontal */}
+              <View style={styles.horizontalDivider} />
+
+              {/* Bloco de apresentação do locador do espaço */}
+              <View style={{ alignItems: 'center', marginBottom: 32 }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 18, color: colors.black, textAlign: 'center' }}>
+                  Conheça o locador do espaço
+                </Text>
+                <Text style={{ color: colors.gray, fontSize: 14, marginBottom: 16, textAlign: 'center' }}>
+                  Clique para ver mais
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: colors.white,
+                    borderRadius: 18,
+                    padding: 24,
+                    width: 320,
+                    alignItems: 'center',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: colors.line,
+                  }}
+                  activeOpacity={0.85}
+                  onPress={() => {/* lógica para abrir detalhes do locador */}}
+                >
+                  <View style={{ alignItems: 'center', marginBottom: 8 }}>
+                    <Image
+                      source={require('../../assets/perfil-login.png')}
+                      style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#e6f0fa' }}
+                    />
+                    <Text style={{ fontWeight: 'bold', fontSize: 20, color: colors.black, marginBottom: 4 }}>
+                      Ricardo Penne
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>10</Text>
+                      <Text style={{ color: colors.gray, fontSize: 13 }}>avaliações</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>4,8</Text>
+                        <MaterialIcons name="star" size={16} color={colors.gray} style={{ marginLeft: 2 }} />
+                      </View>
+                      <Text style={{ color: colors.gray, fontSize: 13 }}>estrelas</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.black }}>4</Text>
+                      <Text style={{ color: colors.gray, fontSize: 13 }}>espaços</Text>
+                    </View>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-
-          {/* Divisor horizontal */}
-          <View style={styles.horizontalDivider} />
-
-          {/* Descrição */}
-          <View>
-            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
-            <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
-              {displayDescription}
-            </Text>
-            {shouldShowMoreButton && (
-              <TouchableOpacity
-                style={styles.moreButton}
-                onPress={() => setShowFullDescription(!showFullDescription)}
-              >
-                <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
-                  {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Divisor horizontal */}
-          <View style={styles.horizontalDivider} />
-
-          {/* Avaliações */}
-          <View>
-            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações do Espaço</Text>
-            <FlatList
-              data={reviews}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => renderReview(item)}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 16 }}
-            />
-          </View>
-
-          {/* Divisor horizontal */}
-          <View style={styles.horizontalDivider} />
-
-          
-        </View>
-      </ScrollView>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
 
       {/* Modal do Calendário */}
       <Modal
