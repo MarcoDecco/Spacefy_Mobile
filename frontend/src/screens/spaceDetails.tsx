@@ -67,6 +67,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       rating: 5,
       text: 'Experiência incrível! O espaço para festas superou todas as expectativas – amplo, bem organizado e exatamente como descrito. A estrutura é perfeita para eventos, com iluminação, som e conforto impecáveis. A comunicação com o anfitrião foi rápida e eficiente. Recomendo muito!',
       expanded: false,
+      avatar: require('../../assets/perfil-login.png'),
     },
     {
       id: 2,
@@ -74,6 +75,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       rating: 4,
       text: 'Pode melhorar em alguns pontos, mas no geral foi uma ótima experiência. O espaço é bem localizado e o anfitrião foi muito prestativo.',
       expanded: false,
+      avatar: require('../../assets/perfil-login.png'),
     },
   ]);
   const [newRating, setNewRating] = useState(0);
@@ -93,18 +95,43 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   };
   const renderReview = (review: any) => (
     <View key={review.id} style={[styles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
-      <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
-      <Text style={[styles.reviewRating, isDarkMode && { color: theme.text }]}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+        {review.avatar ? (
+          <Image source={review.avatar} style={{ width: 36, height: 36, borderRadius: 18, marginRight: 8 }} />
+        ) : (
+          <MaterialIcons name="account-circle" size={36} color={colors.gray} style={{ marginRight: 8 }} />
+        )}
+        <View>
+          <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+            {[...Array(5)].map((_, index) => (
+              <MaterialIcons
+                key={index}
+                name={index < review.rating ? "star" : "star-border"}
+                size={16}
+                color={index < review.rating ? colors.blue : colors.gray}
+                style={{ marginRight: 2 }}
+              />
+            ))}
+          </View>
+        </View>
+      </View>
       <Text style={[styles.reviewText, isDarkMode && { color: theme.text }]}>
         {review.expanded || review.text.length <= MAX_REVIEW_LENGTH
           ? review.text
           : review.text.substring(0, MAX_REVIEW_LENGTH) + '...'}
       </Text>
       {review.text.length > MAX_REVIEW_LENGTH && (
-        <TouchableOpacity onPress={() => toggleReview(review.id)}>
-          <Text style={[styles.reviewMoreButton, isDarkMode && { color: theme.blue }]}>
-            {review.expanded ? 'Mostrar menos' : 'Mostrar mais'} &gt;
+        <TouchableOpacity onPress={() => toggleReview(review.id)} style={{ flexDirection: 'row' }}>
+          <Text style={[styles.reviewMoreButton, isDarkMode && { color: theme.blue }]}> 
+            {review.expanded ? 'Mostrar menos' : 'Mostrar mais'}
           </Text>
+          <Feather
+            name={review.expanded ? 'chevron-up' : 'chevron-down'}
+            size={16}
+            color={isDarkMode ? theme.blue : colors.blue}
+            style={{ marginTop: 8, marginLeft: 4 }}
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -324,12 +351,12 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             </Text>
           </View>
         </View>
-          
+
         <View style={styles.content}>
           {/* Nome, endereço e favorito */}
           <View style={styles.headerRow}>
             <View style={styles.headerInfo}>
-              <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
+          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
               <TouchableOpacity
                 onPress={() => {
                   const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
@@ -371,7 +398,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>({space.reviews})</Text>
           </View>
 
-          {/* Linha divisória */}
+          {/* Divisor horizontal */}
           <View style={styles.horizontalDivider} />
 
           {/* Seção de Aluguel, Tipo e Detalhes */}
@@ -424,6 +451,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             </View>
           </View>
 
+          {/* Divisor horizontal */}
           <View style={styles.horizontalDivider} />
           
           {/* Seção de aluguel do espaço - Layout igual à imagem */}
@@ -498,11 +526,12 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.content}>
+          {/* Divisor horizontal */}
+          <View style={styles.horizontalDivider} />
+
           {/* Descrição */}
-          <View style={styles.section}>
+          <View>
             <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
             <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
               {displayDescription}
@@ -519,24 +548,26 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             )}
           </View>
 
-          {/* Comodidades */}
-          {space.amenities && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Comodidades</Text>
-              {space.amenities.map((amenity, index) => (
-                <View key={index} style={styles.amenityItem}>
-                  <MaterialIcons name="check-circle" size={20} color={colors.blue} />
-                  <Text style={[styles.amenityText, isDarkMode && { color: theme.text }]}>{amenity}</Text>
-                </View>
-              ))}
-            </View>
-          )}
+          {/* Divisor horizontal */}
+          <View style={styles.horizontalDivider} />
 
           {/* Avaliações */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações</Text>
-            {reviews.map(renderReview)}
+          <View>
+            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações do Espaço</Text>
+            <FlatList
+              data={reviews}
+              keyExtractor={item => item.id.toString()}
+              renderItem={({ item }) => renderReview(item)}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 16 }}
+            />
           </View>
+
+          {/* Divisor horizontal */}
+          <View style={styles.horizontalDivider} />
+
+          
         </View>
       </ScrollView>
 
@@ -626,7 +657,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         </View>
       </Modal>
 
-      {/* Modal de Detalhes Extras */}
+      {/* Modal de Comodidades */}
       <Modal
         visible={detailsModalVisible}
         transparent={true}
@@ -638,7 +669,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             <TouchableWithoutFeedback>
               <View style={[styles.calendarModal, { width: 340, maxHeight: 500 }]}> 
                 <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>
-                  Detalhes de <Text style={{ color: colors.blue }}>{space.title}</Text>
+                  Comodidades de <Text style={{ color: colors.blue }}>{space.title}</Text>
                 </Text>
 
                 {/* Ajustar esse bloco referente aos detalhes do espaço de acordo com a API */}

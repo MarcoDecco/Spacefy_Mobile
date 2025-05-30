@@ -171,7 +171,7 @@ export const spaceDetailsStyles = StyleSheet.create({
   horizontalDivider: {
     height: 1,
     backgroundColor: colors.line,
-    marginVertical: 32,
+    marginVertical: 24,
     marginHorizontal: -6,
   },
   label: {
@@ -284,11 +284,10 @@ export const spaceDetailsStyles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: colors.line,
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
+    width: 300,
   },
   reviewUser: {
     fontWeight: 'bold',
@@ -322,7 +321,7 @@ export const spaceDetailsStyles = StyleSheet.create({
   headerRatingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    marginTop: 8,
   },
   headerAddress: {
     color: colors.blue,
@@ -408,7 +407,8 @@ export const spaceDetailsStyles = StyleSheet.create({
   },
   rentalSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginTop: 22,
+    marginBottom: 34,
   },
   rentalTitle: {
     fontSize: 18,
@@ -428,19 +428,14 @@ export const spaceDetailsStyles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     width: '100%',
-    maxWidth: 340,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2)',
     borderWidth: 1,
     borderColor: colors.line,
   },
   rentalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   rentalColumn: {
     flex: 1,
