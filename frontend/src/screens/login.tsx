@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
@@ -21,6 +21,7 @@ export default function Login({ navigation }: any) {
       return;
     }
 
+    Keyboard.dismiss();
     try {
       setLoading(true);
       await authService.login(email, password);

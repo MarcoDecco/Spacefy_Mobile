@@ -2,12 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput, KeyboardAvoidingView, Platform, Keyboard, Alert } from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Calendar } from 'react-native-calendars';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
-import Constants from 'expo-constants';
 import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
-import { reviewBoxStyles } from '../styles/reviewBox.style';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface SpaceDetailsProps {
@@ -213,19 +210,51 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setTimeModalVisible(true);
   };
 
-  // Gerar lista de horários de 30 em 30 minutos
+  // Gerar lista de horários agrupados por período
   const generateTimeList = () => {
-    const times = [];
+    const periods = {
+      manha: { start: 6, end: 12 },
+      tarde: { start: 12, end: 18 },
+      noite: { start: 18, end: 24 }
+    };
+
+    const timeGroups = {
+      manha: [] as string[],
+      tarde: [] as string[],
+      noite: [] as string[]
+    };
+
+    // Primeiro, geramos os horários normais
     for (let h = 0; h < 24; h++) {
       for (let m = 0; m < 60; m += 30) {
         const hour = h.toString().padStart(2, '0');
         const min = m.toString().padStart(2, '0');
-        times.push(`${hour}:${min}`);
+        const timeStr = `${hour}:${min}`;
+        
+        if (h >= periods.manha.start && h < periods.manha.end) {
+          timeGroups.manha.push(timeStr);
+        } else if (h >= periods.tarde.start && h < periods.tarde.end) {
+          timeGroups.tarde.push(timeStr);
+        } else if (h >= periods.noite.start) {
+          timeGroups.noite.push(timeStr);
+        }
       }
     }
-    return times;
+
+    // Adiciona os horários de 00:00 até 05:00 no final do período noturno
+    for (let h = 0; h <= 5; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const hour = h.toString().padStart(2, '0');
+        const min = m.toString().padStart(2, '0');
+        const timeStr = `${hour}:${min}`;
+        timeGroups.noite.push(timeStr);
+      }
+    }
+
+    return timeGroups;
   };
-  const timeList = generateTimeList();
+
+  const timeGroups = generateTimeList();
 
   // Função para selecionar horário
   const handleTimeSelect = (timeStr: string) => {
@@ -265,14 +294,19 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
     // Diferença em milissegundos
     const diffMs = checkOut.getTime() - checkIn.getTime();
-    // Diferença em horas (arredondando para cima)
-    const diffHoras = Math.ceil(diffMs / (1000 * 60 * 60));
+    // Diferença em minutos
+    const diffMinutos = diffMs / (1000 * 60);
+    // Converte para horas com decimais (ex: 1.5 para 1 hora e 30 minutos)
+    const diffHoras = diffMinutos / 60;
     
     // Extrai o valor numérico do preço do espaço (remove R$, espaços e converte vírgula para ponto)
     const precoPorHora = parseFloat(space.price.replace(/[R$\s.]/g, '').replace(',', '.'));
     
-    // Calcula o total
-    const total = diffHoras * precoPorHora;
+    // Calcula o preço por minuto
+    const precoPorMinuto = precoPorHora / 60;
+    
+    // Calcula o total usando os minutos exatos
+    const total = diffMinutos * precoPorMinuto;
     
     // Formata para moeda brasileira
     return total.toLocaleString('pt-BR', { 
@@ -858,7 +892,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               <View style={styles.horizontalDivider} />
 
               {/* Bloco de apresentação do locador do espaço */}
-              <View style={{ alignItems: 'center', marginBottom: 32 }}>
+              <View style={{ alignItems: 'center', marginBottom: 80 }}>
                 <Text style={[styles.sectionTitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
                   Conheça o locador do espaço
                 </Text>
@@ -957,24 +991,90 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         <TouchableWithoutFeedback onPress={() => setTimeModalVisible(false)}>
           <View style={styles.calendarOverlay}>
             <TouchableWithoutFeedback>
-              <View style={[styles.calendarModal, isDarkMode && { backgroundColor: theme.card }]}>
-                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
-                  Selecione o horário
-                </Text>
-                <FlatList
-                  data={timeList}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={[styles.timeItem, isDarkMode && { backgroundColor: theme.background }]}
-                      onPress={() => handleTimeSelect(item)}
+              <View style={[
+                styles.timeModal,
+                isDarkMode && { 
+                  backgroundColor: theme.card,
+                  borderColor: theme.border
+                }
+              ]}>
+                <View style={[
+                  styles.timeModalHeader,
+                  isDarkMode && { 
+                    borderBottomColor: theme.border,
+                    backgroundColor: theme.background
+                  }
+                ]}>
+                  <Text style={[
+                    styles.timeModalTitle,
+                    isDarkMode && { color: theme.text }
+                  ]}>
+                    Selecione o horário
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={() => setTimeModalVisible(false)}
+                    style={[
+                      styles.timeModalCloseButton,
+                      isDarkMode && { 
+                        backgroundColor: theme.card,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }
+                    ]}
+                  >
+                    <MaterialIcons 
+                      name="close" 
+                      size={24} 
+                      color={isDarkMode ? theme.text : colors.black} 
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView 
+                  style={styles.timeModalContent}
+                  contentContainerStyle={{ paddingBottom: 40 }}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {Object.entries(timeGroups).map(([period, times], index, array) => (
+                    <View 
+                      key={period} 
+                      style={[
+                        styles.timePeriodContainer,
+                        index === array.length - 1 && { marginBottom: 40 }
+                      ]}
                     >
-                      <Text style={[styles.timeText, isDarkMode && { color: theme.text }]}>{item}</Text>
-                    </TouchableOpacity>
-                  )}
-                  numColumns={3}
-                  contentContainerStyle={styles.timeList}
-                />
+                      <Text style={[
+                        styles.timePeriodTitle,
+                        isDarkMode && { color: theme.text }
+                      ]}>
+                        {period === 'manha' ? 'Manhã' : 
+                         period === 'tarde' ? 'Tarde' : 'Noite'}
+                      </Text>
+                      <View style={styles.timeGrid}>
+                        {times.map((time) => (
+                          <TouchableOpacity
+                            key={time}
+                            style={[
+                              styles.timeItem,
+                              isDarkMode && { 
+                                backgroundColor: theme.background,
+                                borderColor: theme.border
+                              }
+                            ]}
+                            onPress={() => handleTimeSelect(time)}
+                          >
+                            <Text style={[
+                              styles.timeText,
+                              isDarkMode && { color: theme.text }
+                            ]}>
+                              {time}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
               </View>
             </TouchableWithoutFeedback>
           </View>
