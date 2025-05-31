@@ -8,7 +8,9 @@ export const colors = {
     gray: '#B0B0B0',
     dark_gray: '#2F2F2F',
     black: '#000000',
+
     error: '#FF0000',
+    line: '#E0E0E0',
 
     // Propriedades do tema
     background: '#FCFCFC',
