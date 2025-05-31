@@ -1,7 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = 'https://spacefy-ctwv.onrender.com';
+import { API_URL } from '@env';
 
 const api = axios.create({
     baseURL: API_URL,
