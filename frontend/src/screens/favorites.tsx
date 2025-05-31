@@ -7,58 +7,93 @@ import { homeStyles as styles } from '../styles/homeStyles';
 import SearchBar from "../components/searchBar";
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Favorites() {
   const { cards: favoriteCards, loading } = useCards('favorites');
   const { theme } = useTheme();
+  const { user } = useAuth();
 
   const renderCard = (item: BaseCard) => (
-    <Card 
+    <Card
       id={item.id}
-      images={item.images}
-      title={item.title}
-      address={item.address}
-      price={item.price}
-      rating={item.rating}
-      reviews={item.reviews}
+      images={item.image_url.map(url => ({ uri: url }))}
+      title={item.space_name}
+      address={typeof item.location === 'object' ? item.location.formatted_address : item.location}
+      price={item.price_per_hour.toString()}
+      rating={0}
+      reviews={0}
     />
   );
 
   const EmptyComponent = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50 }}>
-      <Text style={[pageTexts.title, { textAlign: 'center', color: theme.text }]}>
-        Você ainda não tem espaços favoritos.
-      </Text>
-      <Text style={[pageTexts.title, { textAlign: 'center', marginTop: 8, color: theme.text }]}>
-        Explore os espaços disponíveis e adicione seus favoritos!
-      </Text>
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      paddingTop: 50,
+      paddingHorizontal: 20
+    }}>
+      {!user ? (
+        <>
+          <Text style={[pageTexts.title, { 
+            textAlign: 'center', 
+            color: theme.text,
+            fontSize: 24,
+            marginBottom: 16
+          }]}>
+            Faça login para ver seus favoritos
+          </Text>
+          <Text style={[pageTexts.title, { 
+            textAlign: 'center', 
+            color: theme.text,
+            fontSize: 16,
+            opacity: 0.7,
+            lineHeight: 24
+          }]}>
+            Entre com sua conta para ver os espaços que você favoritou.
+          </Text>
+        </>
+      ) : (
+        <>
+          <Text style={[pageTexts.title, { 
+            textAlign: 'center', 
+            color: theme.text,
+            fontSize: 24,
+            marginBottom: 16
+          }]}>
+            Nenhum espaço favorito ainda
+          </Text>
+          <Text style={[pageTexts.title, { 
+            textAlign: 'center', 
+            color: theme.text,
+            fontSize: 16,
+            opacity: 0.7,
+            lineHeight: 24
+          }]}>
+            Explore os espaços disponíveis e adicione seus favoritos para vê-los aqui.
+          </Text>
+        </>
+      )}
     </View>
   );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <SearchBar />
-      <FlatList
-        data={[1]}
-        keyExtractor={() => '1'}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: 130 }}
-        renderItem={() => (
-          <CardList
-            data={favoriteCards}
-            renderCard={renderCard}
-            title="Meus Favoritos"
-            horizontal={false}
-            style={{ alignItems: 'center' }}
-            contentContainerStyle={{ 
-              padding: 16,
-              width: '100%',
-              maxWidth: 400,
-              alignSelf: 'center'
-            }}
-            ListEmptyComponent={loading ? null : EmptyComponent}
-          />
-        )}
+      <CardList
+        data={user ? (favoriteCards || []) : []}
+        renderCard={renderCard}
+        title="Meus Favoritos"
+        horizontal={false}
+        style={{ alignItems: 'center' }}
+        contentContainerStyle={{ 
+          padding: 16,
+          width: '100%',
+          maxWidth: 400,
+          alignSelf: 'center'
+        }}
+        ListEmptyComponent={loading ? null : EmptyComponent}
       />
     </View>
   );

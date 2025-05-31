@@ -1,247 +1,39 @@
-import { useState, useEffect } from 'react';
-import { CardType } from '../types/card';
+import { useEffect, useState } from 'react';
+import { spaceService } from '../services/spaceService';
+import { BaseCard } from '../types/card';
 
-// Dados mockados temporários
-const mockData = {
-  featured: [
-    {
-      id: '1',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Porto Belo, Muriaé - MG',
-      address: 'Rua Leonídio Valentim Ferreira',
-      price: 'R$ 2.000',
-      rating: 4.8,
-      reviews: 24
-    },
-    {
-      id: '2',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço Elegante, Rio de Janeiro',
-      address: 'Av. Atlântica, 200',
-      price: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 32
-    },
-    {
-      id: '3',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg'),require('../../assets/espaco.jpg')
-
-      ],
-      title: 'Espaço Elegante, Rio de Janeiro',
-      address: 'Av. Atlântica, 200',
-      price: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 32
-    },
-  ],
-  promo: [
-    {
-      id: '1',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço Luxuoso, São Paulo',
-      address: 'Av. Brigadeiro Faria Lima, 1500',
-      price: 'R$ 2.800',
-      originalPrice: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 45,
-      discount: '-20%'
-    },
-    {
-      id: '2',
-      images: [require('../../assets/espaco.jpg'  )],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    }
-  ],
-  quadra: [
-    {
-      id: '1',
-      images: [require('../../assets/quadra-01.jpg'), require('../../assets/quadra-01.jpg')],
-      title: 'Espaço Luxuoso, São Paulo',
-      address: 'Av. Brigadeiro Faria Lima, 1500',
-      price: 'R$ 2.800',
-      originalPrice: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 45,
-      discount: '-20%'
-    },
-    {
-      id: '2',
-      images: [require('../../assets/quadra-02.jpg'), require('../../assets/quadra-02.jpg'), require('../../assets/quadra-02.jpg')],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    }
-  ],
-  auditorio: [
-    {
-      id: '1',
-      images: [require('../../assets/auditorio-01.jpg'), require('../../assets/auditorio-01.jpg')],
-      title: 'Espaço Luxuoso, São Paulo',
-      address: 'Av. Brigadeiro Faria Lima, 1500',
-      price: 'R$ 2.800',
-      originalPrice: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 45,
-      discount: '-20%'
-    },
-    {
-      id: '2',
-      images: [require('../../assets/auditorio-02.jpg'), require('../../assets/auditorio-02.jpg'), require('../../assets/auditorio-02.jpg')],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    },
-    {
-      id: '3',
-      images: [require('../../assets/auditorio-03.jpg'), require('../../assets/auditorio-03.jpg'), require('../../assets/auditorio-03.jpg')],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    }
-  ],
-  eventSpace: [
-    {
-      id: '1',
-      images: [require('../../assets/espaco-evento-01.jpg'), require('../../assets/espaco-evento-01.jpg')],
-      title: 'Espaço Luxuoso, São Paulo',
-      address: 'Av. Brigadeiro Faria Lima, 1500',
-      price: 'R$ 2.800',
-      originalPrice: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 45,
-      discount: '-20%'
-    },
-    {
-      id: '2',
-      images: [require('../../assets/espaco-evento-02.jpg'), require('../../assets/espaco-evento-02.jpg'), require('../../assets/espaco-evento-02.jpg')],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    },
-    {
-      id: '3',
-      images: [require('../../assets/espaco-evento-03.jpg'), require('../../assets/espaco-evento-03.jpg'), require('../../assets/espaco-evento-03.jpg')],
-      title: 'Salão Moderno, Rio de Janeiro',
-      address: 'Rua Visconde de Pirajá, 500',
-      price: 'R$ 1.900',
-      originalPrice: 'R$ 2.400',
-      rating: 4.7,
-      reviews: 28,
-      discount: '-15%'
-    }
-  ],
-  rented: [
-    {
-      id: '1',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço Corporativo, São Paulo',
-      address: 'Av. Paulista, 1000',
-      price: 'R$ 4.500',
-      rating: 4.9,
-      reviews: 56
-    },
-    {
-      id: '2',
-      images: [require('../../assets/espaco.jpg')],
-      title: 'Sala de Reuniões Premium, Rio de Janeiro',
-      address: 'Av. Rio Branco, 500',
-      price: 'R$ 3.200',
-      rating: 4.8,
-      reviews: 42
-    },
-    {
-      id: '3',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço para Eventos, Belo Horizonte',
-      address: 'Av. Afonso Pena, 1500',
-      price: 'R$ 5.000',
-      rating: 4.7,
-      reviews: 38
-    }
-  ],
-  favorites: [
-    {
-      id: '1',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço Gourmet, São Paulo',
-      address: 'Rua Augusta, 2000',
-      price: 'R$ 3.800',
-      rating: 4.9,
-      reviews: 48
-    },
-    {
-      id: '2',
-      images: [require('../../assets/espaco.jpg')],
-      title: 'Sala de Treinamento, Rio de Janeiro',
-      address: 'Av. Nossa Senhora de Copacabana, 1000',
-      price: 'R$ 2.900',
-      rating: 4.8,
-      reviews: 35
-    },
-    {
-      id: '3',
-      images: [require('../../assets/espaco.jpg'), require('../../assets/espaco.jpg')],
-      title: 'Espaço Coworking, Belo Horizonte',
-      address: 'Rua da Bahia, 1200',
-      price: 'R$ 1.800',
-      rating: 4.7,
-      reviews: 29
-    },
-    {
-      id: '4',
-      images: [require('../../assets/espaco.jpg')],
-      title: 'Sala de Conferência, Curitiba',
-      address: 'Av. Sete de Setembro, 800',
-      price: 'R$ 3.500',
-      rating: 4.9,
-      reviews: 41
-    }
-  ]
-};
-
-export const useCards = (type: 'featured' | 'promo' | 'quadra' | 'auditorio' | 'eventSpace' | 'rented' | 'favorites') => {
-  const [cards, setCards] = useState<CardType[]>([]);
-  const [loading, setLoading] = useState(true);
+export const useCards = () => {
+  const [cards, setCards] = useState<BaseCard[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCards = async () => {
       try {
         setLoading(true);
-        // Simulando uma chamada de API
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setCards(mockData[type]);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar cards');
+        setError(null);
+        console.log('Buscando todos os espaços...');
+
+        const apiSpaces = await spaceService.getSpaces();
+        console.log('Espaços recebidos:', apiSpaces);
+
+        if (!apiSpaces || !Array.isArray(apiSpaces)) {
+          console.error('Dados recebidos não são um array:', apiSpaces);
+          throw new Error('Formato de dados inválido recebido da API');
+        }
+
+        setCards(apiSpaces);
+        console.log('Cards atualizados com sucesso:', apiSpaces.length);
+      } catch (err: any) {
+        console.error('Erro ao buscar cards:', err);
+        setError(err.message || 'Erro ao buscar espaços');
       } finally {
         setLoading(false);
       }
     };
 
     fetchCards();
-  }, [type]);
+  }, []);
 
   return { cards, loading, error };
-}; 
+};

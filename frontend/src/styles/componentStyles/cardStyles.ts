@@ -1,58 +1,67 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
+
+const { width: windowWidth } = Dimensions.get('window');
+export const CARD_WIDTH = windowWidth * 0.8;
+export const CARD_HEIGHT = 400; // Altura fixa para todos os cards
 
 export const cardStyles = StyleSheet.create({
   card: {
-    borderRadius: 18,
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    borderRadius: 20,
     shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 12,
     overflow: 'hidden',
     marginTop: 16,
     marginBottom: 30,
     position: 'relative',
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
 
   discountTag: {
     position: 'absolute',
-    top: 10,
-    left: 10,
+    top: 12,
+    left: 12,
     backgroundColor: '#DC2626',
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     zIndex: 2,
   },
 
   discountText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 14,
   },
 
   arrow: {
     position: 'absolute',
     top: '50%',
     marginTop: -24,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    padding: 8,
-    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 10,
+    borderRadius: 25,
     zIndex: 2,
   },
 
   arrowLeft: {
-    left: 8,
+    left: 12,
   },
 
   arrowRight: {
-    right: 8,
+    right: 12,
   },
 
   dotsContainer: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 12,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -64,11 +73,13 @@ export const cardStyles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginHorizontal: 3,
+    marginHorizontal: 4,
   },
 
   dotActive: {
     backgroundColor: colors.white,
+    width: 10,
+    height: 10,
   },
 
   dotInactive: {
@@ -77,59 +88,75 @@ export const cardStyles = StyleSheet.create({
 
   counter: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
 
   counterText: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '500',
   },
 
   content: {
-    padding: 16, 
-    flex: 1,
-    gap: 10,
+    padding: 18,
+    height: CARD_HEIGHT - 180, // Altura total menos a altura da imagem
+    display: 'flex',
+    flexDirection: 'column',
   },
 
   header: {
     flexDirection: 'row',
-    marginBottom: 6,
+    marginBottom: 4,
   },
 
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
+    letterSpacing: 0.2,
   },
 
   address: {
-    fontSize: 13,
+    fontSize: 14,
+    marginTop: 2,
+  },
+
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+    marginBottom: 4,
+    maxHeight: 40, // Limita a altura da descrição
   },
 
   priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: 8,
   },
 
   price: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
+    color: colors.blue,
   },
 
   originalPrice: {
-    fontSize: 14,
+    fontSize: 15,
     textDecorationLine: 'line-through',
-    marginLeft: 4,
+    marginLeft: 6,
+    color: colors.gray,
   },
 
   priceHour: {
     fontSize: 14,
     marginLeft: 4,
+    color: colors.gray,
   },
 
   footer: {
@@ -141,16 +168,25 @@ export const cardStyles = StyleSheet.create({
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 8,
   },
 
   rating: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
-    marginLeft: 2,
+    marginLeft: 4,
   },
 
   reviews: {
-    fontSize: 13,
+    fontSize: 14,
     marginLeft: 4,
+    color: colors.gray,
+  },
+
+  spaceType: {
+    fontSize: 13,
+    marginTop: 4,
+    textTransform: 'capitalize',
   },
 });

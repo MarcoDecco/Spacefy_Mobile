@@ -9,16 +9,16 @@ export const homeStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.light_gray,
   },
-  
+
   contentContainer: {
     paddingTop: 130,
   },
-  
+
   horizontalScroll: {
     marginHorizontal: 20,
     marginBottom: 20,
   },
-  
+
   cardWrapper: {
     marginTop: 20,
     marginRight: 16,
