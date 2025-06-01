@@ -13,14 +13,7 @@ export const profileStyles = StyleSheet.create({
     paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    boxShadow: '0 6px 8px 0 rgba(0, 0, 0, 0.2)',
   },
 
   profileInfo: {
@@ -33,15 +26,8 @@ export const profileStyles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     backgroundColor: colors.white,
-    padding: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    padding: 4,
+    boxShadow: '0 4px 10px 0 rgba(0, 0, 0, 0.2)',
   },
 
   avatar: {
@@ -99,14 +85,7 @@ export const profileStyles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 20,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 5,
+    boxShadow: '0 2px 8px 1px rgba(0, 0, 0, 0.2)',
   },
 
   sectionTitle: {
@@ -152,19 +131,12 @@ export const profileStyles = StyleSheet.create({
     backgroundColor: colors.white,
     borderRadius: 20,
     marginHorizontal: 20,
-    marginBottom: 30,
+    marginBottom: 40,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 5,
+    boxShadow: '0 2px 8px 1px rgba(0, 0, 0, 0.2)',
   },
 
   logoutText: {
@@ -181,14 +153,7 @@ export const profileStyles = StyleSheet.create({
     margin: 20,
     padding: 20,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 5,
+    boxShadow: '0 0 6px 2px rgba(0, 0, 0, 0.2)',
   },
 
   bannerTitle: {
