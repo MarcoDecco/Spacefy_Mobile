@@ -95,22 +95,20 @@ const Card: React.FC<CardProps> = ({
   const handleCardPress = () => {
     navigation.navigate('SpaceDetails', {
       space: {
-        _id,
-        image_url,
-        space_name,
-        location,
-        price_per_hour,
-        space_description,
-        space_amenities,
-        space_type,
-        max_people,
-        week_days,
-        opening_time,
-        closing_time,
-        space_rules,
-        owner_name,
-        owner_phone,
-        owner_email
+        id: _id,
+        images: safeImages,
+        title: space_name,
+        address: location,
+        price: `R$ ${price_per_hour.toLocaleString('pt-BR')}`,
+        rating: 5.0,
+        reviews: 100,
+        description: space_description,
+        amenities: space_amenities,
+        type: space_type,
+        area: `${max_people}m²`,
+        capacity: `${max_people} pessoas`,
+        bathrooms: '2',
+        hasWifi: space_amenities.includes('Wi-Fi')
       }
     });
   };

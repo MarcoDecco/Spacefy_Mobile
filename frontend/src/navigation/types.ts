@@ -11,6 +11,11 @@ export type SpaceDetailsParams = {
     reviews: number;
     description?: string;
     amenities?: string[];
+    type?: string;
+    area?: string;
+    capacity?: string;
+    bathrooms?: string;
+    hasWifi?: boolean;
   };
 };
 
