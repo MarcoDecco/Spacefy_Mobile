@@ -1,20 +1,40 @@
 import { useEffect, useState } from 'react';
 import { spaceService } from '../services/spaceService';
 import { BaseCard } from '../types/card';
+import { useAuth } from '../contexts/AuthContext';
 
-export const useCards = () => {
+type CardType = 'all' | 'favorites' | 'rented';
+
+export const useCards = (type: CardType = 'all') => {
   const [cards, setCards] = useState<BaseCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchCards = async () => {
+      if (!user && (type === 'favorites' || type === 'rented')) {
+        setCards([]);
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
-        console.log('Buscando todos os espaços...');
+        console.log(`Buscando espaços do tipo: ${type}...`);
 
-        const apiSpaces = await spaceService.getSpaces();
+        let apiSpaces;
+        switch (type) {
+          case 'favorites':
+            apiSpaces = await spaceService.getFavoriteSpaces(user?.id);
+            break;
+          case 'rented':
+            apiSpaces = await spaceService.getRentedSpaces(user?.id);
+            break;
+          default:
+            apiSpaces = await spaceService.getSpaces();
+        }
+
         console.log('Espaços recebidos:', apiSpaces);
 
         if (!apiSpaces || !Array.isArray(apiSpaces)) {
@@ -33,7 +53,7 @@ export const useCards = () => {
     };
 
     fetchCards();
-  }, []);
+  }, [type, user]);
 
   return { cards, loading, error };
 };

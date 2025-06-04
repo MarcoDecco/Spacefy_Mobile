@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
@@ -26,9 +26,10 @@ export default function Login({ navigation }: any) {
       await authService.login(email, password);
       navigation.navigate('MainApp');
     } catch (error: any) {
+      console.log('Erro detalhado:', error);
       Alert.alert(
         'Erro ao fazer login',
-        error?.response?.data?.message || 'Ocorreu um erro ao fazer login'
+        `Detalhes do erro: ${error?.message || error?.response?.data?.message || 'Erro desconhecido'}`
       );
     } finally {
       setLoading(false);
@@ -36,55 +37,65 @@ export default function Login({ navigation }: any) {
   };
 
   return (
-    <LinearGradient
-      colors={[colors.others[100], colors.others[200]]}
-      style={[styles.container]}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
     >
-      <View style={styles.cardContainer}>
-        <View style={imageStyles.profileImageContainer}>
-          <Image
-            source={require('../../assets/perfil-login.png')}
-            style={imageStyles.profileImage}
-          />
-        </View>
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <LinearGradient
+          colors={[colors.others[100], colors.others[200]]}
+          style={[styles.container]}
+        >
+          <View style={styles.cardContainer}>
+            <View style={imageStyles.profileImageContainer}>
+              <Image
+                source={require('../../assets/perfil-login.png')}
+                style={imageStyles.profileImage}
+              />
+            </View>
 
-        <BaseInput
-          label="E-mail"
-          placeholder="Digite seu e-mail"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          required
-          value={email}
-          onChangeText={setEmail}
-        />
+            <BaseInput
+              label="E-mail"
+              placeholder="Digite seu e-mail"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              required
+              value={email}
+              onChangeText={setEmail}
+            />
 
-        <PasswordInput
-          label="Senha"
-          placeholder="Digite sua senha"
-          required
-          containerStyle={inputStyles.marginBottom}
-          value={password}
-          onChangeText={setPassword}
-        />
+            <PasswordInput
+              label="Senha"
+              placeholder="Digite sua senha"
+              required
+              containerStyle={inputStyles.marginBottom}
+              value={password}
+              onChangeText={setPassword}
+            />
 
-        <Button 
-          text={loading ? "Carregando..." : "Entrar"}
-          onPress={handleLogin}
-          color="blue"
-        />
+            <Button 
+              text={loading ? "Carregando..." : "Entrar"}
+              onPress={handleLogin}
+              color="blue"
+            />
 
-        <View style={styles.dividerContainer}>
-          <View style={styles.divider} />
-          <Text style={styles.dividerText}>ou</Text>
-          <View style={styles.divider} />
-        </View>
+            <View style={styles.dividerContainer}>
+              <View style={styles.divider} />
+              <Text style={styles.dividerText}>ou</Text>
+              <View style={styles.divider} />
+            </View>
 
-        <Text style={styles.registerText}>Não possui uma conta?</Text>
+            <Text style={styles.registerText}>Não possui uma conta?</Text>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerLink}>Cadastre-se</Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.registerLink}>Cadastre-se</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 } 
