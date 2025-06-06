@@ -8,20 +8,22 @@ import SearchBar from "../components/searchBar";
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
 import { userService } from "../services/userService"; // importa o serviço da API
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Favorites() {
   const [favoriteCards, setFavoriteCards] = useState<BaseCard[]>([]);
   const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
+  const { user } = useAuth(); 
 
   useEffect(() => {
-    // Substituir pelo método correto de obter o userId logado
-    const userId = "USER_ID_AQUI";
-    userService.getFavoriteSpaces(userId)
+    if (!user?.id) return; // só busca se tiver usuário logado
+    setLoading(true);
+    userService.getFavoriteSpaces(user.id)
       .then(data => setFavoriteCards(data))
       .catch(() => setFavoriteCards([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [user?.id]);
 
   const renderCard = (item: BaseCard) => (
     <Card 
