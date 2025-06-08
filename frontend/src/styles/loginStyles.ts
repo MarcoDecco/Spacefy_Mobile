@@ -16,14 +16,7 @@ export const loginStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
     marginVertical: 20,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.25)',
   },
 
   profileImageContainer: {

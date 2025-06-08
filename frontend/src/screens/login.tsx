@@ -38,8 +38,9 @@ export default function Login({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior='height'
       style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}
     >
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }}
