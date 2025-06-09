@@ -6,6 +6,7 @@ export const loginStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 70,
   },
 
   cardContainer: {
@@ -14,16 +15,24 @@ export const loginStyles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     padding: 24,
-    boxShadow: '2px 6px 10px rgba(0, 0, 0, 0.2)',
+    marginVertical: 20,
+    boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.25)',
   },
 
   profileImageContainer: {
     marginTop: -70,
-    marginBottom: 50,
+    marginBottom: 30,
     borderRadius: 100,
     backgroundColor: colors.white,
     padding: 6,
-    boxShadow: '0px 5px 10px rgba(0, 0, 0, 0.2)',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 
   profileImage: {

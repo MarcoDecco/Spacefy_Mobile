@@ -46,5 +46,25 @@ export const spaceService = {
     async getSpacesByOwnerId(ownerId) {
         const response = await api.get(`/spaces/getSpacesByOwnerId/${ownerId}`);
         return response.data;
+    },
+
+    async getFavoriteSpaces(userId) {
+        try {
+            const response = await api.get(`/spaces/favorites/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar espaços favoritos:', error);
+            throw error;
+        }
+    },
+
+    async getRentedSpaces(userId) {
+        try {
+            const response = await api.get(`/spaces/rented/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar espaços alugados:', error);
+            throw error;
+        }
     }
 };

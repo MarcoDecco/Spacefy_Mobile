@@ -5,26 +5,41 @@ import Card from "../components/card";
 import PromoCard from "../components/promoCard";
 import { useCards } from "../hooks/useCards";
 import { homeStyles as styles } from '../styles/homeStyles';
-import { BaseCard, PromoCard as PromoCardType, CardType } from "../types/card";
 import { useTheme } from '../contexts/ThemeContext';
 
-interface Section {
-  id: string;
-  title: string;
-  subtitle?: string;
-  data: CardType[];
-  type: 'featured' | 'promo' | 'quadra' | 'auditorio' | 'eventSpace';
+// Função para mapear os dados da API para o formato esperado pelo Card
+function mapCard(item: any) {
+  // Trata o campo location que pode vir como objeto
+  const location = typeof item.location === 'object' && item.location !== null
+    ? item.location.formatted_address || 'Endereço não disponível'
+    : item.location || 'Endereço não disponível';
+
+  return {
+    _id: item._id,
+    image_url: item.image_url || [],
+    space_name: item.space_name || 'Sem nome',
+    location,
+    price_per_hour: item.price_per_hour || 0,
+    space_description: item.space_description || '',
+    space_amenities: item.space_amenities || [],
+    space_type: item.space_type || '',
+    max_people: item.max_people || 0,
+    week_days: item.week_days || [],
+    opening_time: item.opening_time || '',
+    closing_time: item.closing_time || '',
+    space_rules: item.space_rules || [],
+    owner_name: item.owner_name || '',
+    owner_phone: item.owner_phone || '',
+    owner_email: item.owner_email || ''
+  };
 }
 
 export default function Home() {
-  const { cards: featuredCards } = useCards('featured');
-  const { cards: promoCards } = useCards('promo');
-  const { cards: quadraCards } = useCards('quadra');
-  const { cards: auditorioCards } = useCards('auditorio');
-  const { cards: eventSpaceCards } = useCards('eventSpace');
+  const { cards, loading } = useCards();
   const { theme, isDarkMode } = useTheme();
 
-  const renderCard = (item: CardType) => {
+  const renderCard = (item: any) => {
+    // Se for promo, adapte conforme necessário
     if ('originalPrice' in item && 'discount' in item) {
       return (
         <PromoCard 
@@ -43,53 +58,30 @@ export default function Home() {
 
     return (
       <Card 
-        id={item.id}
-        images={item.images}
-        title={item.title}
-        address={item.address}
-        price={item.price}
-        rating={item.rating}
-        reviews={item.reviews}
+        {...item}
       />
     );
   };
 
-  const sections: Section[] = [
+  const sections = [
     {
       id: 'featured',
       title: 'Espaços em Destaque',
-      data: featuredCards as BaseCard[],
+      data: cards.map(mapCard),
       type: 'featured'
     },
     {
       id: 'promo',
       title: 'Promoções Imperdíveis',
       subtitle: 'Descontos exclusivos por tempo limitado',
-      data: promoCards as PromoCardType[],
+      data: cards.map(mapCard),
       type: 'promo'
     },
-    {
-      id: 'quadra',
-      title: 'As melhores quadras',
-      data: quadraCards as BaseCard[],
-      type: 'quadra'
-    },
-    {
-      id: 'auditorio',
-      title: 'Os auditórios mais qualificados',
-      data: auditorioCards as BaseCard[],
-      type: 'auditorio'
-    },
-    {
-      id: 'eventSpace',
-      title: 'Espaços para eventos',
-      data: eventSpaceCards as BaseCard[],
-      type: 'eventSpace'
-    }
   ];
 
-  const renderSection = ({ item }: { item: Section }) => (
-    <CardList<CardType>
+  const renderSection = ({ item }: { item: any }) => (
+    <CardList
+      key={item.id}
       data={item.data}
       renderCard={renderCard}
       title={item.title}

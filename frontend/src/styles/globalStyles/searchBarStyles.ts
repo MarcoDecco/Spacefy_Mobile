@@ -12,22 +12,25 @@ export const searchBarStyles = StyleSheet.create({
     container: {
         position: 'absolute',
         zIndex: 1000,
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        gap: 8,
+        width: '100%',
         paddingBottom: 15,
-        backgroundColor: colors.light_gray, // Fundo com 95% de opacidade
+        backgroundColor: colors.light_gray,
+    },
+
+    searchRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: statusBarHeight + 20,
+        marginHorizontal: 20,
+        gap: 10,
     },
 
     searchContainer: {
         flexDirection: 'row',
-        flex: 1,
-        marginTop: statusBarHeight + 20,
         height: 50,
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 100,
-        marginLeft: 20,
         paddingHorizontal: 8,
         justifyContent: 'space-between',
         boxShadow: '0px 0px 10px 3px rgba(0, 0, 0, 0.1)',
@@ -42,16 +45,5 @@ export const searchBarStyles = StyleSheet.create({
         backgroundColor: colors.blue,
         padding: 6,
         borderRadius: 100,
-    },
-
-    filterButton: {
-        width: 50,
-        height: 50,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 15,
-        backgroundColor: 'white',
-        marginRight: 20,
-        boxShadow: '0px 0px 10px 2px rgba(0, 0, 0, 0.1)',
     },
 });

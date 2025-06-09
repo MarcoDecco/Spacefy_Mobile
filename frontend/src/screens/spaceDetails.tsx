@@ -6,6 +6,7 @@ import { Calendar } from 'react-native-calendars';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../services/api';
 
 interface SpaceDetailsProps {
   route: {
@@ -28,6 +29,22 @@ interface SpaceDetailsProps {
       }
     }
   }
+}
+
+interface Review {
+  id: number;
+  user: string;
+  rating: number;
+  text: string;
+  expanded: boolean;
+  avatar: any;
+}
+
+interface ReviewResponse {
+  id: number;
+  userName: string;
+  rating: number;
+  comment: string;
 }
 
 export default function SpaceDetails({ route }: SpaceDetailsProps) {
@@ -196,18 +213,67 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setCalendarVisible(false);
   };
 
-  const handleRent = () => {
-    setConfirmModalVisible(true);
-    // Fecha o modal após 2 segundos
-    setTimeout(() => {
-      setConfirmModalVisible(false);
-    }, 2000);
-  };
+  // Estado para controle de loading
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Função para abrir o modal de horário
-  const openTimeModal = (target: typeof timeModalTarget) => {
-    setTimeModalTarget(target);
-    setTimeModalVisible(true);
+  // Função para fazer a reserva do espaço
+  const handleRent = async () => {
+    try {
+      setIsLoading(true);
+
+      // Junta data e hora de check-in
+      const checkIn = new Date(
+        checkInDate.getFullYear(),
+        checkInDate.getMonth(),
+        checkInDate.getDate(),
+        checkInTime.getHours(),
+        checkInTime.getMinutes(),
+        0, 0
+      );
+
+      // Junta data e hora de check-out
+      const checkOut = new Date(
+        checkOutDate.getFullYear(),
+        checkOutDate.getMonth(),
+        checkOutDate.getDate(),
+        checkOutTime.getHours(),
+        checkOutTime.getMinutes(),
+        0, 0
+      );
+
+      // Verifica se a data de check-out é posterior ao check-in
+      if (checkOut <= checkIn) {
+        Alert.alert(
+          "Data Inválida",
+          "A data de check-out deve ser posterior à data de check-in.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      const reservationData = {
+        spaceId: space.id,
+        checkIn: checkIn.toISOString(),
+        checkOut: checkOut.toISOString(),
+        totalValue: calcularTotal()
+      };
+
+      await api.post('/reservations', reservationData);
+      
+      setConfirmModalVisible(true);
+      setTimeout(() => {
+        setConfirmModalVisible(false);
+      }, 2000);
+
+    } catch (error) {
+      Alert.alert(
+        "Erro",
+        "Não foi possível realizar a reserva. Tente novamente mais tarde.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Gerar lista de horários agrupados por período
@@ -327,69 +393,50 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
-  // Função para adicionar nova avaliação
-  const handleAddReview = async () => {
-    try {
-      // Validação apenas das estrelas (obrigatório)
-      if (newRating === 0) {
-        Alert.alert(
-          "Avaliação Incompleta",
-          "Por favor, selecione uma avaliação com as estrelas antes de enviar.",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-
-      // Estrutura da avaliação para envio à API
-      const reviewData = {
-        spaceId: space.id,
-        rating: newRating,
-        comment: newComment.trim() || null, // Permite comentário vazio
-        // TODO: Adicionar userId quando implementar autenticação
-        // userId: currentUser.id,
-      };
-
-      // TODO: Implementar chamada à API
-      // const response = await api.post('/reviews', reviewData);
-      
-      // Por enquanto, apenas adiciona localmente
-      const newReview = {
-        id: reviews.length + 1,
-        user: 'Você', // TODO: Substituir pelo nome do usuário logado
-        rating: reviewData.rating,
-        text: reviewData.comment || '', // Se não houver comentário, usa string vazia
-        expanded: false,
-        avatar: require('../../assets/perfil-login.png'),
-      };
-
-      setReviews([newReview, ...reviews]);
-      
-      // Limpa o formulário
-      setNewRating(0);
-      setNewComment('');
-
-      // Mostra o modal de sucesso
-      setSuccessModalVisible(true);
-      
-      // Esconde o modal após 1.5 segundos
-      setTimeout(() => {
-        setSuccessModalVisible(false);
-      }, 1500);
-
-    } catch (error) {
-      console.error('Erro ao adicionar avaliação:', error);
-      Alert.alert(
-        "Erro",
-        "Não foi possível enviar sua avaliação. Tente novamente mais tarde.",
-        [{ text: "OK" }]
-      );
-    }
+  // Adicionar verificação de dados do espaço
+  const spaceDetails = {
+    amenities: space.amenities || ['Wi-Fi', 'Ar Condicionado', 'Cozinha', 'Estacionamento', 'Acessibilidade'],
+    type: space.type || 'Não especificado',
+    area: space.area || 'Não especificado',
+    capacity: space.capacity || 'Não especificado',
+    bathrooms: space.bathrooms || 'Não especificado',
+    hasWifi: space.hasWifi !== undefined ? space.hasWifi : true,
   };
 
-  // Função para limpar o formulário de avaliação
-  const handleClearReview = () => {
+  // Função para adicionar nova avaliação
+  const handleAddReview = () => {
+    if (newRating === 0) {
+      Alert.alert(
+        "Avaliação Incompleta",
+        "Por favor, selecione uma avaliação com as estrelas antes de enviar.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    const newReview: Review = {
+      id: reviews.length + 1,
+      user: 'Você',
+      rating: newRating,
+      text: newComment.trim() || 'Sem comentário',
+      expanded: false,
+      avatar: require('../../assets/perfil-login.png'),
+    };
+
+    setReviews([newReview, ...reviews]);
     setNewRating(0);
     setNewComment('');
+    setSuccessModalVisible(true);
+    
+    setTimeout(() => {
+      setSuccessModalVisible(false);
+    }, 1500);
+  };
+
+  // Função para abrir o modal de horário
+  const openTimeModal = (target: typeof timeModalTarget) => {
+    setTimeModalTarget(target);
+    setTimeModalVisible(true);
   };
 
   return (
@@ -778,6 +825,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         borderWidth: 1
                       }]} 
                       onPress={handleRent}
+                      disabled={isLoading}
                     >
                       <MaterialIcons 
                         name="check-circle" 
@@ -785,7 +833,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         color={colors.white} 
                         style={{ marginRight: 8 }} 
                       />
-                      <Text style={styles.rentalButtonText}>Confirmar Reserva</Text>
+                      <Text style={styles.rentalButtonText}>
+                        {isLoading ? 'Processando...' : 'Alugar'}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -842,7 +892,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         borderColor: theme.border
                       }
                     ]}
-                    onPress={handleClearReview}
+                    onPress={() => {/* lógica para abrir detalhes do locador */}}
                   >
                     <MaterialIcons
                       name="delete"
@@ -1120,169 +1170,160 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         animationType="fade"
         onRequestClose={() => setDetailsModalVisible(false)}
       >
-        <View style={styles.calendarOverlay}>
-          <View style={[
-            styles.detailsModal, 
-            isDarkMode && { 
-              backgroundColor: theme.card,
-              borderColor: theme.border,
-              borderWidth: 1
-            }
-          ]}> 
-            {/* Header do Modal */}
-            <View style={[
-              styles.detailsModalHeader,
-              isDarkMode && { 
-                backgroundColor: theme.card, 
-                borderBottomColor: theme.border 
-              }
-            ]}>
-              <Text style={[
-                styles.detailsModalTitle,
-                isDarkMode && { color: theme.text }
-              ]}>
-                Detalhes do Espaço
-              </Text>
-              <TouchableOpacity 
-                onPress={() => setDetailsModalVisible(false)}
-                style={styles.detailsModalCloseButton}
-              >
-                <MaterialIcons 
-                  name="close" 
-                  size={24} 
-                  color={isDarkMode ? theme.text : colors.black} 
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* Conteúdo Rolável */}
-            <ScrollView 
-              style={styles.detailsModalScrollView}
-              contentContainerStyle={styles.detailsModalContent}
-              showsVerticalScrollIndicator={false}
-            >
-              {/* Imagem do Espaço */}
-              <View style={styles.detailsModalImageContainer}>
-                <Image
-                  source={space.images[0]}
-                  style={[
-                    styles.detailsModalImage,
-                    isDarkMode && {
-                      borderColor: theme.border
-                    }
-                  ]}
-                  resizeMode="cover"
-                />
-                <View style={styles.detailsModalImageOverlay}>
+        <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
+          <View style={styles.calendarOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[
+                styles.detailsModal, 
+                isDarkMode && { 
+                  backgroundColor: theme.card,
+                  borderColor: theme.border,
+                  borderWidth: 1
+                }
+              ]}> 
+                {/* Header do Modal */}
+                <View style={[
+                  styles.detailsModalHeader,
+                  isDarkMode && { 
+                    backgroundColor: theme.background, 
+                    borderBottomColor: theme.border 
+                  }
+                ]}>
                   <Text style={[
-                    styles.detailsModalImageTitle,
+                    styles.detailsModalTitle,
                     isDarkMode && { color: theme.text }
                   ]}>
-                    {space.title}
+                    Detalhes do Espaço
                   </Text>
-                </View>
-              </View>
-
-              {/* Informações Básicas */}
-              <View style={styles.detailsModalGrid}>
-                {[
-                  { icon: 'crop-square', label: 'Área', value: metragem },
-                  { icon: 'groups', label: 'Capacidade', value: capacidade },
-                  { icon: 'wifi', label: 'WiFi', value: wifi },
-                  { icon: 'wc', label: 'Banheiros', value: banheiros }
-                ].map((item, index) => (
-                  <View key={index} style={[
-                    styles.detailsModalGridItem,
-                    isDarkMode && {
-                      backgroundColor: theme.background,
-                      borderColor: theme.border
-                    }
-                  ]}>
-                    <View style={[
-                      styles.detailsModalIconContainer,
-                      isDarkMode && { 
+                  <TouchableOpacity 
+                    onPress={() => setDetailsModalVisible(false)}
+                    style={[
+                      styles.detailsModalCloseButton,
+                      isDarkMode && {
                         backgroundColor: theme.card,
                         borderColor: theme.border,
                         borderWidth: 1
                       }
-                    ]}>
-                      <MaterialIcons 
-                        name={item.icon as any} 
-                        size={24} 
-                        color={isDarkMode ? theme.blue : colors.blue} 
-                      />
-                    </View>
-                    <Text style={[
-                      styles.detailsModalGridLabel,
-                      isDarkMode && { color: theme.text }
-                    ]}>
-                      {item.label}
-                    </Text>
-                    <Text style={[
-                      styles.detailsModalGridValue,
-                      isDarkMode && { color: theme.text }
-                    ]}>
-                      {item.value}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+                    ]}
+                  >
+                    <MaterialIcons 
+                      name="close" 
+                      size={24} 
+                      color={isDarkMode ? theme.text : colors.black} 
+                    />
+                  </TouchableOpacity>
+                </View>
 
-              {/* Comodidades */}
-              <View style={[
-                styles.detailsModalAmenities,
-                isDarkMode && {
-                  borderTopColor: theme.border
-                }
-              ]}>
-                <Text style={[
-                  styles.detailsModalSectionTitle,
-                  isDarkMode && { color: theme.text }
-                ]}>
-                  Comodidades
-                </Text>
-                <View style={styles.detailsModalGrid}>
-                  {space.amenities && space.amenities.map((amenity, index) => (
-                    <View key={index} style={[
-                      styles.detailsModalGridItem,
-                      isDarkMode && {
-                        backgroundColor: theme.background,
-                        borderColor: theme.border
-                      }
-                    ]}>
-                      <View style={[
-                        styles.detailsModalIconContainer,
-                        isDarkMode && { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border,
-                          borderWidth: 1
+                {/* Conteúdo Rolável */}
+                <ScrollView 
+                  style={styles.detailsModalScrollView}
+                  contentContainerStyle={styles.detailsModalContent}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {/* Informações Básicas */}
+                  <View style={styles.detailsModalGrid}>
+                    {[
+                      { icon: 'crop-square', label: 'Área', value: spaceDetails.area },
+                      { icon: 'groups', label: 'Capacidade', value: spaceDetails.capacity },
+                      { icon: 'wifi', label: 'WiFi', value: spaceDetails.hasWifi ? 'Sim' : 'Não' },
+                      { icon: 'wc', label: 'Banheiros', value: spaceDetails.bathrooms }
+                    ].map((item, index) => (
+                      <View key={index} style={[
+                        styles.detailsModalGridItem,
+                        isDarkMode && {
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
                         }
                       ]}>
-                        <MaterialIcons 
-                          name="check-circle" 
-                          size={24} 
-                          color={isDarkMode ? theme.blue : colors.blue} 
-                        />
+                        <View style={[
+                          styles.detailsModalIconContainer,
+                          isDarkMode && { 
+                            backgroundColor: theme.card,
+                            borderColor: theme.border,
+                            borderWidth: 1
+                          }
+                        ]}>
+                          <MaterialIcons 
+                            name={item.icon as any} 
+                            size={24} 
+                            color={isDarkMode ? theme.blue : colors.blue} 
+                          />
+                        </View>
+                        <Text style={[
+                          styles.detailsModalGridLabel,
+                          isDarkMode && { color: theme.text }
+                        ]}>
+                          {item.label}
+                        </Text>
+                        <Text style={[
+                          styles.detailsModalGridValue,
+                          isDarkMode && { color: theme.text }
+                        ]}>
+                          {item.value}
+                        </Text>
                       </View>
-                      <Text style={[
-                        styles.detailsModalGridLabel,
-                        isDarkMode && { color: theme.text }
-                      ]}>
-                        Comodidade
-                      </Text>
-                      <Text style={[
-                        styles.detailsModalGridValue,
-                        isDarkMode && { color: theme.text }
-                      ]}>
-                        {amenity}
-                      </Text>
+                    ))}
+                  </View>
+
+                  {/* Comodidades */}
+                  <View style={[
+                    styles.detailsModalAmenities,
+                    isDarkMode && { 
+                      borderTopColor: theme.border,
+                      backgroundColor: theme.background
+                    }
+                  ]}>
+                    <Text style={[
+                      styles.detailsModalSectionTitle,
+                      isDarkMode && { color: theme.text }
+                    ]}>
+                      Comodidades ({space.amenities?.length || 0})
+                    </Text>
+                    
+                    <View style={styles.detailsModalAmenitiesList}>
+                      {space.amenities && Array.isArray(space.amenities) && space.amenities.length > 0 ? (
+                        space.amenities.map((amenity, index) => (
+                          <View 
+                            key={`${amenity}-${index}`}
+                            style={[
+                              styles.detailsModalAmenityItem,
+                              isDarkMode && {
+                                backgroundColor: theme.background,
+                                borderColor: theme.border
+                              }
+                            ]}
+                          >
+                            <MaterialIcons 
+                              name="check-circle" 
+                              size={24} 
+                              color={isDarkMode ? theme.blue : colors.blue} 
+                              style={{ marginRight: 8 }} 
+                            />
+                            <Text style={[
+                              styles.detailsModalAmenityText,
+                              isDarkMode && { color: theme.text }
+                            ]}>
+                              {amenity}
+                            </Text>
+                          </View>
+                        ))
+                      ) : (
+                        <Text style={[
+                          styles.detailsModalAmenityText,
+                          isDarkMode && { color: theme.text }
+                        ]}>
+                          {!space.amenities ? 'Carregando comodidades...' : 
+                           !Array.isArray(space.amenities) ? 'Erro ao carregar comodidades' :
+                           'Nenhuma comodidade disponível'}
+                        </Text>
+                      )}
                     </View>
-                  ))}
-                </View>
+                  </View>
+                </ScrollView>
               </View>
-            </ScrollView>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
   );

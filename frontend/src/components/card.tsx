@@ -8,25 +8,59 @@ import { cardStyles as styles } from '../styles/componentStyles/cardStyles';
 import { colors } from '~/styles/globalStyles/colors';
 import { NavigationProps } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFavorites } from '../hooks/useFavorites';
 
 interface CardProps {
-  id: string;
-  images: any[];
-  title: string;
-  address: string;
-  price: string;
-  rating: number;
-  reviews: number;
+  _id: string;
+  image_url: string[];
+  space_name: string;
+  location: string;
+  price_per_hour: number;
+  space_description: string;
+  space_amenities: string[];
+  space_type: string;
+  max_people: number;
+  week_days: string[];
+  opening_time: string;
+  closing_time: string;
+  space_rules: string[];
+  owner_name: string;
+  owner_phone: string;
+  owner_email: string;
 }
 
-const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, reviews }) => {
+const Card: React.FC<CardProps> = ({ 
+  _id,
+  image_url = [],
+  space_name,
+  location,
+  price_per_hour,
+  space_description = '',
+  space_amenities = [],
+  space_type = '',
+  max_people = 0,
+  week_days = [],
+  opening_time = '',
+  closing_time = '',
+  space_rules = [],
+  owner_name = '',
+  owner_phone = '',
+  owner_email = ''
+}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProps>();
   const { theme, isDarkMode } = useTheme();
+  const { favorites, toggleFavorite } = useFavorites();
+
+  const isFavorite = favorites.some(fav => fav.spaceId._id === _id);
+
+  // Garantir que sempre haja pelo menos uma imagem válida
+  const safeImages = image_url && image_url.length > 0
+    ? image_url.map(url => ({ uri: url }))
+    : [{ uri: 'https://via.placeholder.com/350x180?text=Sem+imagem' }];
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -35,7 +69,7 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
   };
 
   const scrollToIndex = (index: number) => {
-    const newIndex = Math.max(0, Math.min(index, images.length - 1));
+    const newIndex = Math.max(0, Math.min(index, safeImages.length - 1));
     scrollRef.current?.scrollTo({
       x: newIndex * CARD_WIDTH,
       animated: true
@@ -54,33 +88,41 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
   };
 
   useEffect(() => {
-    if (images.length <= 1 || isAutoPlayPaused || !isFocused) return;
+    if (safeImages.length <= 1 || isAutoPlayPaused || !isFocused) return;
     const timer = setInterval(() => {
-      scrollToIndex((activeIndex + 1) % images.length);
+      scrollToIndex((activeIndex + 1) % safeImages.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [activeIndex, isAutoPlayPaused, images.length, isFocused]);
+  }, [activeIndex, isAutoPlayPaused, safeImages.length, isFocused]);
 
   const handleCardPress = () => {
     navigation.navigate('SpaceDetails', {
       space: {
-        id,
-        images,
-        title,
-        address,
-        price,
-        rating,
-        reviews,
-        description: 'Este é um espaço incrível para seu evento. Com localização privilegiada e todas as comodidades necessárias para garantir o sucesso do seu evento.',
-        amenities: [
-          'Estacionamento',
-          'Wi-Fi',
-          'Ar condicionado',
-          'Cozinha',
-          'Banheiros'
-        ]
+        id: _id,
+        images: safeImages,
+        title: space_name,
+        address: location,
+        price: `R$ ${price_per_hour.toLocaleString('pt-BR')}`,
+        rating: 5.0,
+        reviews: 100,
+        description: space_description,
+        amenities: space_amenities,
+        type: space_type,
+        area: `${max_people}m²`,
+        capacity: `${max_people} pessoas`,
+        bathrooms: '2',
+        hasWifi: space_amenities.includes('Wi-Fi')
       }
     });
+  };
+
+  const handleFavoritePress = async (e: any) => {
+    e.stopPropagation(); // Previne que o card seja clicado
+    try {
+      await toggleFavorite(_id);
+    } catch (error) {
+      console.error('Erro ao favoritar:', error);
+    }
   };
 
   return (
@@ -98,95 +140,72 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
       activeOpacity={0.9}
     >
       {/* Carrossel de Imagens */}
-      {images.length > 1 ? (
-        <View>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            onMomentumScrollEnd={handleMomentumScrollEnd}
-            ref={scrollRef}
-            scrollEventThrottle={16}
-            onTouchStart={() => setIsAutoPlayPaused(true)}
-            onTouchEnd={() => setIsAutoPlayPaused(false)}
-            decelerationRate="fast"
-            snapToInterval={CARD_WIDTH}
-            snapToAlignment="center"
-          >
-            {images.map((img, index) => (
-              <Image
-                key={index}
-                source={img}
-                style={{ width: CARD_WIDTH, height: 180 }}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
+      <View>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          ref={scrollRef}
+          scrollEventThrottle={16}
+          onTouchStart={() => setIsAutoPlayPaused(true)}
+          onTouchEnd={() => setIsAutoPlayPaused(false)}
+          decelerationRate="fast"
+          snapToInterval={CARD_WIDTH}
+          snapToAlignment="center"
+        >
+          {safeImages.map((img, index) => (
+            <Image
+              key={index}
+              source={{ uri: img.uri }}
+              style={{ width: CARD_WIDTH, height: 180 }}
+              resizeMode="cover"
+            />
+          ))}
+        </ScrollView>
 
-          {/* Setas de navegação */}
-          <TouchableOpacity
-            style={[styles.arrow, styles.arrowLeft]}
-            onPress={() => {
-              setIsAutoPlayPaused(true);
-              scrollToIndex(activeIndex - 1);
-              setTimeout(() => setIsAutoPlayPaused(false), 5000);
-            }}
-          >
-            <Feather name="chevron-left" size={24} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.arrow, styles.arrowRight]}
-            onPress={() => {
-              setIsAutoPlayPaused(true);
-              scrollToIndex(activeIndex + 1);
-              setTimeout(() => setIsAutoPlayPaused(false), 5000);
-            }}
-          >
-            <Feather name="chevron-right" size={24} color="white" />
-          </TouchableOpacity>
-
-          {/* Dots */}
-          <View style={styles.dotsContainer}>
-            {images.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === activeIndex ? styles.dotActive : styles.dotInactive
-                ]}
-              />
-            ))}
-          </View>
-
-          {/* Contador de imagens */}
-          <View style={styles.counter}>
-            <Text style={styles.counterText}>
-              {activeIndex + 1}/{images.length}
-            </Text>
-          </View>
+        {/* Dots */}
+        <View style={styles.dotsContainer}>
+          {safeImages.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                index === activeIndex ? styles.dotActive : styles.dotInactive
+              ]}
+            />
+          ))}
         </View>
-      ) : (
-        <Image
-          source={images[0]}
-          style={{ width: CARD_WIDTH, height: 180 }}
-          resizeMode="cover"
-        />
-      )}
+
+        {/* Contador de imagens */}
+        <View style={styles.counter}>
+          <Text style={styles.counterText}>
+            {activeIndex + 1}/{safeImages.length}
+          </Text>
+        </View>
+      </View>
 
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>{title}</Text>
-            <Text style={[styles.address, { color: theme.gray }]} numberOfLines={1}>{address}</Text>
+            <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
+              {space_name || 'Sem nome'}
+            </Text>
+            <Text style={[styles.address, { color: theme.gray }]} numberOfLines={1}>
+              {typeof location === 'string' ? location : 'Endereço não disponível'}
+            </Text>
+            {space_type && (
+              <Text style={[styles.spaceType, { color: theme.gray }]}>{space_type}</Text>
+            )}
           </View>
 
-          <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
+          <TouchableOpacity onPress={handleFavoritePress}>
             {isFavorite ? (
               <MaterialIcons
                 name="favorite"
                 size={21}
-                color={colors.blue}
+                color={colors.error}
               />
             ) : (
               <MaterialIcons
@@ -198,17 +217,22 @@ const Card: React.FC<CardProps> = ({ id, images, title, address, price, rating, 
           </TouchableOpacity>
         </View>
 
-        <View style={styles.priceContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-            <Text style={[styles.price, { color: theme.text }]}>{price}</Text>
-            <Text style={[styles.priceHour, { color: theme.gray }]}>por hora</Text>
-          </View>
+        {space_description && (
+          <Text style={[styles.description, { color: theme.gray }]} numberOfLines={2}>
+            {space_description}
+          </Text>
+        )}
 
-          <View style={styles.ratingRow}>
-            <MaterialIcons name="star" size={18} color="#F59E0B" />
-            <Text style={[styles.rating, { color: theme.text }]}>{rating.toFixed(2)}</Text>
-            <Text style={[styles.reviews, { color: theme.gray }]}>({reviews} avaliações)</Text>
-          </View>
+        <View style={styles.priceContainer}>
+          <Text style={[styles.price, { color: theme.blue }]}>
+            {price_per_hour ? `R$ ${price_per_hour.toLocaleString('pt-BR')}/hora` : 'Preço não disponível'}
+          </Text>
+        </View>
+
+        <View style={styles.ratingRow}>
+          <MaterialIcons name="star" size={16} color="#F59E0B" />
+          <Text style={[styles.rating, { color: theme.text }]}>5.0</Text>
+          <Text style={[styles.reviews, { color: theme.gray }]}>(100 avaliações)</Text>
         </View>
       </View>
     </TouchableOpacity>

@@ -1,11 +1,19 @@
+export interface Location {
+  formatted_address: string;
+  place_id: string;
+}
+
 export interface BaseCard {
+  _id: string;
   id: string;
-  images: any[];
-  title: string;
-  address: string;
-  price: string;
-  rating: number;
-  reviews: number;
+  space_name: string;
+  location: string | Location;
+  price_per_hour: number;
+  image_url: string[];
+  space_type: string;
+  space_description: string;
+  featured?: boolean;
+  promo?: boolean;
 }
 
 export interface PromoCard extends BaseCard {

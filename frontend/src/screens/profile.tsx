@@ -11,6 +11,7 @@ import BaseInput from '../components/inputs/baseInput';
 import { NotificationButton } from '../components/NotificationButton';
 import { RootStackParamList } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -23,10 +24,11 @@ type MenuItem = {
 
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
+  const { theme, isDarkMode } = useTheme();
+  const { signOut } = useAuth();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [editedAvatar, setEditedAvatar] = useState<string | null>(null);
-  const { theme, isDarkMode } = useTheme();
 
   // Dados do usuário (simulados)
   const [user, setUser] = useState({
@@ -132,11 +134,16 @@ export default function Profile() {
     }
   ];
 
-  const handleLogout = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Welcome' }],
-    });
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Welcome' }],
+      });
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
   };
 
   return (
