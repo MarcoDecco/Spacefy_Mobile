@@ -1,8 +1,12 @@
 import React from 'react';
-import { View, FlatList, ViewStyle, Text } from 'react-native';
+import { View, FlatList, ViewStyle, Text, Dimensions } from 'react-native';
 import { CARD_WIDTH } from '../styles/homeStyles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
+
+const { width: windowWidth } = Dimensions.get('window');
+const CARD_MARGIN = 8;
+const CARD_TOTAL_WIDTH = CARD_WIDTH + (CARD_MARGIN * 2);
 
 interface CardListProps<T> {
   data: T[];
@@ -31,7 +35,14 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
   const safeData = Array.isArray(data) ? data : [];
 
   const renderItem = ({ item }: { item: T }) => (
-    <View key={String(item.id ?? item._id)} style={{ marginHorizontal: 8 }}>
+    <View 
+      key={String(item.id ?? item._id)} 
+      style={{ 
+        marginHorizontal: CARD_MARGIN,
+        alignItems: 'center',
+        width: CARD_WIDTH
+      }}
+    >
       {renderCard(item)}
     </View>
   );
@@ -41,9 +52,31 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
   console.log('CardList data:', safeData);
 
   return (
-    <View style={style}>
-      {title && <Text style={[pageTexts.titleCardList, { color: theme.text }]}>{title}</Text>}
-      {subtitle && <Text style={[pageTexts.subtitleCardList, { color: theme.text }]}>{subtitle}</Text>}
+    <View style={[style, { alignItems: 'center' }]}>
+      {title && (
+        <Text style={[
+          pageTexts.titleCardList, 
+          { 
+            color: theme.text,
+            textAlign: 'center',
+            marginBottom: 8
+          }
+        ]}>
+          {title}
+        </Text>
+      )}
+      {subtitle && (
+        <Text style={[
+          pageTexts.subtitleCardList, 
+          { 
+            color: theme.text,
+            textAlign: 'center',
+            marginBottom: 16
+          }
+        ]}>
+          {subtitle}
+        </Text>
+      )}
 
       <FlatList
         data={safeData}
@@ -51,11 +84,17 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
         horizontal={horizontal}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
-          horizontal ? { paddingHorizontal: 8 } : {},
+          horizontal ? { 
+            paddingHorizontal: (windowWidth - CARD_TOTAL_WIDTH) / 2,
+            alignItems: 'center'
+          } : {
+            paddingHorizontal: 16,
+            alignItems: 'center'
+          },
           contentContainerStyle,
         ]}
-        snapToInterval={horizontal ? CARD_WIDTH + 16 : undefined}
-        snapToAlignment={horizontal ? 'center' : undefined}
+        snapToInterval={horizontal ? CARD_TOTAL_WIDTH : undefined}
+        snapToAlignment="center"
         decelerationRate="fast"
         renderItem={renderItem}
         ListEmptyComponent={ListEmptyComponent}

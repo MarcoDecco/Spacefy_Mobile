@@ -8,6 +8,7 @@ import { cardStyles as styles } from '../styles/componentStyles/cardStyles';
 import { colors } from '~/styles/globalStyles/colors';
 import { NavigationProps } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
+import { useFavorites } from '../hooks/useFavorites';
 
 interface CardProps {
   _id: string;
@@ -48,11 +49,13 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const isFocused = useIsFocused();
   const navigation = useNavigation<NavigationProps>();
   const { theme, isDarkMode } = useTheme();
+  const { favorites, toggleFavorite } = useFavorites();
+
+  const isFavorite = favorites.some(fav => fav.spaceId._id === _id);
 
   // Garantir que sempre haja pelo menos uma imagem válida
   const safeImages = image_url && image_url.length > 0
@@ -111,6 +114,15 @@ const Card: React.FC<CardProps> = ({
         hasWifi: space_amenities.includes('Wi-Fi')
       }
     });
+  };
+
+  const handleFavoritePress = async (e: any) => {
+    e.stopPropagation(); // Previne que o card seja clicado
+    try {
+      await toggleFavorite(_id);
+    } catch (error) {
+      console.error('Erro ao favoritar:', error);
+    }
   };
 
   return (
@@ -188,12 +200,12 @@ const Card: React.FC<CardProps> = ({
             )}
           </View>
 
-          <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
+          <TouchableOpacity onPress={handleFavoritePress}>
             {isFavorite ? (
               <MaterialIcons
                 name="favorite"
                 size={21}
-                color={colors.blue}
+                color={colors.error}
               />
             ) : (
               <MaterialIcons
