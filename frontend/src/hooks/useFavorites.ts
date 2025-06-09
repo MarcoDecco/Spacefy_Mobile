@@ -57,7 +57,7 @@ export const useFavorites = () => {
       console.log('🔍 Buscando favoritos para o usuário:', userId);
       console.log('🌐 URL da API:', api.defaults.baseURL);
       
-      const response = await api.get(`/users/${userId}/favorites`, {
+      const response = await api.get(`/users/favorites/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
