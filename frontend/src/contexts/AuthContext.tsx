@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
-import authService from '../services/authService';
+import { authService } from '../services/authService';
 
 interface JwtPayload {
   sub: string;

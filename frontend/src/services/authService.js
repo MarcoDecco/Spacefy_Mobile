@@ -16,7 +16,7 @@ export const authService = {
     return response.data;
   },
 
-  uptade: async (userId, userData) => {
+  update: async (userId, userData) => {
     const token = await AsyncStorage.getItem("token"); // Recupera o token salvo
     const response = await api.put(
       `/users/updateUser/${userId}`,
