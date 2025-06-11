@@ -55,7 +55,7 @@ const Card: React.FC<CardProps> = ({
   const { theme, isDarkMode } = useTheme();
   const { favorites, toggleFavorite } = useFavorites();
 
-  const isFavorite = favorites.some(fav => fav.spaceId._id === _id);
+const isFavorite = favorites.some(fav => fav.spaceId && fav.spaceId._id === _id);
 
   // Garantir que sempre haja pelo menos uma imagem válida
   const safeImages = image_url && image_url.length > 0
