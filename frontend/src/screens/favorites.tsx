@@ -71,12 +71,16 @@ export default function Favorites() {
   const filteredFavorites = favorites.filter(favorite => {
     if (!favorite.spaceId) return false;
 
-    const matchesSearch = 
-      favorite.spaceId.space_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      favorite.spaceId.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const space = favorite.spaceId;
+    const searchLower = searchQuery.toLowerCase();
 
-    const matchesPrice = filterByPrice(favorite.spaceId.price_per_hour, filters.priceRange);
-    const matchesType = filterByType(favorite.spaceId.space_type, filters.spaceType);
+    const matchesSearch = searchQuery === '' || (
+      (typeof space.space_name === 'string' && space.space_name.toLowerCase().includes(searchLower)) ||
+      (typeof space.location === 'string' && space.location.toLowerCase().includes(searchLower))
+    );
+
+    const matchesPrice = filterByPrice(space.price_per_hour, filters.priceRange);
+    const matchesType = filterByType(space.space_type, filters.spaceType);
     const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
