@@ -1,138 +1,76 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { profileStyles as styles } from '../styles/profileStyles';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import espacoImg from '../../assets/mansao.png';
-import { useState } from 'react';
-import { colors } from '../styles/globalStyles/colors';
-import * as ImagePicker from 'expo-image-picker';
-import BaseInput from '../components/inputs/baseInput';
-import { NotificationButton } from '../components/NotificationButton';
-import { RootStackParamList } from '../navigation/types';
-import { useTheme } from '../contexts/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import * as ImagePicker from 'expo-image-picker';
+import { profileStyles as styles } from '../styles/profileStyles';
+import { colors } from '../styles/globalStyles/colors';
+import { RootStackParamList } from '../navigation/types';
+import { NotificationButton } from '../components/NotificationButton';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-type MenuItem = {
-  id: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  onPress: () => void;
-};
-
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
-  const { theme, isDarkMode } = useTheme();
-  const { signOut } = useAuth();
-  const [showEditProfile, setShowEditProfile] = useState(false);
-  const [editedName, setEditedName] = useState('');
-  const [editedAvatar, setEditedAvatar] = useState<string | null>(null);
-
-  // Dados do usuário (simulados)
-  const [user, setUser] = useState({
-    name: 'João Silva',
-    email: 'joao.silva@email.com',
-    avatar: { uri: 'https://randomuser.me/api/portraits/men/32.jpg' },
-    stats: {
-      reservas: 12,
-      favoritos: 8,
-      avaliacoes: 15
-    }
+  const { user, updateUser, signOut } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState({
+    name: '',
+    surname: '',
+    telephone: '',
   });
+  const [loading, setLoading] = useState(false);
 
-  // Dados simulados de notificações
-  const notifications = [
-    {
-      id: '1',
-      title: 'Nova reserva confirmada',
-      message: 'Sua reserva para o espaço "Casa na Praia" foi confirmada',
-      time: '5 min atrás',
-      read: false
-    },
-    {
-      id: '2',
-      title: 'Lembrete de pagamento',
-      message: 'Não se esqueça de realizar o pagamento da sua próxima reserva',
-      time: '1 hora atrás',
-      read: true
-    },
-    {
-      id: '3',
-      title: 'Avaliação recebida',
-      message: 'Você recebeu uma nova avaliação do seu espaço',
-      time: '2 horas atrás',
-      read: true
+  useEffect(() => {
+    if (user) {
+      console.log('👤 Dados do usuário carregados:', user);
+      setEditedUser({
+        name: user.name || '',
+        surname: user.surname || '',
+        telephone: user.telephone || '',
+      });
     }
-  ];
+  }, [user]);
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Desculpe', 'Precisamos de permissão para acessar suas fotos!');
-      return;
-    }
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setEditedAvatar(result.assets[0].uri);
+  const handleSaveProfile = async () => {
+    try {
+      setLoading(true);
+      console.log('📝 Salvando perfil:', editedUser);
+      await updateUser(editedUser);
+      setIsEditing(false);
+      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao salvar perfil:', error);
+      Alert.alert('Erro', 'Não foi possível atualizar o perfil. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSaveProfile = () => {
-    setUser(prev => ({
-      ...prev,
-      name: editedName || prev.name,
-      avatar: editedAvatar ? { uri: editedAvatar } : prev.avatar
-    }));
-    setShowEditProfile(false);
-    setEditedName('');
-    setEditedAvatar(null);
-  };
+  const handlePickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-  const menuItems: MenuItem[] = [
-    {
-      id: '1',
-      icon: 'person-outline',
-      title: 'Editar Perfil',
-      onPress: () => {
-        setEditedName(user.name);
-        setShowEditProfile(true);
+      if (!result.canceled) {
+        console.log('🖼️ Imagem selecionada:', result.assets[0].uri);
+        // Aqui você pode implementar o upload da imagem para o servidor
       }
-    },
-    {
-      id: '2',
-      icon: 'calendar-outline',
-      title: 'Minhas Reservas',
-      onPress: () => console.log('Minhas Reservas')
-    },
-    {
-      id: '3',
-      icon: 'heart-outline',
-      title: 'Favoritos',
-      onPress: () => console.log('Favoritos')
-    },
-    {
-      id: '4',
-      icon: 'star-outline',
-      title: 'Minhas Avaliações',
-      onPress: () => console.log('Minhas Avaliações')
-    },
-    {
-      id: '5',
-      icon: 'settings-outline',
-      title: 'Configurações',
-      onPress: () => navigation.navigate('Settings')
+    } catch (error) {
+      console.error('❌ Erro ao selecionar imagem:', error);
+      Alert.alert('Erro', 'Não foi possível selecionar a imagem. Tente novamente.');
     }
-  ];
+  };
 
   const handleLogout = async () => {
     try {
@@ -142,80 +80,107 @@ export default function Profile() {
         routes: [{ name: 'Welcome' }],
       });
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('❌ Erro ao fazer logout:', error);
     }
   };
 
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      {/* Header com informações do perfil */}
+    <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <NotificationButton notifications={notifications} />
+          <NotificationButton notifications={[]} />
         </View>
         <View style={styles.profileInfo}>
-          <View style={[styles.avatarContainer, isDarkMode && { backgroundColor: theme.background }]}>
+          <View style={styles.avatarContainer}>
             <Image
-              source={user.avatar}
+              source={user.avatar ? { uri: user.avatar } : { uri: 'https://via.placeholder.com/120' }}
               style={styles.avatar}
-              resizeMode="cover"
             />
           </View>
-          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.name}>{user.name} {user.surname}</Text>
           <Text style={styles.email}>{user.email}</Text>
-
-          {/* Estatísticas */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.stats.reservas}</Text>
-              <Text style={styles.statLabel}>Reservas</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.stats.favoritos}</Text>
-              <Text style={styles.statLabel}>Favoritos</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.stats.avaliacoes}</Text>
-              <Text style={styles.statLabel}>Avaliações</Text>
-            </View>
-          </View>
+          {user.telephone && <Text style={styles.telephone}>{user.telephone}</Text>}
         </View>
       </View>
 
-      {/* Modal de Edição de Perfil */}
+      <ScrollView style={styles.content}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
+          <Ionicons name="person-outline" size={24} color={colors.black} />
+          <Text style={styles.menuItemText}>Editar Perfil</Text>
+          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyReservations')}>
+          <Ionicons name="calendar" size={24} color={colors.black} />
+          <Text style={styles.menuItemText}>Minhas Reservas</Text>
+          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Favorites')}>
+          <Ionicons name="heart-outline" size={24} color={colors.black} />
+          <Text style={styles.menuItemText}>Favoritos</Text>
+          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyReviews')}>
+          <Ionicons name="star-outline" size={24} color={colors.black} />
+          <Text style={styles.menuItemText}>Minhas Avaliações</Text>
+          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
+          <Ionicons name="settings-outline" size={24} color={colors.black} />
+          <Text style={styles.menuItemText}>Configurações</Text>
+          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color={colors.error} />
+          <Text style={styles.logoutButtonText}>Sair</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
       <Modal
-        visible={showEditProfile}
-        transparent={true}
+        visible={isEditing}
         animationType="slide"
-        onRequestClose={() => setShowEditProfile(false)}
+        transparent={true}
+        onRequestClose={() => setIsEditing(false)}
       >
         <TouchableOpacity 
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPress={() => setShowEditProfile(false)}
+          onPress={() => setIsEditing(false)}
         >
           <TouchableOpacity 
             activeOpacity={1} 
-            style={[styles.editProfileModal, isDarkMode && { backgroundColor: theme.background }]}
+            style={styles.editProfileModal}
             onPress={(e) => e.stopPropagation()}
           >
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, isDarkMode && { color: theme.text }]}>Editar Perfil</Text>
+              <Text style={styles.modalTitle}>Editar Perfil</Text>
               <TouchableOpacity 
-                onPress={() => setShowEditProfile(false)}
+                onPress={() => setIsEditing(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color={isDarkMode ? theme.text : colors.black} />
+                <Ionicons name="close" size={24} color={colors.black} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.editProfileContent}>
               <TouchableOpacity 
                 style={styles.avatarEditContainer}
-                onPress={pickImage}
+                onPress={handlePickImage}
               >
                 <Image
-                  source={editedAvatar ? { uri: editedAvatar } : user.avatar}
+                  source={user.avatar ? { uri: user.avatar } : { uri: 'https://via.placeholder.com/120' }}
                   style={styles.avatarEdit}
                 />
                 <View style={styles.avatarEditOverlay}>
@@ -223,73 +188,50 @@ export default function Profile() {
                 </View>
               </TouchableOpacity>
 
-              <BaseInput
-                label="Nome"
-                value={editedName}
-                onChangeText={setEditedName}
-                placeholder="Seu nome"
-              />
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Nome</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedUser.name}
+                  onChangeText={(text) => setEditedUser(prev => ({ ...prev, name: text }))}
+                  placeholder="Seu nome"
+                />
+              </View>
 
-              <TouchableOpacity 
-                style={styles.saveButton}
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Sobrenome</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedUser.surname}
+                  onChangeText={(text) => setEditedUser(prev => ({ ...prev, surname: text }))}
+                  placeholder="Seu sobrenome"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Telefone</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editedUser.telephone}
+                  onChangeText={(text) => setEditedUser(prev => ({ ...prev, telephone: text }))}
+                  placeholder="Seu telefone"
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
                 onPress={handleSaveProfile}
+                disabled={loading}
               >
-                <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+                <Text style={styles.saveButtonText}>
+                  {loading ? 'Salvando...' : 'Salvar Alterações'}
+                </Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
-      {/* Conteúdo */}
-      <ScrollView 
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Banner promocional */}
-        <View style={styles.bannerContainer}>
-          <View style={{ flex: 2 }}>
-            <Text style={styles.bannerTitle}>Anuncie seu Espaço na Spacefy</Text>
-            <Text style={styles.bannerSubtitle}>
-              Veja fica mais fácil anunciar o seu local para aluguel.
-            </Text>
-            <TouchableOpacity style={styles.bannerButton}>
-              <Text style={styles.bannerButtonText}>Anunciar Espaço</Text>
-            </TouchableOpacity>
-          </View>
-          <Image source={espacoImg} style={styles.bannerImage} resizeMode="contain" />
-        </View>
-
-        {/* Menu de opções */}
-        <View style={[styles.section, isDarkMode && { backgroundColor: theme.card }]}>
-          {menuItems.map((item, index) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.menuItem,
-                index === menuItems.length - 1 && styles.menuItemLast,
-                isDarkMode && { borderBottomColor: theme.border }
-              ]}
-              onPress={item.onPress}
-            >
-              <View style={styles.menuIcon}>
-                <Ionicons name={item.icon} size={20} color={colors.blue} />
-              </View>
-              <Text style={[styles.menuText, isDarkMode && { color: theme.text }]}>{item.title}</Text>
-              <Ionicons name="chevron-forward" size={20} style={[styles.menuArrow, isDarkMode && { color: theme.text }]} />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Botão de logout */}
-        <TouchableOpacity 
-          style={[styles.logoutButton, isDarkMode && { backgroundColor: theme.card }]}
-          onPress={handleLogout}
-        >
-          <Ionicons name="log-out-outline" size={24} color="#DC2626" />
-          <Text style={styles.logoutText}>Sair</Text>
-        </TouchableOpacity>
-      </ScrollView>
     </View>
   );
 }

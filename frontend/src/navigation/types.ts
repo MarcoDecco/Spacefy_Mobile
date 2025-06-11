@@ -25,8 +25,13 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   MainApp: undefined;
+  Home: undefined;
+  Profile: undefined;
   SpaceDetails: SpaceDetailsParams;
   Settings: undefined;
+  MyReservations: undefined;
+  Favorites: undefined;
+  MyReviews: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

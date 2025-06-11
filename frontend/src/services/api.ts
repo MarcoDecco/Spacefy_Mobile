@@ -16,7 +16,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const token = await AsyncStorage.getItem('@Spacefy:token');
+      const token = await AsyncStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -63,7 +63,7 @@ api.interceptors.response.use(
         case 401:
           // Token expirado ou inválido
           console.error('Não autorizado. Por favor, faça login novamente.');
-          await AsyncStorage.removeItem('@Spacefy:token');
+          await AsyncStorage.removeItem('token');
           // Aqui você pode adicionar uma lógica para redirecionar para a tela de login
           break;
         case 404:

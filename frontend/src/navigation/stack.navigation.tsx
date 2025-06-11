@@ -6,6 +6,9 @@ import Login from '../screens/login';
 import Register from '../screens/register';
 import SpaceDetails from '../screens/spaceDetails';
 import Settings from '../screens/settings';
+import MyReservations from '../screens/myReservations';
+import Favorites from '../screens/favorites';
+import MyReviews from '../screens/myReviews';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -30,6 +33,51 @@ export default function StackNavigation() {
         component={Settings}
         options={{
           headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="MyReservations"
+        component={MyReservations}
+        options={{
+          headerShown: true,
+          title: 'Minhas Reservas',
+          headerStyle: {
+            backgroundColor: '#fff',
+          },
+          headerTintColor: '#333',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="Favorites"
+        component={Favorites}
+        options={{
+          headerShown: true,
+          title: 'Favoritos',
+          headerStyle: {
+            backgroundColor: '#fff',
+          },
+          headerTintColor: '#333',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      />
+      <Stack.Screen
+        name="MyReviews"
+        component={MyReviews}
+        options={{
+          headerShown: true,
+          title: 'Minhas Avaliações',
+          headerStyle: {
+            backgroundColor: '#fff',
+          },
+          headerTintColor: '#333',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
         }}
       />
     </Stack.Navigator>

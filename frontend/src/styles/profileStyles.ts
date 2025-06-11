@@ -4,7 +4,7 @@ import { colors } from './globalStyles/colors';
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.light_gray,
+    backgroundColor: colors.white,
   },
 
   header: {
@@ -13,12 +13,25 @@ export const profileStyles = StyleSheet.create({
     paddingBottom: 30,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
-    boxShadow: '0 6px 8px 0 rgba(0, 0, 0, 0.2)',
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
 
   profileInfo: {
     alignItems: 'center',
-    paddingHorizontal: 20,
   },
 
   avatarContainer: {
@@ -26,57 +39,46 @@ export const profileStyles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     backgroundColor: colors.white,
-    padding: 4,
-    boxShadow: '0 4px 10px 0 rgba(0, 0, 0, 0.2)',
+    padding: 3,
+    marginBottom: 15,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 
   avatar: {
     width: '100%',
     height: '100%',
-    borderRadius: 100,
+    borderRadius: 60,
   },
 
   name: {
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.white,
-    marginTop: 16,
+    marginBottom: 5,
   },
 
   email: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: 4,
-  },
-
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 20,
-    paddingHorizontal: 40,
-    width: '100%',
-  },
-  
-  statItem: {
-    alignItems: 'center',
-    minWidth: 80,
-  },
-
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
     color: colors.white,
+    marginBottom: 5,
   },
 
-  statLabel: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-    marginTop: 2,
+  telephone: {
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 15,
   },
 
   content: {
     flex: 1,
-    paddingTop: 20,
+    padding: 20,
   },
   
   section: {
@@ -95,55 +97,57 @@ export const profileStyles = StyleSheet.create({
     marginBottom: 15,
   },
 
+  menuContainer: {
+    padding: 20,
+  },
+
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.light_gray,
+    padding: 15,
+    backgroundColor: colors.white,
+    borderRadius: 10,
+    marginBottom: 10,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
 
-  menuItemLast: {
-    borderBottomWidth: 0,
-  },
-
-  menuIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.light_gray,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-
-  menuText: {
-    fontSize: 16,
-    color: colors.black,
+  menuItemText: {
     flex: 1,
-  },
-
-  menuArrow: {
-    color: '#999',
+    fontSize: 16,
+    marginLeft: 15,
+    color: colors.black,
   },
 
   logoutButton: {
-    backgroundColor: colors.white,
-    borderRadius: 20,
-    marginHorizontal: 20,
-    marginBottom: 40,
-    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 2px 8px 1px rgba(0, 0, 0, 0.2)',
+    padding: 15,
+    backgroundColor: colors.white,
+    borderRadius: 10,
+    marginTop: 20,
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2,
   },
 
-  logoutText: {
+  logoutButtonText: {
+    color: colors.error,
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#DC2626',
-    marginLeft: 8,
+    marginLeft: 10,
   },
   
   bannerContainer: {
@@ -190,13 +194,6 @@ export const profileStyles = StyleSheet.create({
     flex: 1,
   },
 
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-
   notificationIconContainer: {
     position: 'relative',
   },
@@ -228,79 +225,23 @@ export const profileStyles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-
-  notificationModal: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    height: '80%',
-    padding: 20,
-  },
-
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.light_gray,
-  },
-
-  notificationTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.black,
-  },
-
-  closeButton: {
-    padding: 8,
-  },
-
-  notificationList: {
-    flex: 1,
-  },
-
-  notificationItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.light_gray,
-  },
-
-  unreadNotification: {
-    backgroundColor: 'rgba(30, 172, 227, 0.1)',
-  },
-
-  notificationContent: {
-    flex: 1,
-  },
-
-  notificationItemTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.black,
-    marginBottom: 5,
-  },
-
-  notificationItemMessage: {
-    fontSize: 14,
-    color: colors.black,
-    marginBottom: 5,
-  },
-
-  notificationItemTime: {
-    fontSize: 12,
-    color: '#666',
   },
 
   editProfileModal: {
+    width: '90%',
     backgroundColor: colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
     padding: 20,
-    maxHeight: '80%',
+    shadowColor: colors.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
 
   modalHeader: {
@@ -308,15 +249,16 @@ export const profileStyles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.light_gray,
   },
 
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: colors.black,
+  },
+
+  closeButton: {
+    padding: 5,
   },
 
   editProfileContent: {
@@ -327,10 +269,8 @@ export const profileStyles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: colors.blue,
     marginBottom: 20,
     position: 'relative',
-    overflow: 'hidden',
   },
 
   avatarEdit: {
@@ -342,10 +282,12 @@ export const profileStyles = StyleSheet.create({
   avatarEditOverlay: {
     position: 'absolute',
     bottom: 0,
-    left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 8,
+    backgroundColor: colors.blue,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
   },
 
@@ -370,17 +312,21 @@ export const profileStyles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: colors.blue,
-    borderRadius: 8,
     paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 30,
+    borderRadius: 25,
     marginTop: 20,
     width: '100%',
-    alignItems: 'center',
+  },
+
+  saveButtonDisabled: {
+    opacity: 0.7,
   },
 
   saveButtonText: {
     color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
 }); 
