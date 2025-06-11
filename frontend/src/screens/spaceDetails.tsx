@@ -7,6 +7,8 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { spaceDetailsStyles as styles, windowWidth } from '../styles/spaceDetails.style';
 import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
+import { useFavorites } from '../hooks/useFavorites';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SpaceDetailsProps {
   route: {
@@ -49,12 +51,13 @@ interface ReviewResponse {
 
 export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const { space } = route.params;
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { theme, isDarkMode } = useTheme();
+  const { user } = useAuth();
+  const { favorites, toggleFavorite } = useFavorites();
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const [checkInDate, setCheckInDate] = useState(new Date());
@@ -439,6 +442,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setTimeModalVisible(true);
   };
 
+  const handleFavoritePress = async () => {
+    try {
+      await toggleFavorite(space.id);
+    } catch (error) {
+      console.error('Erro ao favoritar:', error);
+      Alert.alert('Erro', 'Não foi possível favoritar o espaço. Tente novamente.');
+    }
+  };
+
+  const isFavorite = favorites.some(fav => fav.spaceId?._id === space.id);
+
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
       <StatusBar
@@ -530,11 +544,11 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
-                  onPress={() => setIsFavorite(!isFavorite)}
+                  onPress={handleFavoritePress}
                 >
                   <MaterialIcons
                     name={isFavorite ? "favorite" : "favorite-border"}
-                    color={isFavorite ? colors.blue : colors.blue}
+                    color={isFavorite ? colors.blue : colors.gray}
                     size={25}
                   />
                 </TouchableOpacity>

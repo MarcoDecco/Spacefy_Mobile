@@ -95,7 +95,8 @@ export const useFavorites = () => {
       console.log('🔑 Dados de autenticação (toggle):', {
         userId,
         hasToken: !!token,
-        tokenLength: token?.length
+        tokenLength: token?.length,
+        token: token // Temporariamente para debug
       });
       
       if (!userId) {
@@ -109,7 +110,10 @@ export const useFavorites = () => {
       console.log('🔄 Toggling favorito para espaço:', {
         spaceId,
         userId,
-        url: `${api.defaults.baseURL}/users/${userId}/favorite`
+        url: `${api.defaults.baseURL}/users/${userId}/favorite`,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
       
       const response = await api.post(
