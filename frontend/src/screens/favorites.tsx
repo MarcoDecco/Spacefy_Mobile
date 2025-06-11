@@ -6,6 +6,7 @@ import Search from '../components/searchBar';
 import { useTheme } from '../contexts/ThemeContext';
 import { homeStyles as styles } from '../styles/homeStyles';
 import { FilterOptions } from '../components/filter';
+import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 interface Space {
   _id: string;
@@ -139,6 +140,34 @@ export default function Favorites() {
     );
   }
 
+  const EmptySearchComponent = () => (
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      paddingTop: 50,
+      paddingHorizontal: 20
+    }}>
+      <Text style={[pageTexts.title, { 
+        textAlign: 'center', 
+        color: theme.text,
+        fontSize: 24,
+        marginBottom: 16
+      }]}>
+        Nenhum espaço encontrado
+      </Text>
+      <Text style={[pageTexts.title, { 
+        textAlign: 'center', 
+        color: theme.text,
+        fontSize: 16,
+        opacity: 0.7,
+        lineHeight: 24
+      }]}>
+        Tente ajustar sua busca ou filtros para encontrar o que você procura.
+      </Text>
+    </View>
+  );
+
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <Search 
@@ -153,6 +182,7 @@ export default function Favorites() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.contentContainer, localStyles.listContainer]}
         numColumns={1}
+        ListEmptyComponent={EmptySearchComponent}
       />
     </View>
   );
