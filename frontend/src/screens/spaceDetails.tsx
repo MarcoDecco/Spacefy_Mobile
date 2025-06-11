@@ -592,47 +592,57 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                 <View style={styles.detailsColRight}>
                   <Text style={[styles.detailsLabel, { marginBottom: 8 }, isDarkMode && { color: theme.text }]}>Detalhes:</Text>
 
-                  <View style={styles.detailsGrid}>
-                    <View style={styles.detailsGridItem}>
-                      <MaterialIcons 
-                        name="crop-square" 
-                        size={20} 
-                        color={isDarkMode ? theme.text : colors.gray} 
-                        style={styles.detailsIcon} 
-                      />
-                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
+                  <View style={[styles.detailsGrid, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
+                    {/* Primeira linha */}
+                    <View style={[styles.detailsGridItem, { width: '48%', marginBottom: 12 }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <MaterialIcons 
+                          name="crop-square" 
+                          size={20} 
+                          color={isDarkMode ? theme.text : colors.gray} 
+                          style={{ marginRight: 8 }} 
+                        />
+                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
+                      </View>
                     </View>
 
-                    <View style={styles.detailsGridItem}>
-                      <Feather 
-                        name="wifi" 
-                        size={20} 
-                        color={isDarkMode ? theme.text : colors.gray} 
-                        style={styles.detailsIcon} 
-                      />
-                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{wifi}</Text>
+                    <View style={[styles.detailsGridItem, { width: '48%', marginBottom: 12 }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Feather 
+                          name="wifi" 
+                          size={20} 
+                          color={isDarkMode ? theme.text : colors.gray} 
+                          style={{ marginRight: 8 }} 
+                        />
+                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{wifi}</Text>
+                      </View>
                     </View>
 
-                    <View style={styles.detailsGridItem}>
-                      <MaterialIcons 
-                        name="groups" 
-                        size={20} 
-                        color={isDarkMode ? theme.text : colors.gray} 
-                        style={styles.detailsIcon} 
-                      />
-                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
+                    {/* Segunda linha */}
+                    <View style={[styles.detailsGridItem, { width: '48%' }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <MaterialIcons 
+                          name="groups" 
+                          size={20} 
+                          color={isDarkMode ? theme.text : colors.gray} 
+                          style={{ marginRight: 8 }} 
+                        />
+                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
+                      </View>
                     </View>
 
-                    <View style={styles.detailsGridItem}>
-                      <MaterialIcons 
-                        name="wc" 
-                        size={20} 
-                        color={isDarkMode ? theme.text : colors.gray} 
-                        style={styles.detailsIcon} 
-                      />
-                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
+                    <View style={[styles.detailsGridItem, { width: '48%' }]}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <MaterialIcons 
+                          name="wc" 
+                          size={20} 
+                          color={isDarkMode ? theme.text : colors.gray} 
+                          style={{ marginRight: 8 }} 
+                        />
+                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
+                      </View>
                     </View>
-          </View>
+                  </View>
 
                   <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
                     <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
@@ -1297,29 +1307,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                     <View style={styles.detailsModalAmenitiesList}>
                       {space.amenities && Array.isArray(space.amenities) && space.amenities.length > 0 ? (
                         space.amenities.map((amenity, index) => (
-                          <View 
+                          <Text 
                             key={`${amenity}-${index}`}
                             style={[
-                              styles.detailsModalAmenityItem,
-                              isDarkMode && {
-                                backgroundColor: theme.background,
-                                borderColor: theme.border
-                              }
-                            ]}
-                          >
-                            <MaterialIcons 
-                              name="check-circle" 
-                              size={24} 
-                              color={isDarkMode ? theme.blue : colors.blue} 
-                              style={{ marginRight: 8 }} 
-                            />
-                            <Text style={[
                               styles.detailsModalAmenityText,
                               isDarkMode && { color: theme.text }
-                            ]}>
-                              {amenity}
-                            </Text>
-                          </View>
+                            ]}
+                          >
+                            • {amenity}
+                          </Text>
                         ))
                       ) : (
                         <Text style={[
@@ -1333,6 +1329,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                       )}
                     </View>
                   </View>
+
+                  <TouchableOpacity 
+                    onPress={() => setDetailsModalVisible(true)} 
+                    style={styles.detailsModalMoreButton}
+                  >
+                    <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
+                  </TouchableOpacity>
                 </ScrollView>
               </View>
             </TouchableWithoutFeedback>

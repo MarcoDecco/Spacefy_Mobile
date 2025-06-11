@@ -371,7 +371,7 @@ export const spaceDetailsStyles = StyleSheet.create({
     color: colors.black,
   },
   detailsIcon: {
-    marginRight: 6,
+    marginRight: 8,
   },
   detailsMoreButton: {
     textAlign: 'center',
@@ -393,17 +393,12 @@ export const spaceDetailsStyles = StyleSheet.create({
     color: colors.black,
   },
   detailsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
+    width: '100%',
   },
   detailsGridItem: {
-    width: '48%',
-    alignItems: 'center',
-    padding: 12,
     backgroundColor: colors.white,
     borderRadius: 12,
+    padding: 12,
     borderWidth: 1,
     borderColor: colors.border,
     shadowColor: '#000',
@@ -479,6 +474,7 @@ export const spaceDetailsStyles = StyleSheet.create({
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: colors.light_gray,
+    marginBottom: 24,
   },
   detailsModalSectionTitle: {
     fontSize: 18,
@@ -487,24 +483,22 @@ export const spaceDetailsStyles = StyleSheet.create({
     marginBottom: 16,
   },
   detailsModalAmenitiesList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  detailsModalAmenityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.light_gray,
-    padding: 12,
-    borderRadius: 8,
-    width: '48%',
-    borderWidth: 1,
-    borderColor: colors.light_gray,
+    flexDirection: 'column',
+    gap: 8,
+    marginBottom: 16,
   },
   detailsModalAmenityText: {
-    fontSize: 14,
+    fontSize: 16,
     color: colors.black,
-    flex: 1,
+    lineHeight: 24,
+  },
+  detailsModalMoreButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.light_gray,
+    marginTop: 8,
   },
   // Estilos do Modal de Horário
   timeModal: {
