@@ -592,22 +592,10 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                 <View style={styles.detailsColRight}>
                   <Text style={[styles.detailsLabel, { marginBottom: 8 }, isDarkMode && { color: theme.text }]}>Detalhes:</Text>
 
-                  <View style={[styles.detailsGrid, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
-                    {/* Primeira linha */}
-                    <View style={[styles.detailsGridItem, { width: '48%', marginBottom: 12 }]}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <MaterialIcons 
-                          name="crop-square" 
-                          size={20} 
-                          color={isDarkMode ? theme.text : colors.gray} 
-                          style={{ marginRight: 8 }} 
-                        />
-                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
-                      </View>
-                    </View>
-
-                    <View style={[styles.detailsGridItem, { width: '48%', marginBottom: 12 }]}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={[styles.detailsGrid, { flexDirection: 'column', gap: 16 }]}>
+                    {/* Linha de cima */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 16 }}>
+                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
                         <Feather 
                           name="wifi" 
                           size={20} 
@@ -616,23 +604,18 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         />
                         <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{wifi}</Text>
                       </View>
-                    </View>
 
-                    {/* Segunda linha */}
-                    <View style={[styles.detailsGridItem, { width: '48%' }]}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
                         <MaterialIcons 
-                          name="groups" 
+                          name="crop-square" 
                           size={20} 
                           color={isDarkMode ? theme.text : colors.gray} 
                           style={{ marginRight: 8 }} 
                         />
-                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
+                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
                       </View>
-                    </View>
 
-                    <View style={[styles.detailsGridItem, { width: '48%' }]}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
                         <MaterialIcons 
                           name="wc" 
                           size={20} 
@@ -641,6 +624,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         />
                         <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
                       </View>
+                    </View>
+
+                    {/* Linha de baixo */}
+                    <View style={styles.detailsGridItem}>
+                      <MaterialIcons 
+                        name="groups" 
+                        size={20} 
+                        color={isDarkMode ? theme.text : colors.gray} 
+                        style={{ marginRight: 8 }} 
+                      />
+                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
                     </View>
                   </View>
 

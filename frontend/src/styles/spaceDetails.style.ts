@@ -396,16 +396,8 @@ export const spaceDetailsStyles = StyleSheet.create({
     width: '100%',
   },
   detailsGridItem: {
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   detailsGridIconContainer: {
     width: 48,
