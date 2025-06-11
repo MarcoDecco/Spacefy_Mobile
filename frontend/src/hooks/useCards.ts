@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { spaceService } from '../services/spaceService';
 import { BaseCard } from '../types/card';
 import { useAuth } from '../contexts/AuthContext';
+import { rentalService } from '../services/rentalService';
+import { RentalSpace } from '../types/card';
 
 type CardType = 'all' | 'favorites' | 'rented';
 
@@ -29,7 +31,19 @@ export const useCards = (type: CardType = 'all') => {
             apiSpaces = await spaceService.getFavoriteSpaces(user?.id);
             break;
           case 'rented':
-            apiSpaces = await spaceService.getRentedSpaces(user?.id);
+            if (!user?.id) {
+              throw new Error('Usuário não autenticado');
+            }
+            const rentedSpaces = await rentalService.getRentalsByUserID(user.id);
+            apiSpaces = rentedSpaces.map((rental: RentalSpace) => ({
+              ...rental.space,
+              rental_id: rental._id,
+              rental_start_date: rental.start_date,
+              rental_end_date: rental.end_date,
+              rental_start_time: rental.startTime,
+              rental_end_time: rental.endTime,
+              rental_value: rental.value
+            }));
             break;
           default:
             apiSpaces = await spaceService.getSpaces();

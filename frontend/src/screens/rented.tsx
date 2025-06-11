@@ -16,13 +16,22 @@ export default function Rented() {
 
   const renderCard = (item: BaseCard) => (
     <Card
-      id={item.id}
-      images={item.image_url.map(url => ({ uri: url }))}
-      title={item.space_name}
-      address={typeof item.location === 'object' ? item.location.formatted_address : item.location}
-      price={item.price_per_hour.toString()}
-      rating={0}
-      reviews={0}
+      _id={item._id}
+      image_url={item.image_url}
+      space_name={item.space_name}
+      location={typeof item.location === 'object' ? item.location.formatted_address : item.location}
+      price_per_hour={item.price_per_hour}
+      space_description={item.space_description}
+      space_type={item.space_type}
+      space_amenities={[]}
+      max_people={0}
+      week_days={[]}
+      opening_time=""
+      closing_time=""
+      space_rules={[]}
+      owner_name=""
+      owner_phone=""
+      owner_email=""
     />
   );
 

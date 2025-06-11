@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { authService } from '../services/authService';
 
 interface JwtPayload {
-  sub: string;
+  id: string;
   name: string;
   email: string;
   surname: string;
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           console.log('✅ Token válido, configurando usuário...');
           setUser({
-            id: decodedToken.sub,
+            id: decodedToken.id,
             name: decodedToken.name,
             email: decodedToken.email,
             surname: decodedToken.surname,
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('📝 Token decodificado:', decodedToken);
       
       setUser({
-        id: decodedToken.sub,
+        id: decodedToken.id,
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('📝 Token decodificado:', decodedToken);
       
       setUser({
-        id: decodedToken.sub,
+        id: decodedToken.id,
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
