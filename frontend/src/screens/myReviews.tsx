@@ -1,39 +1,79 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { homeStyles as styles } from '../styles/homeStyles';
+import { assessmentService } from '../services/assessmentService';
+import { useAuth } from '../contexts/AuthContext';
+
+interface Space {
+  _id: string;
+  space_name: string;
+}
+
+interface Assessment {
+  _id: string;
+  score: number;
+  comment: string;
+  evaluation_date: string;
+  userID: string;
+  spaceID: Space;
+}
 
 export default function MyReviews() {
   const { theme, isDarkMode } = useTheme();
+  const { user } = useAuth();
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Dados simulados de avaliações
-  const reviews = [
-    {
-      id: '1',
-      spaceName: 'Casa na Praia',
-      rating: 5,
-      comment: 'Excelente espaço! Superou todas as expectativas.',
-      date: '15/06/2024'
-    },
-    {
-      id: '2',
-      spaceName: 'Sala de Reuniões',
-      rating: 4,
-      comment: 'Bom espaço, mas poderia ter mais equipamentos.',
-      date: '20/06/2024'
+  const fetchAllAssessments = async () => {
+    try {
+      let allAssessments: Assessment[] = [];
+      let currentPage = 1;
+      let hasNextPage = true;
+
+      while (hasNextPage) {
+        const response = await assessmentService.getAssessmentsByUser(user?.id, currentPage);
+        allAssessments = [...allAssessments, ...response.assessments];
+        hasNextPage = response.pagination.hasNextPage;
+        currentPage++;
+      }
+
+      setAssessments(allAssessments);
+    } catch (error) {
+      console.error('Erro ao buscar avaliações:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-  ];
+  };
 
-  const renderReview = ({ item }: { item: typeof reviews[0] }) => (
+  useEffect(() => {
+    fetchAllAssessments();
+  }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchAllAssessments();
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+
+  const renderReview = ({ item }: { item: Assessment }) => (
     <View style={[localStyles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
-      <Text style={[localStyles.spaceName, isDarkMode && { color: theme.text }]}>{item.spaceName}</Text>
+      <Text style={[localStyles.spaceName, isDarkMode && { color: theme.text }]}>
+        {item.spaceID.space_name}
+      </Text>
       <View style={localStyles.ratingContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
           <Text
             key={star}
             style={[
               localStyles.star,
-              star <= item.rating ? localStyles.starFilled : localStyles.starEmpty,
+              star <= item.score ? localStyles.starFilled : localStyles.starEmpty,
               isDarkMode && { color: theme.text }
             ]}
           >
@@ -42,18 +82,35 @@ export default function MyReviews() {
         ))}
       </View>
       <Text style={[localStyles.comment, isDarkMode && { color: theme.text }]}>{item.comment}</Text>
-      <Text style={[localStyles.date, isDarkMode && { color: theme.text }]}>{item.date}</Text>
+      <Text style={[localStyles.date, isDarkMode && { color: theme.text }]}>
+        {formatDate(item.evaluation_date)}
+      </Text>
     </View>
   );
+
+  if (loading && !refreshing) {
+    return (
+      <View style={[styles.container, localStyles.loadingContainer, isDarkMode && { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.blue} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <FlatList
-        data={reviews}
-        keyExtractor={(item) => item.id}
+        data={assessments}
+        keyExtractor={(item) => item._id}
         renderItem={renderReview}
         contentContainerStyle={localStyles.listContainer}
         showsVerticalScrollIndicator={false}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+        ListEmptyComponent={
+          <Text style={[localStyles.emptyText, isDarkMode && { color: theme.text }]}>
+            Nenhuma avaliação encontrada
+          </Text>
+        }
       />
     </View>
   );
@@ -102,5 +159,15 @@ const localStyles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: '#999',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#666',
+    marginTop: 20,
   },
 }); 
