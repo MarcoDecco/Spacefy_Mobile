@@ -15,10 +15,19 @@ export const rentalService = {
 
     getRentalsByUserID: async (userId) => {
         try {
-            const response = await api.get(`/users/rentals/${userId}`);
+            const response = await api.get(`/rentals/user/${userId}`);
             return response.data;
         } catch (error) {
             throw new Error('Erro ao buscar aluguéis do usuário');
+        }
+    },
+
+    getSpacesByUserRentalID: async (userId) => {
+        try {
+            const response = await api.get(`/users/rentals/${userId}`);
+            return response.data;
+        } catch (error) {
+            throw new Error('Erro ao buscar espaços do aluguel');
         }
     }
 }; 
