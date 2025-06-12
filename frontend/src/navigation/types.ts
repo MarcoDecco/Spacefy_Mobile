@@ -32,6 +32,7 @@ export type RootStackParamList = {
   MyReservations: undefined;
   Favorites: undefined;
   MyReviews: undefined;
+  EditProfile: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

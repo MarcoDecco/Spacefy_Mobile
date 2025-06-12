@@ -9,6 +9,7 @@ import Settings from '../screens/settings';
 import MyReservations from '../screens/myReservations';
 import Favorites from '../screens/favorites';
 import MyReviews from '../screens/myReviews';
+import EditProfile from '../screens/editProfile';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -78,6 +79,13 @@ export default function StackNavigation() {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+        }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfile}
+        options={{
+          headerShown: false
         }}
       />
     </Stack.Navigator>
