@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { profileStyles as styles } from '../styles/profileStyles';
@@ -18,6 +18,9 @@ export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser, signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSpaceOwnerModalVisible, setIsSpaceOwnerModalVisible] = useState(false);
+  const [documentNumber, setDocumentNumber] = useState('');
+  const [documentType, setDocumentType] = useState<'CPF' | 'CNPJ'>('CPF');
   const [editedUser, setEditedUser] = useState({
     name: '',
     surname: '',
@@ -86,6 +89,11 @@ export default function Profile() {
     }
   };
 
+  const handleOpenSpaceOwnerModal = () => {
+    console.log('Opening space owner modal...');
+    setIsSpaceOwnerModalVisible(true);
+  };
+
   if (!user) {
     return (
       <View style={styles.container}>
@@ -121,7 +129,10 @@ export default function Profile() {
             <Text style={styles.bannerSubtitle}>
               Veja fica mais fácil anunciar o seu local para aluguel.
             </Text>
-            <TouchableOpacity style={styles.bannerButton}>
+            <TouchableOpacity 
+              style={styles.bannerButton}
+              onPress={handleOpenSpaceOwnerModal}
+            >
               <Text style={styles.bannerButtonText}>Anunciar Espaço</Text>
             </TouchableOpacity>
           </View>
@@ -247,6 +258,58 @@ export default function Profile() {
             </View>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* New Space Owner Registration Modal */}
+      <Modal
+        visible={isSpaceOwnerModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsSpaceOwnerModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.editProfileModal}>
+            <View style={styles.modalHeader}>
+              <View style={{ gap: 10 }}>
+                <Text style={styles.modalTitle}>Registre-se como Locador(a)</Text>
+                <Text style={{ fontSize: 16 }}>Antes de continuar com o anuncio do espaço, você precisa se tornar um locador(a) em nossa plataforma.</Text>
+              </View>
+              <TouchableOpacity 
+                onPress={() => setIsSpaceOwnerModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={24} color={colors.black} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.editProfileContent}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>{documentType}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={documentNumber}
+                  onChangeText={setDocumentNumber}
+                  placeholder={`Digite seu ${documentType}`}
+                  keyboardType="numeric"
+                  maxLength={documentType === 'CPF' ? 11 : 14}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+                onPress={() => {
+                  // TODO: Implement registration logic
+                  setIsSpaceOwnerModalVisible(false);
+                }}
+                disabled={loading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {loading ? 'Processando...' : 'Confirmar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       </Modal>
     </View>
   );
