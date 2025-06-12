@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
 interface FilterProps {
@@ -13,6 +12,7 @@ export interface FilterOptions {
   priceRange: string;
   spaceType: string;
   rating: string;
+  priceOrder: string;
 }
 
 export default function Filter({ onFilterChange, isDarkMode, theme }: FilterProps) {
@@ -21,6 +21,7 @@ export default function Filter({ onFilterChange, isDarkMode, theme }: FilterProp
     priceRange: '',
     spaceType: '',
     rating: '',
+    priceOrder: '',
   });
 
   const priceRanges = [
@@ -44,6 +45,12 @@ export default function Filter({ onFilterChange, isDarkMode, theme }: FilterProp
     { label: '4+ estrelas', value: '4+' },
     { label: '3+ estrelas', value: '3+' },
     { label: '2+ estrelas', value: '2+' },
+  ];
+
+  const priceOrders = [
+    { label: 'Padrão', value: '' },
+    { label: 'Menores Preços', value: 'asc' },
+    { label: 'Maiores Preços', value: 'desc' },
   ];
 
   const handleFilterSelect = (type: keyof FilterOptions, value: string) => {
@@ -122,14 +129,15 @@ export default function Filter({ onFilterChange, isDarkMode, theme }: FilterProp
               {renderFilterSection('Preço', priceRanges, 'priceRange')}
               {renderFilterSection('Tipo de Espaço', spaceTypes, 'spaceType')}
               {renderFilterSection('Avaliação', ratings, 'rating')}
+              {renderFilterSection('Ordenar por Preço', priceOrders, 'priceOrder')}
             </ScrollView>
 
             <View style={styles.modalFooter}>
               <TouchableOpacity
                 style={[styles.resetButton, { borderColor: theme.blue }]}
                 onPress={() => {
-                  setSelectedFilters({ priceRange: '', spaceType: '', rating: '' });
-                  onFilterChange({ priceRange: '', spaceType: '', rating: '' });
+                  setSelectedFilters({ priceRange: '', spaceType: '', rating: '', priceOrder: '' });
+                  onFilterChange({ priceRange: '', spaceType: '', rating: '', priceOrder: '' });
                 }}
               >
                 <Text style={[styles.resetButtonText, { color: theme.blue }]}>Limpar Filtros</Text>
@@ -236,4 +244,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-}); 
+});
