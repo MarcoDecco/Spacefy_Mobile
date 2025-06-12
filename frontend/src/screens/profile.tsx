@@ -9,7 +9,6 @@ import { profileStyles as styles } from '../styles/profileStyles';
 import { colors } from '../styles/globalStyles/colors';
 import { RootStackParamList } from '../navigation/types';
 import { NotificationButton } from '../components/NotificationButton';
-import EditProfile from './editProfile';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -113,7 +112,7 @@ export default function Profile() {
       </View>
 
       <ScrollView style={styles.content}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditProfile')}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
           <Ionicons name="person-outline" size={24} color={colors.black} />
           <Text style={styles.menuItemText}>Editar Perfil</Text>
           <Ionicons name="chevron-forward" size={24} color={colors.black} />
