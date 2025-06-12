@@ -106,16 +106,11 @@ export const profileStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     backgroundColor: colors.white,
+    borderWidth: 0.5,
+    borderColor: colors.line,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.2)',
   },
 
   menuItemText: {
@@ -152,30 +147,32 @@ export const profileStyles = StyleSheet.create({
   
   bannerContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
-    borderRadius: 20,
+    alignItems: 'center',
+    padding: 20,
     marginTop: 16,
     marginBottom: 26,
-    padding: 20,
-    alignItems: 'center',
-    boxShadow: '0 0 6px 2px rgba(0, 0, 0, 0.2)',
+    // backgroundColor: colors.white,
+    // borderWidth: 0.5,
+    // borderColor: colors.line,
+    // borderRadius: 20,
+    // boxShadow: '0 4px 6px 0 rgba(0, 0, 0, 0.2)',
   },
 
   bannerTitle: {
-    color: colors.white,
+    color: colors.dark_gray,
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
 
   bannerSubtitle: {
-    color: colors.white,
+    color: colors.dark_gray,
     fontSize: 14, 
     marginBottom: 16,
   },
 
   bannerButton: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.blue,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -183,7 +180,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   bannerButtonText: {
-    color: colors.blue,
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
