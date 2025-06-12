@@ -9,6 +9,7 @@ import { profileStyles as styles } from '../styles/profileStyles';
 import { colors } from '../styles/globalStyles/colors';
 import { RootStackParamList } from '../navigation/types';
 import { NotificationButton } from '../components/NotificationButton';
+import espacoImg from '../../assets/mansao.png';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -112,6 +113,20 @@ export default function Profile() {
       </View>
 
       <ScrollView style={styles.content}>
+        {/* Banner promocional */}
+        <View style={styles.bannerContainer}>
+          <View style={{ flex: 2 }}>
+            <Text style={styles.bannerTitle}>Anuncie seu Espaço no Spacefy</Text>
+            <Text style={styles.bannerSubtitle}>
+              Veja fica mais fácil anunciar o seu local para aluguel.
+            </Text>
+            <TouchableOpacity style={styles.bannerButton}>
+              <Text style={styles.bannerButtonText}>Anunciar Espaço</Text>
+            </TouchableOpacity>
+          </View>
+          <Image source={espacoImg} style={styles.bannerImage} resizeMode="contain" />
+        </View>
+
         <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
           <Ionicons name="person-outline" size={24} color={colors.black} />
           <Text style={styles.menuItemText}>Editar Perfil</Text>
