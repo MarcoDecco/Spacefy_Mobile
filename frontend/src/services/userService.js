@@ -2,6 +2,12 @@ import api from './api';
 
 export const userService = {
 
+    // Buscar usuário pelo ID
+    async getUserById(userId) {
+        const response = await api.get(`/users/getUserById/${userId}`);
+        return response.data;
+    },
+
     // Toggle favorito do espaço (adiciona/remove)
     async toggleFavoriteSpace(userId, spaceId) {
         const response = await api.post(`/${userId}/favorite`, { spaceId });
