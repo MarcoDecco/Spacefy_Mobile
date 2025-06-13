@@ -9,6 +9,7 @@ interface JwtPayload {
   email: string;
   surname: string;
   telephone: string;
+  profilePhoto: string;
   iat: number;
   exp: number;
 }
@@ -19,7 +20,7 @@ interface User {
   email: string;
   surname?: string;
   telephone?: string;
-  avatar?: string;
+  profilePhoto?: string;
 }
 
 interface AuthContextData {
@@ -64,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: decodedToken.email,
             surname: decodedToken.surname,
             telephone: decodedToken.telephone,
+            profilePhoto: decodedToken.profilePhoto,
           });
         }
       } else {
@@ -90,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
+        profilePhoto: decodedToken.profilePhoto,
       });
     } catch (error) {
       console.error('❌ Erro no login:', error);

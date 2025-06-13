@@ -111,7 +111,7 @@ export default function Profile() {
         <View style={styles.profileInfo}>
           <View style={styles.avatarContainer}>
             <Image
-              source={user.avatar ? { uri: user.avatar } : { uri: 'https://via.placeholder.com/120' }}
+              source={user.profilePhoto ? { uri: user.profilePhoto } : { uri: 'https://via.placeholder.com/120' }}
               style={styles.avatar}
             />
           </View>
@@ -207,7 +207,7 @@ export default function Profile() {
                 onPress={handlePickImage}
               >
                 <Image
-                  source={user.avatar ? { uri: user.avatar } : { uri: 'https://via.placeholder.com/120' }}
+                  source={user.profilePhoto ? { uri: user.profilePhoto } : { uri: 'https://via.placeholder.com/120' }}
                   style={styles.avatarEdit}
                 />
                 <View style={styles.avatarEditOverlay}>
