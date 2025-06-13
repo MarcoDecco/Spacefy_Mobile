@@ -106,16 +106,11 @@ export const profileStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     backgroundColor: colors.white,
+    borderWidth: 0.5,
+    borderColor: colors.line,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.2)',
   },
 
   menuItemText: {
@@ -152,29 +147,32 @@ export const profileStyles = StyleSheet.create({
   
   bannerContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.blue,
-    borderRadius: 20,
-    margin: 20,
-    padding: 20,
     alignItems: 'center',
-    boxShadow: '0 0 6px 2px rgba(0, 0, 0, 0.2)',
+    padding: 20,
+    marginTop: 16,
+    marginBottom: 26,
+    // backgroundColor: colors.white,
+    // borderWidth: 0.5,
+    // borderColor: colors.line,
+    // borderRadius: 20,
+    // boxShadow: '0 4px 6px 0 rgba(0, 0, 0, 0.2)',
   },
 
   bannerTitle: {
-    color: colors.white,
+    color: colors.dark_gray,
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
   },
 
   bannerSubtitle: {
-    color: colors.white,
+    color: colors.dark_gray,
     fontSize: 14, 
     marginBottom: 16,
   },
 
   bannerButton: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.blue,
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -182,7 +180,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   bannerButtonText: {
-    color: colors.blue,
+    color: colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -230,29 +228,22 @@ export const profileStyles = StyleSheet.create({
   },
 
   editProfileModal: {
-    width: '90%',
+    justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 20,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    width: '90%',
+    minHeight: 300,
   },
 
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
   },
 
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: colors.black,
   },
@@ -262,7 +253,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   editProfileContent: {
-    alignItems: 'center',
+    gap: 15,
   },
 
   avatarEditContainer: {
@@ -292,31 +283,29 @@ export const profileStyles = StyleSheet.create({
   },
 
   inputContainer: {
-    width: '100%',
-    marginBottom: 20,
+    marginBottom: 15,
   },
 
   inputLabel: {
     fontSize: 16,
     color: colors.black,
-    marginBottom: 8,
+    marginBottom: 5,
   },
 
   input: {
-    backgroundColor: colors.light_gray,
+    borderWidth: 1,
+    borderColor: colors.gray,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: colors.black,
   },
 
   saveButton: {
     backgroundColor: colors.blue,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    marginTop: 20,
-    width: '100%',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
   },
 
   saveButtonDisabled: {
@@ -327,6 +316,5 @@ export const profileStyles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
   },
 }); 

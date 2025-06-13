@@ -8,6 +8,7 @@ interface JwtPayload {
   name: string;
   email: string;
   surname: string;
+  telephone: string;
   iat: number;
   exp: number;
 }
@@ -62,6 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             name: decodedToken.name,
             email: decodedToken.email,
             surname: decodedToken.surname,
+            telephone: decodedToken.telephone,
           });
         }
       } else {

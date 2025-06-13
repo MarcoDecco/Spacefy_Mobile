@@ -34,7 +34,7 @@ export const useCards = (type: CardType = 'all') => {
             if (!user?.id) {
               throw new Error('Usuário não autenticado');
             }
-            const rentedSpaces = await rentalService.getRentalsByUserID(user.id);
+            const rentedSpaces = await rentalService.getSpacesByUserRentalID(user.id);
             apiSpaces = rentedSpaces.map((rental: RentalSpace) => ({
               ...rental.space,
               rental_id: rental._id,
