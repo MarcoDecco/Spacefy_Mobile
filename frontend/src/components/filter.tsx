@@ -126,10 +126,10 @@ export default function Filter({ onFilterChange, isDarkMode, theme }: FilterProp
             </View>
 
             <ScrollView style={styles.modalBody}>
+              {renderFilterSection('Ordenar por Preço', priceOrders, 'priceOrder')}
               {renderFilterSection('Preço', priceRanges, 'priceRange')}
               {renderFilterSection('Tipo de Espaço', spaceTypes, 'spaceType')}
               {renderFilterSection('Avaliação', ratings, 'rating')}
-              {renderFilterSection('Ordenar por Preço', priceOrders, 'priceOrder')}
             </ScrollView>
 
             <View style={styles.modalFooter}>
