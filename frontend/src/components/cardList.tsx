@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, FlatList, ViewStyle, Text, Dimensions } from 'react-native';
 import { CARD_WIDTH } from '../styles/homeStyles';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
@@ -10,7 +10,7 @@ const CARD_TOTAL_WIDTH = CARD_WIDTH + (CARD_MARGIN * 2);
 
 interface CardListProps<T> {
   data: T[];
-  renderCard: (item: T) => React.ReactElement;
+  renderCard: (item: T & { isSelected?: boolean }) => React.ReactElement;
   title?: string;
   subtitle?: string;
   horizontal?: boolean;
@@ -19,44 +19,42 @@ interface CardListProps<T> {
   ListEmptyComponent?: React.ComponentType<any> | React.ReactElement | null;
 }
 
-export const CardList = <T extends { id?: string | number; _id?: string | number }>({
-  data,
-  renderCard,
-  title,
-  subtitle,
-  horizontal = true,
-  style,
-  contentContainerStyle,
-  ListEmptyComponent,
-}: CardListProps<T>) => {
+export const CardList = <T extends { id?: string | number; _id?: string | number }>(
+  {
+    data,
+    renderCard,
+    title,
+    subtitle,
+    horizontal = true,
+    style,
+    contentContainerStyle,
+    ListEmptyComponent,
+  }: CardListProps<T>
+) => {
   const { theme } = useTheme();
+  const [selectedCardIndex, setSelectedCardIndex] = useState(0);
 
-  // Garante que data é sempre um array e que os itens possuem id ou _id
   const safeData = Array.isArray(data) ? data : [];
 
-  const renderItem = ({ item }: { item: T }) => (
-    <View 
-      key={String(item.id ?? item._id)} 
-      style={{ 
+  const renderItem = ({ item, index }: { item: T; index: number }) => (
+    <View
+      key={String(item.id ?? item._id)}
+      style={{
         marginHorizontal: CARD_MARGIN,
         alignItems: 'center',
         width: CARD_WIDTH
       }}
     >
-      {renderCard(item)}
+      {renderCard({ ...item, isSelected: index === selectedCardIndex })}
     </View>
   );
-
-  // Debug: veja o que está chegando
-  // Remova depois de testar!
-  console.log('CardList data:', safeData);
 
   return (
     <View style={[style, { alignItems: 'center' }]}>
       {title && (
         <Text style={[
-          pageTexts.titleCardList, 
-          { 
+          pageTexts.titleCardList,
+          {
             color: theme.text,
             textAlign: 'center',
             marginBottom: 8
@@ -67,8 +65,8 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
       )}
       {subtitle && (
         <Text style={[
-          pageTexts.subtitleCardList, 
-          { 
+          pageTexts.subtitleCardList,
+          {
             color: theme.text,
             textAlign: 'center',
             marginBottom: 16
@@ -84,7 +82,7 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
         horizontal={horizontal}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[
-          horizontal ? { 
+          horizontal ? {
             paddingHorizontal: (windowWidth - CARD_TOTAL_WIDTH) / 2,
             alignItems: 'center'
           } : {
@@ -98,6 +96,10 @@ export const CardList = <T extends { id?: string | number; _id?: string | number
         decelerationRate="fast"
         renderItem={renderItem}
         ListEmptyComponent={ListEmptyComponent}
+        onMomentumScrollEnd={e => {
+          const index = Math.round(e.nativeEvent.contentOffset.x / CARD_TOTAL_WIDTH);
+          setSelectedCardIndex(index);
+        }}
       />
     </View>
   );
