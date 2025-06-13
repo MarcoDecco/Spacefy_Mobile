@@ -27,6 +27,7 @@ interface CardProps {
   owner_name: string;
   owner_phone: string;
   owner_email: string;
+  isSelected?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({ 
@@ -45,7 +46,8 @@ const Card: React.FC<CardProps> = ({
   space_rules = [],
   owner_name = '',
   owner_phone = '',
-  owner_email = ''
+  owner_email = '',
+  isSelected = false
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
@@ -55,7 +57,7 @@ const Card: React.FC<CardProps> = ({
   const { theme, isDarkMode } = useTheme();
   const { favorites, toggleFavorite } = useFavorites();
 
-  const isFavorite = favorites.some(fav => fav.space_id === _id);
+  const isFavorite = favorites.some(fav => fav.spaceId && fav.spaceId._id === _id);
 
   // Garantir que sempre haja pelo menos uma imagem válida
   const safeImages = image_url && image_url.length > 0
@@ -88,12 +90,12 @@ const Card: React.FC<CardProps> = ({
   };
 
   useEffect(() => {
-    if (safeImages.length <= 1 || isAutoPlayPaused || !isFocused) return;
-    const timer = setInterval(() => {
-      scrollToIndex((activeIndex + 1) % safeImages.length);
-    }, 3000);
-    return () => clearInterval(timer);
-  }, [activeIndex, isAutoPlayPaused, safeImages.length, isFocused]);
+  if (!isSelected || safeImages.length <= 1 || isAutoPlayPaused || !isFocused) return;
+  const timer = setInterval(() => {
+    scrollToIndex((activeIndex + 1) % safeImages.length);
+  }, 3000);
+  return () => clearInterval(timer);
+}, [activeIndex, isAutoPlayPaused, safeImages.length, isFocused, isSelected]);
 
   const handleCardPress = () => {
     navigation.navigate('SpaceDetails', {
