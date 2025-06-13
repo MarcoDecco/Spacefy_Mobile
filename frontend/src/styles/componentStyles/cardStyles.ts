@@ -3,7 +3,7 @@ import { colors } from '../globalStyles/colors';
 
 const { width: windowWidth } = Dimensions.get('window');
 export const CARD_WIDTH = windowWidth * 0.8;
-export const CARD_HEIGHT = 400; // Altura fixa para todos os cards
+export const CARD_HEIGHT = 'auto';
 
 export const cardStyles = StyleSheet.create({
   card: {
@@ -104,7 +104,7 @@ export const cardStyles = StyleSheet.create({
 
   content: {
     padding: 18,
-    height: CARD_HEIGHT - 180, // Altura total menos a altura da imagem
+    height: CARD_HEIGHT, // Altura total menos a altura da imagem
     display: 'flex',
     flexDirection: 'column',
   },

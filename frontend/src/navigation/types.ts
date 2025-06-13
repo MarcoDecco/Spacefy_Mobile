@@ -19,6 +19,14 @@ export type SpaceDetailsParams = {
   };
 };
 
+export type Conversation = {
+  id: string;
+  name: string;
+  role: string;
+  lastMessage: string;
+  time: string;
+};
+
 export type RootStackParamList = {
   Splash: undefined;
   Welcome: undefined;
@@ -32,6 +40,8 @@ export type RootStackParamList = {
   MyReservations: undefined;
   Favorites: undefined;
   MyReviews: undefined;
+  EditProfile: undefined;
+  Messages: { conversation: Conversation };
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

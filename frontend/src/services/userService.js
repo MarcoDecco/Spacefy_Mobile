@@ -2,6 +2,12 @@ import api from './api';
 
 export const userService = {
 
+    // Buscar usuário pelo ID
+    async getUserById(userId) {
+        const response = await api.get(`/users/getUserById/${userId}`);
+        return response.data;
+    },
+
     // Toggle favorito do espaço (adiciona/remove)
     async toggleFavoriteSpace(userId, spaceId) {
         const response = await api.post(`/${userId}/favorite`, { spaceId });
@@ -28,5 +34,11 @@ export const userService = {
         const response = await api.get(`/view-history/user/${userId}`);
         return response.data;
     },
+
+    // Atualizar dados do usuário
+    async updateUser(userId, userData) {
+        const response = await api.put(`/users/updateUser/${userId}`, userData);
+        return response.data;
+    }
 
 };
