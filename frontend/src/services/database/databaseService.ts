@@ -2,28 +2,88 @@ import * as SQLite from 'expo-sqlite';
 import { databaseConfig, getCreateTableQueries } from '../../config/database';
 import { DatabaseSchema, LocalUser } from '../../types/database';
 
+interface TransactionStatus {
+    transaction_status: number;
+}
+
 class DatabaseService {
     private db: SQLite.SQLiteDatabase | null = null;
+    private transactionInProgress: boolean = false;
+    private isInitializing: boolean = false;
+    private initializationPromise: Promise<void> | null = null;
+    private transactionLock: boolean = false;
+    private transactionPromise: Promise<void> | null = null;
+
+    private async acquireTransactionLock(): Promise<void> {
+        while (this.transactionLock) {
+            console.log('[SQLITE] ⏳ Aguardando liberação do lock de transação...');
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        this.transactionLock = true;
+        console.log('[SQLITE] 🔒 Lock de transação adquirido');
+    }
+
+    private releaseTransactionLock(): void {
+        this.transactionLock = false;
+        console.log('[SQLITE] 🔓 Lock de transação liberado');
+    }
+
+    private async checkTransactionState(): Promise<boolean> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        try {
+            const result = await this.db.getAllAsync<TransactionStatus>('PRAGMA transaction_status;');
+            const status = result[0]?.transaction_status;
+            const isActive = status === 1;
+
+            console.log('[SQLITE] ℹ️ Estado da transação:', {
+                status,
+                isActive,
+                hasLock: this.transactionLock
+            });
+
+            this.transactionInProgress = isActive;
+            return isActive;
+        } catch (error) {
+            console.error('[SQLITE] ❌ Erro ao verificar estado da transação:', error);
+            this.transactionInProgress = false;
+            return false;
+        }
+    }
+
+    private async ensureNoTransaction(): Promise<void> {
+        const isActive = await this.checkTransactionState();
+        if (isActive) {
+            console.log('[SQLITE] ⚠️ Transação pendente detectada, tentando finalizar...');
+            try {
+                await this.db?.runAsync('ROLLBACK;');
+                this.transactionInProgress = false;
+                console.log('[SQLITE] ✅ Transação pendente finalizada com sucesso');
+            } catch (error) {
+                console.error('[SQLITE] ❌ Erro ao finalizar transação pendente:', error);
+            }
+        }
+    }
 
     private async clearDatabase(): Promise<void> {
         try {
-            console.log('🧹 Iniciando limpeza do banco de dados...');
+            console.log('[SQLITE] 🧹 Iniciando limpeza do banco de dados...');
 
             if (!this.db) {
-                console.log('⚠️ Banco de dados não inicializado, abrindo conexão...');
+                console.log('[SQLITE] ⚠️ Banco de dados não inicializado, abrindo conexão...');
                 this.db = await SQLite.openDatabaseAsync(databaseConfig.name);
             }
 
             // Obtém todas as tabelas do banco
             const tables = Object.keys(databaseConfig.tables);
-            console.log('📋 Tabelas encontradas:', tables);
+            console.log('[SQLITE] 📋 Tabelas encontradas:', tables);
 
             // Desativa as chaves estrangeiras temporariamente
             await this.db.runAsync('PRAGMA foreign_keys = OFF;');
 
             // Limpa cada tabela
             for (const table of tables) {
-                console.log(`🗑️ Limpando tabela: ${table}`);
+                console.log(`[SQLITE] 🗑️ Limpando tabela: ${table}`);
                 await this.db.runAsync(`DELETE FROM ${table};`);
                 // Reseta o contador de sequência (se existir)
                 await this.db.runAsync(`DELETE FROM sqlite_sequence WHERE name = '${table}';`);
@@ -33,32 +93,85 @@ class DatabaseService {
             await this.db.runAsync('PRAGMA foreign_keys = ON;');
 
             // Executa VACUUM para recuperar espaço
-            console.log('🧹 Executando VACUUM para otimizar o banco...');
+            console.log('[SQLITE] 🧹 Executando VACUUM para otimizar o banco...');
             await this.db.runAsync('VACUUM;');
 
-            console.log('✅ Banco de dados limpo com sucesso!');
+            console.log('[SQLITE] ✅ Banco de dados limpo com sucesso!');
         } catch (error) {
-            console.error('❌ Erro ao limpar banco de dados:', error);
+            console.error('[SQLITE] ❌ Erro ao limpar banco de dados:', error);
             throw error;
         }
     }
 
     async init(shouldClearDatabase: boolean = false): Promise<void> {
+        // Se já está inicializando, retorna a promise existente
+        if (this.isInitializing && this.initializationPromise) {
+            console.log('[SQLITE] ⏳ Banco já está sendo inicializado, aguardando...');
+            return this.initializationPromise;
+        }
+
+        // Se já está inicializado, apenas retorna
+        if (this.db) {
+            console.log('[SQLITE] ℹ️ Banco já inicializado');
+            return;
+        }
+
+        this.isInitializing = true;
+        this.initializationPromise = this._init(shouldClearDatabase);
+
         try {
-            console.log('🚀 Iniciando banco de dados...');
+            await this.initializationPromise;
+        } finally {
+            this.isInitializing = false;
+            this.initializationPromise = null;
+        }
+    }
+
+    private async _init(shouldClearDatabase: boolean = false): Promise<void> {
+        try {
+            console.log('[SQLITE] 🚀 Iniciando banco de dados...');
+
+            // Garante que não há transações pendentes
+            if (this.db) {
+                await this.ensureNoTransaction();
+            }
 
             if (shouldClearDatabase) {
-                console.log('⚠️ Modo de limpeza ativado, limpando banco antes de inicializar...');
+                console.log('[SQLITE] ⚠️ Modo de limpeza ativado, limpando banco antes de inicializar...');
                 await this.clearDatabase();
             }
 
-            this.db = await SQLite.openDatabaseAsync(databaseConfig.name);
-            console.log('✅ Conexão com banco de dados estabelecida');
+            // Tenta abrir o banco de dados
+            try {
+                this.db = await SQLite.openDatabaseAsync(databaseConfig.name);
+                console.log('[SQLITE] ✅ Conexão com banco de dados estabelecida');
+            } catch (error) {
+                console.error('[SQLITE] ❌ Erro ao abrir banco de dados:', error);
+                throw new Error('Falha ao abrir banco de dados: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+            }
 
+            // Verifica se o banco foi realmente aberto
+            if (!this.db) {
+                throw new Error('Banco de dados não foi aberto corretamente');
+            }
+
+            // Cria as tabelas
             await this.createTables();
-            console.log('✅ Tabelas criadas/verificadas com sucesso');
+            console.log('[SQLITE] ✅ Tabelas criadas/verificadas com sucesso');
+
+            // Verifica se o banco está funcionando com uma query simples
+            try {
+                await this.db.getAllAsync('SELECT 1');
+                console.log('[SQLITE] ✅ Banco de dados está respondendo corretamente');
+            } catch (error) {
+                console.error('[SQLITE] ❌ Erro ao verificar banco de dados:', error);
+                throw new Error('Banco de dados não está respondendo corretamente');
+            }
         } catch (error) {
-            console.error('❌ Erro ao inicializar banco de dados:', error);
+            console.error('[SQLITE] ❌ Erro ao inicializar banco de dados:', error);
+            // Limpa o estado em caso de erro
+            this.db = null;
+            this.transactionInProgress = false;
             throw error;
         }
     }
@@ -66,29 +179,169 @@ class DatabaseService {
     private async createTables(): Promise<void> {
         if (!this.db) throw new Error('Database not initialized');
 
-        const queries = getCreateTableQueries();
+        try {
+            console.log('[SQLITE] 📝 Criando/verificando tabelas...');
 
-        for (const query of queries) {
-            await this.db.execAsync(query);
+            // Cria a tabela de usuários
+            await this.db.runAsync(`
+                CREATE TABLE IF NOT EXISTS users (
+                    id TEXT PRIMARY KEY,
+                    email TEXT NOT NULL,
+                    token TEXT,
+                    lastLogin TEXT,
+                    isLoggedIn INTEGER DEFAULT 0,
+                    createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Cria a tabela de espaços favoritos
+            await this.db.runAsync(`
+                CREATE TABLE IF NOT EXISTS spaces (
+                    _id TEXT PRIMARY KEY,
+                    space_name TEXT NOT NULL,
+                    image_url TEXT,
+                    location TEXT,
+                    price_per_hour REAL,
+                    space_description TEXT,
+                    space_amenities TEXT,
+                    space_type TEXT,
+                    max_people INTEGER,
+                    week_days TEXT,
+                    space_rules TEXT,
+                    createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                    updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            console.log('[SQLITE] ✅ Tabelas verificadas com sucesso');
+        } catch (error) {
+            console.error('[SQLITE] ❌ Erro ao criar tabelas:', error);
+            throw error;
         }
     }
 
-    async executeQuery<T>(query: string, params: any[] = []): Promise<T[]> {
-        if (!this.db) throw new Error('Database not initialized');
+    async executeQuery<T>(query: string, params: any[] = [], inTransaction = false): Promise<T[]> {
+        if (!this.db) {
+            console.log('[SQLITE] ⚠️ Banco não inicializado, tentando inicializar...');
+            await this.init();
+            if (!this.db) throw new Error('Database not initialized after init attempt');
+        }
+
+        // Se a query contém BEGIN, precisa do lock
+        const needsLock = query.trim().toLowerCase().includes('begin');
 
         try {
-            if (query.trim().toLowerCase().startsWith('select')) {
-                // Para SELECT, use getAllAsync
-                const result = await this.db.getAllAsync(query, params);
-                return result as T[];
-            } else {
-                // Para outros comandos, use runAsync
-                await this.db.runAsync(query, params);
-                return [];
+            if (needsLock) {
+                await this.acquireTransactionLock();
+
+                // Força um ROLLBACK antes de iniciar nova transação
+                try {
+                    console.log('[SQLITE] 🔄 Forçando ROLLBACK antes de nova transação...');
+                    await this.db.runAsync('ROLLBACK;');
+                    this.transactionInProgress = false;
+                } catch (e) {
+                    // Ignora erro se não houver transação ativa
+                    console.log('[SQLITE] ℹ️ Sem transação ativa para ROLLBACK');
+                }
             }
+
+            // Verifica e limpa qualquer transação pendente
+            await this.checkTransactionState();
+
+            // Se a query já contém BEGIN TRANSACTION, executa direto
+            if (needsLock) {
+                console.log('[SQLITE] 📝 Executando query com transação explícita:', { query, params });
+                const result = await this.db!.runAsync(query, params);
+                console.log('[SQLITE] ✅ Query com transação executada com sucesso:', {
+                    type: query.trim().split(' ')[0].toUpperCase(),
+                    affectedRows: result.changes
+                });
+                return [] as T[];
+            }
+
+            // SELECT não precisa de transação
+            if (query.trim().toLowerCase().startsWith('select')) {
+                console.log('[SQLITE] 📝 Executando query SELECT:', { query, params });
+                const result = await this.db.getAllAsync(query, params);
+                console.log('[SQLITE] ✅ Query SELECT executada com sucesso:', { rowCount: result.length });
+                return result as T[];
+            }
+
+            // Se já está em transação, executa direto
+            if (inTransaction) {
+                console.log('[SQLITE] 📝 Executando query dentro de transação:', { query, params });
+                const result = await this.db!.runAsync(query, params);
+                console.log('[SQLITE] ✅ Query executada com sucesso:', {
+                    type: query.trim().split(' ')[0].toUpperCase(),
+                    affectedRows: result.changes
+                });
+                return [] as T[];
+            }
+
+            // Se não está em transação e a query não tem BEGIN, inicia uma
+            return await this.executeInTransaction(async () => {
+                return await this.executeQuery(query, params, true);
+            });
         } catch (error) {
-            console.error('Erro ao executar query:', error);
+            console.error('[SQLITE] ❌ Erro ao executar query:', {
+                error,
+                query,
+                params,
+                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+                errorStack: error instanceof Error ? error.stack : undefined
+            });
             throw error;
+        } finally {
+            if (needsLock) {
+                this.releaseTransactionLock();
+            }
+        }
+    }
+
+    private async executeInTransaction<T>(callback: () => Promise<T>): Promise<T> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        await this.acquireTransactionLock();
+        let transactionStarted = false;
+
+        try {
+            // Verifica e limpa qualquer transação pendente
+            await this.checkTransactionState();
+
+            console.log('[SQLITE] 🔄 Iniciando nova transação...');
+            await this.db.runAsync('BEGIN IMMEDIATE;');
+            this.transactionInProgress = true;
+            transactionStarted = true;
+
+            const result = await callback();
+
+            if (transactionStarted) {
+                console.log('[SQLITE] ✅ Commit da transação...');
+                await this.db.runAsync('COMMIT;');
+                this.transactionInProgress = false;
+            }
+            return result;
+        } catch (error) {
+            console.error('[SQLITE] ❌ Erro na transação, fazendo rollback...', {
+                error,
+                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+                errorStack: error instanceof Error ? error.stack : undefined,
+                transactionStarted
+            });
+
+            if (transactionStarted) {
+                try {
+                    await this.db?.runAsync('ROLLBACK;');
+                    this.transactionInProgress = false;
+                    console.log('[SQLITE] ✅ Rollback realizado com sucesso');
+                } catch (rollbackError) {
+                    console.error('[SQLITE] ❌ Erro ao fazer rollback:', rollbackError);
+                }
+            }
+
+            throw error;
+        } finally {
+            this.releaseTransactionLock();
         }
     }
 
@@ -98,16 +351,32 @@ class DatabaseService {
     ): Promise<void> {
         if (!this.db) throw new Error('Database not initialized');
 
-        const columns = Object.keys(data);
-        const values = Object.values(data);
-        const placeholders = columns.map(() => '?').join(', ');
+        try {
+            console.log(`[SQLITE] 📝 Iniciando inserção em ${table}:`, data);
 
-        const query = `
-      INSERT INTO ${databaseConfig.tables[table].name} (${columns.join(', ')})
-      VALUES (${placeholders})
-    `;
+            const columns = Object.keys(data);
+            const values = Object.values(data);
+            const placeholders = columns.map(() => '?').join(', ');
 
-        await this.executeQuery(query, values);
+            const query = `
+                INSERT INTO ${databaseConfig.tables[table].name} (${columns.join(', ')})
+                VALUES (${placeholders})
+            `;
+
+            await this.executeInTransaction(async () => {
+                await this.executeQuery(query, values, true); // <-- Passe true aqui!
+            });
+
+            console.log(`[SQLITE] ✅ Inserção em ${table} realizada com sucesso`);
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao inserir em ${table}:`, {
+                error,
+                data,
+                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+                errorStack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
     }
 
     async update<T extends keyof DatabaseSchema>(
@@ -117,18 +386,35 @@ class DatabaseService {
     ): Promise<void> {
         if (!this.db) throw new Error('Database not initialized');
 
-        const setClause = Object.keys(data)
-            .map(key => `${key} = ?`)
-            .join(', ');
-        const values = [...Object.values(data), where.value];
+        try {
+            console.log(`[SQLITE] 📝 Iniciando atualização em ${table}:`, { data, where });
 
-        const query = `
-      UPDATE ${databaseConfig.tables[table].name}
-      SET ${setClause}
-      WHERE ${where.column} = ?
-    `;
+            const setClause = Object.keys(data)
+                .map(key => `${key} = ?`)
+                .join(', ');
+            const values = [...Object.values(data), where.value];
 
-        await this.executeQuery(query, values);
+            const query = `
+                UPDATE ${databaseConfig.tables[table].name}
+                SET ${setClause}
+                WHERE ${where.column} = ?
+            `;
+
+            await this.executeInTransaction(async () => {
+                await this.executeQuery(query, values, true); // <-- Passe true aqui!
+            });
+
+            console.log(`[SQLITE] ✅ Atualização em ${table} realizada com sucesso`);
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao atualizar em ${table}:`, {
+                error,
+                data,
+                where,
+                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
+                errorStack: error instanceof Error ? error.stack : undefined
+            });
+            throw error;
+        }
     }
 
     async delete<T extends keyof DatabaseSchema>(
@@ -179,9 +465,24 @@ class DatabaseService {
     }
 
     async close(): Promise<void> {
-        if (this.db) {
-            await this.db.closeAsync();
-            this.db = null;
+        try {
+            if (this.isInitializing) {
+                console.log('[SQLITE] ⏳ Aguardando finalização da inicialização...');
+                await this.initializationPromise;
+            }
+
+            // Garante que não há transações pendentes antes de fechar
+            await this.ensureNoTransaction();
+
+            if (this.db) {
+                await this.db.closeAsync();
+                this.db = null;
+                this.transactionInProgress = false;
+                console.log('[SQLITE] ✅ Conexão com banco de dados fechada com sucesso');
+            }
+        } catch (error) {
+            console.error('[SQLITE] ❌ Erro ao fechar banco de dados:', error);
+            throw error;
         }
     }
 

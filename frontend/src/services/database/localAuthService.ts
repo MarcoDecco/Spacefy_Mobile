@@ -1,4 +1,4 @@
-import { databaseService, DatabaseService } from './databaseService';
+import { databaseService } from './databaseService';
 import { LocalUser } from '../../types/database';
 
 class LocalAuthService {
@@ -8,46 +8,60 @@ class LocalAuthService {
         token: string;
     }): Promise<void> {
         try {
-            console.log('📝 Iniciando salvamento da sessão do usuário:', { email: userData.email, tokenLength: userData.token.length, userId: userData.id });
+            console.log('📝 Iniciando salvamento da sessão do usuário:', {
+                email: userData.email,
+                tokenLength: userData.token.length,
+                userId: userData.id
+            });
+
             const now = new Date().toISOString();
             console.log('⏰ Timestamp de login:', now);
 
             // Sanitização e validação dos dados
-            const sanitizedData: Partial<LocalUser> = {
+            const sanitizedData = {
                 id: this.sanitizeString(userData.id, 'id'),
                 email: this.sanitizeString(userData.email, 'email'),
                 token: this.sanitizeString(userData.token, 'token'),
                 lastLogin: now,
-                isLoggedIn: true
+                isLoggedIn: 1
             };
-            console.log('🧹 Dados sanitizados:', sanitizedData);
 
             // Validação adicional
             this.validateUserData(sanitizedData);
             console.log('✅ Dados validados com sucesso');
 
-            // Verificar se o usuário já existe
-            console.log('🔍 Verificando se usuário já existe...');
-            const existingUser = await databaseService.findOne('users', { column: 'id', value: sanitizedData.id });
+            // Executa todas as operações em uma única transação
+            const query = `
+                BEGIN IMMEDIATE;
+                
+                -- Insere ou atualiza o usuário
+                INSERT INTO users (id, email, token, lastLogin, isLoggedIn)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    email = excluded.email,
+                    token = excluded.token,
+                    lastLogin = excluded.lastLogin,
+                    isLoggedIn = excluded.isLoggedIn;
+                
+                COMMIT;
+            `;
 
-            if (existingUser) {
-                console.log('🔄 Usuário encontrado, atualizando dados...');
-                await databaseService.update('users', sanitizedData, {
-                    column: 'id',
-                    value: sanitizedData.id
-                });
-                console.log('✅ Usuário atualizado com sucesso');
-            } else {
-                console.log('➕ Usuário não encontrado, criando novo registro...');
-                await databaseService.insert('users', sanitizedData);
-                console.log('✅ Novo usuário criado com sucesso');
-            }
+            const params = [
+                sanitizedData.id,
+                sanitizedData.email,
+                sanitizedData.token,
+                sanitizedData.lastLogin,
+                sanitizedData.isLoggedIn
+            ];
+
+            await databaseService.executeQuery(query, params);
 
             // Verificação pós-salvamento
             const savedUser = await databaseService.executeQuery<LocalUser>(
                 'SELECT * FROM users WHERE id = ?',
                 [sanitizedData.id]
             );
+
             console.log('🔍 Verificação pós-salvamento:', {
                 encontrado: savedUser.length > 0,
                 dados: savedUser[0] ? {
@@ -143,11 +157,28 @@ class LocalAuthService {
     }
 
     async logout(userId: string): Promise<void> {
-        await databaseService.update(
-            'users',
-            { isLoggedIn: false },
-            { column: 'id', value: userId }
-        );
+        try {
+            console.log('🚪 Iniciando processo de logout...');
+
+            const query = `
+                BEGIN IMMEDIATE;
+                
+                -- Atualiza o status de login do usuário
+                UPDATE users 
+                SET isLoggedIn = 0,
+                    token = NULL,
+                    lastLogin = CURRENT_TIMESTAMP
+                WHERE id = ?;
+                
+                COMMIT;
+            `;
+
+            await databaseService.executeQuery(query, [userId]);
+            console.log('✅ Logout realizado com sucesso');
+        } catch (error) {
+            console.error('❌ Erro ao fazer logout:', error);
+            throw error;
+        }
     }
 
     async clearUserSession(userId: string): Promise<void> {
@@ -156,7 +187,7 @@ class LocalAuthService {
 
     async isUserLoggedIn(userId: string): Promise<boolean> {
         const user = await this.getUserSession(userId);
-        return user?.isLoggedIn || false;
+        return user?.isLoggedIn === 1;
     }
 }
 

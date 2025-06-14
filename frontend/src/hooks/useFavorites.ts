@@ -1,152 +1,168 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface Space {
-  _id: string;
-  space_name: string;
-  image_url: string[];
-  price_per_hour: number;
-  location: string;
-  space_description: string;
-  space_amenities: string[];
-  space_type: string;
-  max_people: number;
-  week_days: string[];
-  opening_time: string;
-  closing_time: string;
-  space_rules: string[];
-  owner_name: string;
-  owner_phone: string;
-  owner_email: string;
-}
-
-interface Favorite {
-  _id: string;
-  spaceId: Space | null;
-  createdAt: string;
-}
+import { Favorite, Space } from '../types/favorite';
+import { localFavoriteService } from '../services/database/localFavoriteService';
+import { databaseService } from '../services/database/databaseService'; // Importe o databaseService
+import NetInfo from '@react-native-community/netinfo';
 
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+
+  // Monitora o estado da conexão
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsOnline(state.isConnected ?? false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const fetchFavorites = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
+      // Inicialize o banco de dados antes de qualquer operação
+      await databaseService.init();
+
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('token');
-      
-      console.log('🔑 Dados de autenticação:', {
-        userId,
-        hasToken: !!token,
-        tokenLength: token?.length
-      });
-      
+
       if (!userId) {
         throw new Error('Usuário não autenticado');
       }
 
-      if (!token) {
-        throw new Error('Token não encontrado');
+      try {
+        // Tenta buscar do servidor primeiro
+        if (token) {
+          const response = await api.get(`/users/favorites/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+
+          // Atualiza o banco local com os dados do servidor
+          for (const favorite of response.data) {
+            if (favorite.spaceId && favorite.spaceId._id) {
+              await localFavoriteService.saveFavorite(favorite.spaceId, userId);
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Usando dados locais devido a erro na API:', err);
       }
 
-      console.log('🔍 Buscando favoritos para o usuário:', userId);
-      console.log('🌐 URL da API:', api.defaults.baseURL);
-      
-      const response = await api.get(`/users/favorites/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      // Filtra favoritos com spaceId nulo
-      const validFavorites = response.data.filter((fav: Favorite) => fav.spaceId !== null);
-
-      console.log('✅ Favoritos recebidos:', {
-        count: validFavorites.length,
-        data: validFavorites
-      });
-      
-      setFavorites(validFavorites);
-      setError(null);
+      // Busca do banco local (seja após sincronização ou em caso de erro)
+      const localSpaces = await localFavoriteService.getFavoriteSpaces(userId);
+      setFavorites(localSpaces.map(space => ({
+        _id: space._id, // Adiciona o _id do espaço ao objeto Favorite
+        spaceId: space,
+        userId,
+        createdAt: new Date(),
+        lastViewed: new Date()
+      })));
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'Erro ao carregar favoritos';
-      console.error('❌ Erro ao buscar favoritos:', {
-        message: errorMessage,
-        error: err,
-        response: err.response,
-        request: err.request
-      });
+      const errorMessage = err.message || 'Erro ao carregar favoritos';
+      console.error('Erro ao buscar favoritos:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleFavorite = async (spaceId: string) => {
+  const toggleFavorite = async (space: Space) => {
     try {
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('token');
-      
-      console.log('🔑 Dados de autenticação (toggle):', {
-        userId,
-        hasToken: !!token,
-        tokenLength: token?.length,
-        token: token // Temporariamente para debug
-      });
-      
+
       if (!userId) {
         throw new Error('Usuário não autenticado');
       }
 
-      if (!token) {
-        throw new Error('Token não encontrado');
+      if (!space._id) {
+        throw new Error('ID do espaço não encontrado');
       }
 
-      console.log('🔄 Toggling favorito para espaço:', {
-        spaceId,
-        userId,
-        url: `${api.defaults.baseURL}/users/${userId}/favorite`,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      const response = await api.post(
-        `/users/${userId}/favorite`,
-        { spaceId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+      // Verifica se já está favoritado localmente
+      const isFavorited = await localFavoriteService.isFavorite(space._id, userId);
+
+      try {
+        // Tenta sincronizar com o servidor
+        if (token) {
+          console.log('Enviando requisição para favoritar espaço:', {
+            userId,
+            spaceId: space._id,
+            spaceName: space.space_name
+          });
+
+          const response = await api.post(
+            `/users/${userId}/favorite`,
+            { spaceId: space._id },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          // Atualiza o banco local baseado na resposta do servidor
+          if (response.data.isFavorited) {
+            // Garante que temos todos os dados necessários do espaço
+            if (!space.space_name) {
+              throw new Error('Dados do espaço incompletos');
+            }
+            await localFavoriteService.saveFavorite(space, userId);
+          } else {
+            await localFavoriteService.removeFavorite(space._id, userId);
+          }
+        } else {
+          // Se não tiver token, inverte o estado local
+          if (isFavorited) {
+            await localFavoriteService.removeFavorite(space._id, userId);
+          } else {
+            // Garante que temos todos os dados necessários do espaço
+            if (!space.space_name) {
+              throw new Error('Dados do espaço incompletos');
+            }
+            await localFavoriteService.saveFavorite(space, userId);
           }
         }
-      );
-      
-      console.log('✅ Resposta do toggle favorito:', response.data);
-      
-      // Atualiza a lista de favoritos após a ação
+      } catch (err) {
+        console.error('Erro ao sincronizar com servidor:', err);
+        // Se falhar a sincronização, inverte o estado local
+        if (isFavorited) {
+          await localFavoriteService.removeFavorite(space._id, userId);
+        } else {
+          // Garante que temos todos os dados necessários do espaço
+          if (!space.space_name) {
+            throw new Error('Dados do espaço incompletos');
+          }
+          await localFavoriteService.saveFavorite(space, userId);
+        }
+      }
+
+      // Atualiza a lista de favoritos
       await fetchFavorites();
-      
-      return response.data.isFavorited;
+
+      return !isFavorited;
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'Erro ao atualizar favorito';
-      console.error('❌ Erro ao favoritar/desfavoritar:', {
-        message: errorMessage,
-        error: err,
-        response: err.response,
-        request: err.request
-      });
+      const errorMessage = err.message || 'Erro ao atualizar favorito';
+      console.error('Erro ao favoritar/desfavoritar:', errorMessage);
       setError(errorMessage);
       throw err;
     }
   };
 
+  const updateLastViewed = async (spaceId: string) => {
+    try {
+      const userId = await AsyncStorage.getItem('userId');
+      if (!userId) return;
+
+      await localFavoriteService.updateLastViewed(spaceId, userId);
+    } catch (err) {
+      console.error('Erro ao atualizar última visualização:', err);
+    }
+  };
+
   useEffect(() => {
-    console.log('🔄 Hook de favoritos montado');
     fetchFavorites();
   }, []);
 
@@ -155,6 +171,8 @@ export const useFavorites = () => {
     loading,
     error,
     refreshFavorites: fetchFavorites,
-    toggleFavorite
+    toggleFavorite,
+    updateLastViewed,
+    isOnline
   };
-}; 
+};

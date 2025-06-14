@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
@@ -9,6 +9,7 @@ import { colors } from '~/styles/globalStyles/colors';
 import { NavigationProps } from '../navigation/types';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFavorites } from '../hooks/useFavorites';
+import { Space } from '../types/favorite';
 
 interface CardProps {
   _id: string;
@@ -119,9 +120,42 @@ const Card: React.FC<CardProps> = ({
   const handleFavoritePress = async (e: any) => {
     e.stopPropagation(); // Previne que o card seja clicado
     try {
-      await toggleFavorite(_id);
-    } catch (error) {
+      if (!_id) {
+        console.error('Erro ao favoritar: ID do espaço não encontrado');
+        Alert.alert(
+          'Erro',
+          'Não foi possível favoritar este espaço. ID não encontrado.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const spaceData: Space = {
+        _id,
+        space_name,
+        image_url: safeImages.map(img => img.uri),
+        location,
+        price_per_hour,
+        space_description,
+        space_amenities,
+        space_type,
+        max_people,
+        week_days: [],
+        opening_time: '',
+        closing_time: '',
+        space_rules: [],
+        owner_name: '',
+        owner_phone: '',
+        owner_email: ''
+      };
+      await toggleFavorite(spaceData);
+    } catch (error: any) {
       console.error('Erro ao favoritar:', error);
+      Alert.alert(
+        'Erro',
+        error.message || 'Não foi possível favoritar este espaço. Tente novamente mais tarde.',
+        [{ text: 'OK' }]
+      );
     }
   };
 

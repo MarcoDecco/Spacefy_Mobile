@@ -444,10 +444,34 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const handleFavoritePress = async () => {
     try {
-      await toggleFavorite(space.id);
-    } catch (error) {
+      if (!space.id) {
+        Alert.alert('Erro', 'ID do espaço não encontrado');
+        return;
+      }
+
+      const spaceData = {
+        _id: space.id,
+        space_name: space.title,
+        image_url: space.images.map(img => typeof img === 'string' ? img : img.uri),
+        location: space.address,
+        price_per_hour: parseFloat(space.price.replace(/[^0-9.-]+/g, '')),
+        space_description: space.description || '',
+        space_amenities: space.amenities || [],
+        space_type: space.type || '',
+        max_people: parseInt(space.capacity?.replace(/[^0-9]/g, '') || '0'),
+        week_days: [],
+        opening_time: '',
+        closing_time: '',
+        space_rules: [],
+        owner_name: '',
+        owner_phone: '',
+        owner_email: ''
+      };
+
+      await toggleFavorite(spaceData);
+    } catch (error: any) {
       console.error('Erro ao favoritar:', error);
-      Alert.alert('Erro', 'Não foi possível favoritar o espaço. Tente novamente.');
+      Alert.alert('Erro', error.message || 'Não foi possível favoritar o espaço. Tente novamente.');
     }
   };
 

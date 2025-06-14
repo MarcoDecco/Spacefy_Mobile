@@ -28,9 +28,11 @@ interface Space {
 }
 
 interface Favorite {
-  _id: string;
+  _id: string; // Agora o campo _id existe
   spaceId: Space | null;
-  createdAt: string;
+  userId: string;
+  createdAt: Date;
+  lastViewed: Date;
 }
 
 export default function Favorites() {
@@ -69,16 +71,17 @@ export default function Favorites() {
     return rating >= minRating;
   };
 
-  const filteredFavorites = favorites.filter(favorite => {
+  const filteredFavorites = favorites.filter((favorite) => {
     if (!favorite.spaceId) return false;
 
     const space = favorite.spaceId;
     const searchLower = searchQuery.toLowerCase();
 
-    const matchesSearch = searchQuery === '' || (
-      (typeof space.space_name === 'string' && space.space_name.toLowerCase().includes(searchLower)) ||
-      (typeof space.location === 'string' && space.location.toLowerCase().includes(searchLower))
-    );
+    const matchesSearch =
+      searchQuery === '' ||
+      (typeof space.space_name === 'string' &&
+        space.space_name.toLowerCase().includes(searchLower)) ||
+      (typeof space.location === 'string' && space.location.toLowerCase().includes(searchLower));
 
     const matchesPrice = filterByPrice(space.price_per_hour, filters.priceRange);
     const matchesType = filterByType(space.space_type, filters.spaceType);
@@ -106,7 +109,7 @@ export default function Favorites() {
       space_rules: item.spaceId.space_rules || [],
       owner_name: item.spaceId.owner_name || '',
       owner_phone: item.spaceId.owner_phone || '',
-      owner_email: item.spaceId.owner_email || ''
+      owner_email: item.spaceId.owner_email || '',
     };
 
     return (
@@ -141,28 +144,37 @@ export default function Favorites() {
   }
 
   const EmptySearchComponent = () => (
-    <View style={{ 
-      flex: 1, 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      paddingTop: 50,
-      paddingHorizontal: 20
-    }}>
-      <Text style={[pageTexts.title, { 
-        textAlign: 'center', 
-        color: theme.text,
-        fontSize: 24,
-        marginBottom: 16
-      }]}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: 50,
+        paddingHorizontal: 20,
+      }}>
+      <Text
+        style={[
+          pageTexts.title,
+          {
+            textAlign: 'center',
+            color: theme.text,
+            fontSize: 24,
+            marginBottom: 16,
+          },
+        ]}>
         Nenhum espaço encontrado
       </Text>
-      <Text style={[pageTexts.title, { 
-        textAlign: 'center', 
-        color: theme.text,
-        fontSize: 16,
-        opacity: 0.7,
-        lineHeight: 24
-      }]}>
+      <Text
+        style={[
+          pageTexts.title,
+          {
+            textAlign: 'center',
+            color: theme.text,
+            fontSize: 16,
+            opacity: 0.7,
+            lineHeight: 24,
+          },
+        ]}>
         Tente ajustar sua busca ou filtros para encontrar o que você procura.
       </Text>
     </View>
@@ -170,10 +182,10 @@ export default function Favorites() {
 
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      <Search 
-        onSearch={handleSearch} 
+      <Search
+        onSearch={handleSearch}
         onFilterChange={handleFilterChange}
-        initialValue={searchQuery} 
+        initialValue={searchQuery}
       />
       <FlatList
         data={filteredFavorites}
