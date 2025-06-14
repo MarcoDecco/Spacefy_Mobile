@@ -1,11 +1,12 @@
-import { View, FlatList } from "react-native";
+import { View, FlatList, Text } from "react-native";
 import SearchBar from "../components/searchBar";
-import { CardList } from "../components/cardList";
 import Card from "../components/card";
-import PromoCard from "../components/promoCard";
 import { useCards } from "../hooks/useCards";
 import { homeStyles as styles } from '../styles/homeStyles';
 import { useTheme } from '../contexts/ThemeContext';
+import { useState, useCallback } from 'react';
+import { FilterOptions } from '../components/filter';
+import { pageTexts } from '../styles/globalStyles/pageTexts';
 
 // Função para mapear os dados da API para o formato esperado pelo Card
 function mapCard(item: any) {
@@ -37,67 +38,103 @@ function mapCard(item: any) {
 export default function Home() {
   const { cards, loading } = useCards();
   const { theme, isDarkMode } = useTheme();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<FilterOptions>({
+    priceRange: '',
+    spaceType: '',
+    rating: '',
+  });
 
-  const renderCard = (item: any) => {
-    // Se for promo, adapte conforme necessário
-    if ('originalPrice' in item && 'discount' in item) {
-      return (
-        <PromoCard 
-          id={item.id}
-          images={item.images}
-          title={item.title}
-          address={item.address}
-          price={item.price}
-          originalPrice={item.originalPrice}
-          rating={item.rating}
-          reviews={item.reviews}
-          discount={item.discount}
-        />
-      );
-    }
+  const handleSearch = useCallback((text: string) => {
+    setSearchQuery(text);
+  }, []);
 
-    return (
-      <Card 
-        {...item}
-      />
-    );
+  const handleFilterChange = useCallback((newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  }, []);
+
+  const filterByPrice = (price: number, range: string) => {
+    if (!range) return true;
+    const [min, max] = range.split('-').map(Number);
+    if (range === '200+') return price >= 200;
+    return price >= min && price <= max;
   };
 
-  const sections = [
-    {
-      id: 'featured',
-      title: 'Espaços em Destaque',
-      data: cards.map(mapCard),
-      type: 'featured'
-    },
-    {
-      id: 'promo',
-      title: 'Promoções Imperdíveis',
-      subtitle: 'Descontos exclusivos por tempo limitado',
-      data: cards.map(mapCard),
-      type: 'promo'
-    },
-  ];
+  const filterByType = (type: string, filterType: string) => {
+    if (!filterType) return true;
+    return type === filterType;
+  };
 
-  const renderSection = ({ item }: { item: any }) => (
-    <CardList
-      key={item.id}
-      data={item.data}
-      renderCard={renderCard}
-      title={item.title}
-      subtitle={item.subtitle}
-    />
+  const filterByRating = (rating: number, filterRating: string) => {
+    if (!filterRating) return true;
+    const minRating = parseInt(filterRating);
+    return rating >= minRating;
+  };
+
+  const filteredCards = cards
+    .map(mapCard)
+    .filter(card => {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = searchQuery === '' || (
+        card.space_name.toLowerCase().includes(searchLower) ||
+        card.location.toLowerCase().includes(searchLower)
+      );
+
+      const matchesPrice = filterByPrice(card.price_per_hour, filters.priceRange);
+      const matchesType = filterByType(card.space_type, filters.spaceType);
+      const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
+
+      return matchesSearch && matchesPrice && matchesType && matchesRating;
+    });
+
+  const renderCard = ({ item }: { item: any }) => (
+    <View style={{ alignItems: 'center' }}>
+      <Card {...item} />
+    </View>
+  );
+
+  const EmptySearchComponent = () => (
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      paddingTop: 50,
+      paddingHorizontal: 20
+    }}>
+      <Text style={[pageTexts.title, { 
+        textAlign: 'center', 
+        color: theme.text,
+        fontSize: 24,
+        marginBottom: 16
+      }]}>
+        Nenhum espaço encontrado
+      </Text>
+      <Text style={[pageTexts.title, { 
+        textAlign: 'center', 
+        color: theme.text,
+        fontSize: 16,
+        opacity: 0.7,
+        lineHeight: 24
+      }]}>
+        Tente ajustar sua busca ou filtros para encontrar o que você procura.
+      </Text>
+    </View>
   );
 
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      <SearchBar />
+      <SearchBar 
+        onSearch={handleSearch} 
+        onFilterChange={handleFilterChange}
+        initialValue={searchQuery} 
+      />
       <FlatList
-        data={sections}
-        keyExtractor={(item) => item.id}
-        renderItem={renderSection}
+        data={filteredCards}
+        keyExtractor={(item) => item._id}
+        renderItem={renderCard}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, { alignItems: 'center' }]}
+        ListEmptyComponent={EmptySearchComponent}
       />
     </View>
   );
