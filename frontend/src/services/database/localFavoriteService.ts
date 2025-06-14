@@ -57,8 +57,9 @@ class LocalFavoriteService {
         const sanitizedWeekDays = JSON.stringify(space.week_days || []);
         const sanitizedRules = JSON.stringify(space.space_rules || []);
 
+        // Usando apenas as colunas que existem na tabela spaces, sem os campos automáticos
         const sanitizedData = {
-            id: space._id,
+            _id: space._id,
             space_name: space.space_name,
             image_url: sanitizedImageUrl,
             location: sanitizedLocation,
@@ -68,12 +69,7 @@ class LocalFavoriteService {
             space_type: space.space_type || '',
             max_people: space.max_people || 0,
             week_days: sanitizedWeekDays,
-            opening_time: space.opening_time || '',
-            closing_time: space.closing_time || '',
             space_rules: sanitizedRules,
-            owner_name: space.owner_name || '',
-            owner_phone: space.owner_phone || '',
-            owner_email: space.owner_email || '',
             last_updated: new Date().toISOString()
         };
 
@@ -86,61 +82,70 @@ class LocalFavoriteService {
     }
 
     async saveFavorite(space: Space, userId: string): Promise<void> {
-        console.log('💾 Iniciando salvamento de favorito:', { spaceId: space._id, userId });
-
         try {
-            if (!userId) {
-                console.error('❌ ID do usuário não fornecido');
-                throw new Error('ID do usuário é obrigatório');
+            console.log('💾 Iniciando salvamento de favorito:', { spaceId: space._id, userId });
+
+            // Valida os dados antes de salvar
+            if (!space._id || !userId) {
+                throw new Error('ID do espaço e ID do usuário são obrigatórios');
             }
 
-            // Sanitiza os dados do espaço antes da transação
-            const spaceData = this.sanitizeSpaceData(space);
-            console.log('📝 Dados do espaço preparados:', spaceData);
+            // Verifica se o usuário existe
+            const userExists = await databaseService.executeQuery<any>(
+                'SELECT id FROM users WHERE id = ?',
+                [userId]
+            );
 
-            // Executa todas as operações em uma única transação usando executeQuery
-            const transactionQuery = `
-                BEGIN IMMEDIATE;
-                
-                -- Verifica se o usuário existe
-                SELECT 1 FROM users WHERE id = ?;
-                
-                -- Insere ou atualiza o espaço
-                INSERT INTO spaces (${Object.keys(spaceData).join(', ')})
-                VALUES (${Object.keys(spaceData).map(() => '?').join(', ')})
-                ON CONFLICT(id) DO UPDATE SET
-                ${Object.keys(spaceData).map(key => `${key} = excluded.${key}`).join(', ')};
-                
-                -- Insere o favorito se não existir
-                INSERT INTO favorite_spaces (space_id, user_id, created_at, last_viewed)
-                SELECT ?, ?, ?, ?
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM favorite_spaces 
-                    WHERE space_id = ? AND user_id = ?
-                );
-                
-                COMMIT;
+            if (!userExists || userExists.length === 0) {
+                throw new Error('Usuário não encontrado');
+            }
+
+            // Sanitiza os dados do espaço
+            const sanitizedSpace = this.sanitizeSpaceData(space);
+            console.log('📝 Dados do espaço preparados:', sanitizedSpace);
+
+            // Insere ou atualiza o espaço
+            const insertSpaceQuery = `
+                INSERT OR REPLACE INTO spaces (
+                    _id, space_name, image_url, location, price_per_hour,
+                    space_description, space_amenities, space_type, max_people,
+                    week_days, space_rules, last_updated
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
-            const now = new Date().toISOString();
-            const params = [
-                userId, // para verificar usuário
-                ...Object.values(spaceData), // para inserir/atualizar espaço
-                space._id, userId, now, now, // para inserir favorito
-                space._id, userId // para verificar se favorito existe
-            ];
+            await databaseService.executeQuery(insertSpaceQuery, [
+                sanitizedSpace._id,
+                sanitizedSpace.space_name,
+                sanitizedSpace.image_url,
+                sanitizedSpace.location,
+                sanitizedSpace.price_per_hour,
+                sanitizedSpace.space_description,
+                sanitizedSpace.space_amenities,
+                sanitizedSpace.space_type,
+                sanitizedSpace.max_people,
+                sanitizedSpace.week_days,
+                sanitizedSpace.space_rules,
+                sanitizedSpace.last_updated
+            ]);
 
-            await databaseService.executeQuery(transactionQuery, params);
+            // Insere o favorito
+            const now = new Date().toISOString();
+            const insertFavoriteQuery = `
+                INSERT OR REPLACE INTO favorite_spaces (
+                    space_id, user_id, created_at, last_viewed
+                ) VALUES (?, ?, ?, ?)
+            `;
+
+            await databaseService.executeQuery(insertFavoriteQuery, [
+                space._id,
+                userId,
+                now,
+                now
+            ]);
 
             console.log('✅ Favorito salvo com sucesso');
         } catch (error) {
-            console.error('❌ Erro ao salvar favorito:', {
-                error,
-                spaceId: space._id,
-                userId,
-                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-                errorStack: error instanceof Error ? error.stack : undefined
-            });
+            console.error('❌ Erro ao salvar favorito:', error);
             throw error;
         }
     }
@@ -189,7 +194,7 @@ class LocalFavoriteService {
             const query = `
                 SELECT s.*, f.created_at, f.last_viewed
                 FROM spaces s
-                INNER JOIN favorite_spaces f ON s.id = f.space_id
+                INNER JOIN favorite_spaces f ON s._id = f.space_id
                 WHERE f.user_id = ?
                 ORDER BY f.created_at DESC
             `;
@@ -197,22 +202,17 @@ class LocalFavoriteService {
             const results = await databaseService.executeQuery<any>(query, [userId]);
 
             return results.map(row => ({
-                _id: row.id,
+                _id: row._id,
                 space_name: row.space_name,
-                image_url: JSON.parse(row.image_url),
-                location: row.location,
+                image_url: JSON.parse(row.image_url || '[]'),
+                location: JSON.parse(row.location || '{}'),
                 price_per_hour: row.price_per_hour,
                 space_description: row.space_description,
-                space_amenities: JSON.parse(row.space_amenities),
+                space_amenities: JSON.parse(row.space_amenities || '[]'),
                 space_type: row.space_type,
                 max_people: row.max_people,
-                week_days: JSON.parse(row.week_days),
-                opening_time: row.opening_time,
-                closing_time: row.closing_time,
-                space_rules: JSON.parse(row.space_rules),
-                owner_name: row.owner_name,
-                owner_phone: row.owner_phone,
-                owner_email: row.owner_email
+                week_days: JSON.parse(row.week_days || '[]'),
+                space_rules: JSON.parse(row.space_rules || '[]')
             }));
         } catch (error) {
             console.error('Erro ao buscar espaços favoritos:', error);
