@@ -182,38 +182,58 @@ class DatabaseService {
         try {
             console.log('[SQLITE] 📝 Criando/verificando tabelas...');
 
+            // Dropa as tabelas existentes para recriar com a estrutura correta
+            await this.db.runAsync('DROP TABLE IF EXISTS favorite_spaces');
+            await this.db.runAsync('DROP TABLE IF EXISTS spaces');
+            await this.db.runAsync('DROP TABLE IF EXISTS users');
+
             // Cria a tabela de usuários
             await this.db.runAsync(`
                 CREATE TABLE IF NOT EXISTS users (
                     id TEXT PRIMARY KEY,
                     email TEXT NOT NULL,
-                    token TEXT,
-                    lastLogin TEXT,
-                    isLoggedIn INTEGER DEFAULT 0,
+                    token TEXT NOT NULL,
+                    lastLogin TEXT NOT NULL,
+                    isLoggedIn INTEGER NOT NULL DEFAULT 0,
                     createdAt TEXT DEFAULT CURRENT_TIMESTAMP
                 )
             `);
 
-            // Cria a tabela de espaços favoritos
+            // Cria a tabela de espaços
             await this.db.runAsync(`
                 CREATE TABLE IF NOT EXISTS spaces (
                     _id TEXT PRIMARY KEY,
                     space_name TEXT NOT NULL,
-                    image_url TEXT,
-                    location TEXT,
-                    price_per_hour REAL,
+                    image_url TEXT NOT NULL,
+                    location TEXT NOT NULL,
+                    price_per_hour REAL NOT NULL,
                     space_description TEXT,
-                    space_amenities TEXT,
+                    space_amenities TEXT NOT NULL,
                     space_type TEXT,
                     max_people INTEGER,
-                    week_days TEXT,
-                    space_rules TEXT,
+                    week_days TEXT NOT NULL,
+                    space_rules TEXT NOT NULL,
+                    last_updated TEXT NOT NULL,
                     createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
                     updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                 )
             `);
 
-            console.log('[SQLITE] ✅ Tabelas verificadas com sucesso');
+            // Cria a tabela de favoritos
+            await this.db.runAsync(`
+                CREATE TABLE IF NOT EXISTS favorite_spaces (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    space_id TEXT NOT NULL,
+                    user_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    last_viewed TEXT NOT NULL,
+                    FOREIGN KEY (space_id) REFERENCES spaces(_id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    UNIQUE(space_id, user_id)
+                )
+            `);
+
+            console.log('[SQLITE] ✅ Tabelas recriadas com sucesso');
         } catch (error) {
             console.error('[SQLITE] ❌ Erro ao criar tabelas:', error);
             throw error;

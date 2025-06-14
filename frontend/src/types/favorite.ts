@@ -13,19 +13,23 @@ export interface Space {
   _id: string;
   space_name: string;
   image_url: string[];
-  location: string;
+  location: {
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+    formatted_address: string;
+    place_id: string;
+  };
   price_per_hour: number;
   space_description: string;
   space_amenities: string[];
   space_type: string;
   max_people: number;
   week_days: string[];
-  opening_time: string;
-  closing_time: string;
   space_rules: string[];
-  owner_name: string;
-  owner_phone: string;
-  owner_email: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateFavoriteParams {

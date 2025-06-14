@@ -7,7 +7,7 @@ export interface LocalUser {
 }
 
 export interface LocalSpace {
-    id: string;
+    _id: string;
     space_name: string;
     image_url: string;
     location: string;
@@ -17,12 +17,7 @@ export interface LocalSpace {
     space_type: string;
     max_people: number;
     week_days: string;
-    opening_time: string;
-    closing_time: string;
     space_rules: string;
-    owner_name: string;
-    owner_phone: string;
-    owner_email: string;
     last_updated: string;
 }
 
