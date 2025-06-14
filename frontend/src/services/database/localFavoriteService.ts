@@ -98,39 +98,45 @@ class LocalFavoriteService {
             const spaceData = this.sanitizeSpaceData(space);
             console.log('📝 Dados do espaço preparados:', spaceData);
 
-            // Executa todas as operações em uma única transação usando executeQuery
-            const transactionQuery = `
-                BEGIN IMMEDIATE;
-                
-                -- Verifica se o usuário existe
-                SELECT 1 FROM users WHERE id = ?;
-                
-                -- Insere ou atualiza o espaço
+            // Primeiro, verifica se o usuário existe
+            const userCheck = await databaseService.executeQuery<{ user_exists: number }>(
+                'SELECT 1 as user_exists FROM users WHERE id = ?',
+                [userId]
+            );
+
+            if (userCheck.length === 0) {
+                throw new Error('Usuário não encontrado');
+            }
+
+            // Insere ou atualiza o espaço
+            const spaceQuery = `
                 INSERT INTO spaces (${Object.keys(spaceData).join(', ')})
                 VALUES (${Object.keys(spaceData).map(() => '?').join(', ')})
                 ON CONFLICT(id) DO UPDATE SET
                 ${Object.keys(spaceData).map(key => `${key} = excluded.${key}`).join(', ')};
-                
-                -- Insere o favorito se não existir
+            `;
+
+            await databaseService.executeQuery(spaceQuery, Object.values(spaceData));
+
+            // Insere o favorito se não existir
+            const now = new Date().toISOString();
+            const favoriteQuery = `
                 INSERT INTO favorite_spaces (space_id, user_id, created_at, last_viewed)
                 SELECT ?, ?, ?, ?
                 WHERE NOT EXISTS (
                     SELECT 1 FROM favorite_spaces 
                     WHERE space_id = ? AND user_id = ?
                 );
-                
-                COMMIT;
             `;
 
-            const now = new Date().toISOString();
-            const params = [
-                userId, // para verificar usuário
-                ...Object.values(spaceData), // para inserir/atualizar espaço
-                space._id, userId, now, now, // para inserir favorito
-                space._id, userId // para verificar se favorito existe
-            ];
-
-            await databaseService.executeQuery(transactionQuery, params);
+            await databaseService.executeQuery(favoriteQuery, [
+                space._id,
+                userId,
+                now,
+                now,
+                space._id,
+                userId
+            ]);
 
             console.log('✅ Favorito salvo com sucesso');
         } catch (error) {
