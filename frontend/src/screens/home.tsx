@@ -43,6 +43,7 @@ export default function Home() {
     priceRange: '',
     spaceType: '',
     rating: '',
+    sortBy: '',
   });
 
   const handleSearch = useCallback((text: string) => {
@@ -71,21 +72,34 @@ export default function Home() {
     return rating >= minRating;
   };
 
-  const filteredCards = cards
-    .map(mapCard)
-    .filter(card => {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = searchQuery === '' || (
-        card.space_name.toLowerCase().includes(searchLower) ||
-        card.location.toLowerCase().includes(searchLower)
-      );
+  const sortCards = (cards: any[]) => {
+    switch (filters.sortBy) {
+      case 'price_asc':
+        return [...cards].sort((a, b) => a.price_per_hour - b.price_per_hour);
+      case 'price_desc':
+        return [...cards].sort((a, b) => b.price_per_hour - a.price_per_hour);
+      default:
+        return cards;
+    }
+  };
 
-      const matchesPrice = filterByPrice(card.price_per_hour, filters.priceRange);
-      const matchesType = filterByType(card.space_type, filters.spaceType);
-      const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
+  const filteredCards = sortCards(
+    cards
+      .map(mapCard)
+      .filter(card => {
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch = searchQuery === '' || (
+          card.space_name.toLowerCase().includes(searchLower) ||
+          card.location.toLowerCase().includes(searchLower)
+        );
 
-      return matchesSearch && matchesPrice && matchesType && matchesRating;
-    });
+        const matchesPrice = filterByPrice(card.price_per_hour, filters.priceRange);
+        const matchesType = filterByType(card.space_type, filters.spaceType);
+        const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
+
+        return matchesSearch && matchesPrice && matchesType && matchesRating;
+      })
+  );
 
   const renderCard = ({ item }: { item: any }) => (
     <View style={{ alignItems: 'center' }}>

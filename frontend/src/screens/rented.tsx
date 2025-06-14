@@ -19,6 +19,7 @@ export default function Rented() {
     priceRange: '',
     spaceType: '',
     rating: '',
+    sortBy: '',
   });
 
   const handleSearch = useCallback((text: string) => {
@@ -47,7 +48,18 @@ export default function Rented() {
     return rating >= minRating;
   };
 
-  const filteredCards = (rentedCards || []).filter(card => {
+  const sortCards = (cards: BaseCard[]) => {
+    switch (filters.sortBy) {
+      case 'price_asc':
+        return [...cards].sort((a, b) => a.price_per_hour - b.price_per_hour);
+      case 'price_desc':
+        return [...cards].sort((a, b) => b.price_per_hour - a.price_per_hour);
+      default:
+        return cards;
+    }
+  };
+
+  const filteredCards = sortCards((rentedCards || []).filter(card => {
     const searchLower = searchQuery.toLowerCase();
     const location = typeof card.location === 'object' ? card.location.formatted_address : card.location;
 
@@ -61,7 +73,7 @@ export default function Rented() {
     const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
-  });
+  }));
 
   const renderCard = (item: BaseCard) => (
     <View style={localStyles.cardContainer}>

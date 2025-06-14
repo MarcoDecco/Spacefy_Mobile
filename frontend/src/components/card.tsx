@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Image, Text, TouchableOpacity, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
@@ -142,7 +142,7 @@ const Card: React.FC<CardProps> = ({
       activeOpacity={0.9}
     >
       {/* Carrossel de Imagens */}
-      <View>
+      <View style={{ width: CARD_WIDTH, height: 180 }}>
         <ScrollView
           horizontal
           pagingEnabled
@@ -158,12 +158,15 @@ const Card: React.FC<CardProps> = ({
           snapToAlignment="center"
         >
           {safeImages.map((img, index) => (
-            <Image
-              key={index}
-              source={{ uri: img.uri }}
-              style={{ width: CARD_WIDTH, height: 180 }}
-              resizeMode="cover"
-            />
+            <TouchableWithoutFeedback key={index}>
+              <View style={{ width: CARD_WIDTH, height: 180 }}>
+                <Image
+                  source={{ uri: img.uri }}
+                  style={{ width: CARD_WIDTH, height: 180 }}
+                  resizeMode="cover"
+                />
+              </View>
+            </TouchableWithoutFeedback>
           ))}
         </ScrollView>
 
