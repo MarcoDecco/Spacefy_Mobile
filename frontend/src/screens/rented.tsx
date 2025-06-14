@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import Card from "../components/card";
 import { useCards } from "../hooks/useCards";
@@ -9,16 +9,20 @@ import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FilterOptions } from '../components/filter';
+import ScrollToTopButton from '../components/scrollToTopButton';
 
 export default function Rented() {
   const { cards: rentedCards, loading } = useCards('rented');
   const { theme, isDarkMode } = useTheme();
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     priceRange: '',
     spaceType: '',
     rating: '',
+    sortBy: '',
   });
 
   const handleSearch = useCallback((text: string) => {
@@ -47,7 +51,18 @@ export default function Rented() {
     return rating >= minRating;
   };
 
-  const filteredCards = (rentedCards || []).filter(card => {
+  const sortCards = (cards: BaseCard[]) => {
+    switch (filters.sortBy) {
+      case 'price_asc':
+        return [...cards].sort((a, b) => a.price_per_hour - b.price_per_hour);
+      case 'price_desc':
+        return [...cards].sort((a, b) => b.price_per_hour - a.price_per_hour);
+      default:
+        return cards;
+    }
+  };
+
+  const filteredCards = sortCards((rentedCards || []).filter(card => {
     const searchLower = searchQuery.toLowerCase();
     const location = typeof card.location === 'object' ? card.location.formatted_address : card.location;
 
@@ -61,7 +76,7 @@ export default function Rented() {
     const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
-  });
+  }));
 
   const renderCard = (item: BaseCard) => (
     <View style={localStyles.cardContainer}>
@@ -138,6 +153,15 @@ export default function Rented() {
     </View>
   );
 
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollTop(offsetY > 300);
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <SearchBar 
@@ -146,6 +170,7 @@ export default function Rented() {
         initialValue={searchQuery}
       />
       <FlatList
+        ref={flatListRef}
         data={user ? filteredCards : []}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => renderCard(item)}
@@ -153,7 +178,10 @@ export default function Rented() {
         contentContainerStyle={[styles.contentContainer, localStyles.listContainer]}
         numColumns={1}
         ListEmptyComponent={loading ? null : EmptyComponent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       />
+      <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, FlatList, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import Card from '../components/card';
@@ -7,6 +7,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { homeStyles as styles } from '../styles/homeStyles';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
+import ScrollToTopButton from '../components/scrollToTopButton';
 
 interface Space {
   _id: string;
@@ -39,10 +40,13 @@ export default function Favorites() {
   const { favorites, loading, error } = useFavorites();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     priceRange: '',
     spaceType: '',
     rating: '',
+    sortBy: '',
   });
 
   const handleSearch = useCallback((text: string) => {
@@ -119,6 +123,15 @@ export default function Favorites() {
     );
   };
 
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollTop(offsetY > 300);
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -188,6 +201,7 @@ export default function Favorites() {
         initialValue={searchQuery}
       />
       <FlatList
+        ref={flatListRef}
         data={filteredFavorites}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => renderCard(item)}
@@ -195,7 +209,10 @@ export default function Favorites() {
         contentContainerStyle={[styles.contentContainer, localStyles.listContainer]}
         numColumns={1}
         ListEmptyComponent={EmptySearchComponent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       />
+      <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
     </View>
   );
 }

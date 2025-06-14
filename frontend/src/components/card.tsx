@@ -1,5 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Image,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  TouchableWithoutFeedback,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+
 import { Feather } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CARD_WIDTH } from '../styles/homeStyles';
@@ -28,9 +40,10 @@ interface CardProps {
   owner_name: string;
   owner_phone: string;
   owner_email: string;
+  isSelected?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({ 
+const Card: React.FC<CardProps> = ({
   _id,
   image_url = [],
   space_name,
@@ -46,7 +59,8 @@ const Card: React.FC<CardProps> = ({
   space_rules = [],
   owner_name = '',
   owner_phone = '',
-  owner_email = ''
+  owner_email = '',
+  isSelected = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoPlayPaused, setIsAutoPlayPaused] = useState(false);
@@ -56,12 +70,13 @@ const Card: React.FC<CardProps> = ({
   const { theme, isDarkMode } = useTheme();
   const { favorites, toggleFavorite } = useFavorites();
 
-  const isFavorite = favorites.some(fav => fav.spaceId && fav.spaceId._id === _id);
+  const isFavorite = favorites.some((fav) => fav.spaceId && fav.spaceId._id === _id);
 
   // Garantir que sempre haja pelo menos uma imagem válida
-  const safeImages = image_url && image_url.length > 0
-    ? image_url.map(url => ({ uri: url }))
-    : [{ uri: 'https://via.placeholder.com/350x180?text=Sem+imagem' }];
+  const safeImages =
+    image_url && image_url.length > 0
+      ? image_url.map((url) => ({ uri: url }))
+      : [{ uri: 'https://via.placeholder.com/350x180?text=Sem+imagem' }];
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -73,7 +88,7 @@ const Card: React.FC<CardProps> = ({
     const newIndex = Math.max(0, Math.min(index, safeImages.length - 1));
     scrollRef.current?.scrollTo({
       x: newIndex * CARD_WIDTH,
-      animated: true
+      animated: true,
     });
     setActiveIndex(newIndex);
   };
@@ -89,12 +104,12 @@ const Card: React.FC<CardProps> = ({
   };
 
   useEffect(() => {
-    if (safeImages.length <= 1 || isAutoPlayPaused || !isFocused) return;
+    if (!isSelected || safeImages.length <= 1 || isAutoPlayPaused || !isFocused) return;
     const timer = setInterval(() => {
       scrollToIndex((activeIndex + 1) % safeImages.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [activeIndex, isAutoPlayPaused, safeImages.length, isFocused]);
+  }, [activeIndex, isAutoPlayPaused, safeImages.length, isFocused, isSelected]);
 
   const handleCardPress = () => {
     navigation.navigate('SpaceDetails', {
@@ -112,8 +127,8 @@ const Card: React.FC<CardProps> = ({
         area: `${max_people}m²`,
         capacity: `${max_people} pessoas`,
         bathrooms: '2',
-        hasWifi: space_amenities.includes('Wi-Fi')
-      }
+        hasWifi: space_amenities.includes('Wi-Fi'),
+      },
     });
   };
 
@@ -122,18 +137,16 @@ const Card: React.FC<CardProps> = ({
     try {
       if (!_id) {
         console.error('Erro ao favoritar: ID do espaço não encontrado');
-        Alert.alert(
-          'Erro',
-          'Não foi possível favoritar este espaço. ID não encontrado.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Erro', 'Não foi possível favoritar este espaço. ID não encontrado.', [
+          { text: 'OK' },
+        ]);
         return;
       }
 
       const spaceData: Space = {
         _id,
         space_name,
-        image_url: safeImages.map(img => img.uri),
+        image_url: safeImages.map((img) => img.uri),
         location,
         price_per_hour,
         space_description,
@@ -146,7 +159,7 @@ const Card: React.FC<CardProps> = ({
         space_rules: [],
         owner_name: '',
         owner_phone: '',
-        owner_email: ''
+        owner_email: '',
       };
       await toggleFavorite(spaceData);
     } catch (error: any) {
@@ -162,19 +175,18 @@ const Card: React.FC<CardProps> = ({
   return (
     <TouchableOpacity
       style={[
-        styles.card, 
-        { 
+        styles.card,
+        {
           width: CARD_WIDTH,
           backgroundColor: isDarkMode ? theme.background : colors.white,
           borderWidth: isDarkMode ? 1 : 0,
-          borderColor: colors.blue
-        }
+          borderColor: colors.blue,
+        },
       ]}
       onPress={handleCardPress}
-      activeOpacity={0.9}
-    >
+      activeOpacity={0.9}>
       {/* Carrossel de Imagens */}
-      <View>
+      <View style={{ width: CARD_WIDTH, height: 180 }}>
         <ScrollView
           horizontal
           pagingEnabled
@@ -187,15 +199,17 @@ const Card: React.FC<CardProps> = ({
           onTouchEnd={() => setIsAutoPlayPaused(false)}
           decelerationRate="fast"
           snapToInterval={CARD_WIDTH}
-          snapToAlignment="center"
-        >
+          snapToAlignment="center">
           {safeImages.map((img, index) => (
-            <Image
-              key={index}
-              source={{ uri: img.uri }}
-              style={{ width: CARD_WIDTH, height: 180 }}
-              resizeMode="cover"
-            />
+            <TouchableWithoutFeedback key={index}>
+              <View style={{ width: CARD_WIDTH, height: 180 }}>
+                <Image
+                  source={{ uri: img.uri }}
+                  style={{ width: CARD_WIDTH, height: 180 }}
+                  resizeMode="cover"
+                />
+              </View>
+            </TouchableWithoutFeedback>
           ))}
         </ScrollView>
 
@@ -204,10 +218,7 @@ const Card: React.FC<CardProps> = ({
           {safeImages.map((_, index) => (
             <View
               key={index}
-              style={[
-                styles.dot,
-                index === activeIndex ? styles.dotActive : styles.dotInactive
-              ]}
+              style={[styles.dot, index === activeIndex ? styles.dotActive : styles.dotInactive]}
             />
           ))}
         </View>
@@ -236,17 +247,9 @@ const Card: React.FC<CardProps> = ({
 
           <TouchableOpacity onPress={handleFavoritePress}>
             {isFavorite ? (
-              <MaterialIcons
-                name="favorite"
-                size={21}
-                color={colors.error}
-              />
+              <MaterialIcons name="favorite" size={21} color={colors.error} />
             ) : (
-              <MaterialIcons
-                name="favorite-outline"
-                size={22}
-                color={theme.gray}
-              />
+              <MaterialIcons name="favorite-outline" size={22} color={theme.gray} />
             )}
           </TouchableOpacity>
         </View>
@@ -259,7 +262,9 @@ const Card: React.FC<CardProps> = ({
 
         <View style={styles.priceContainer}>
           <Text style={[styles.price, { color: theme.blue }]}>
-            {price_per_hour ? `R$ ${price_per_hour.toLocaleString('pt-BR')}/hora` : 'Preço não disponível'}
+            {price_per_hour
+              ? `R$ ${price_per_hour.toLocaleString('pt-BR')}/hora`
+              : 'Preço não disponível'}
           </Text>
         </View>
 

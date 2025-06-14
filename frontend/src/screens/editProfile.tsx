@@ -12,14 +12,17 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { colors } from '../styles/globalStyles/colors';
 import { useTheme } from '../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
 import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
+import { uploadImages } from '../services/imageService';
 
 const EditProfile = () => {
   const [formData, setFormData] = useState({
@@ -28,7 +31,8 @@ const EditProfile = () => {
     email: '',
     telephone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    profilePhoto: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,7 +50,8 @@ const EditProfile = () => {
         email: user.email || '',
         telephone: user.telephone || '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        profilePhoto: user.profilePhoto || ''
       });
     }
   }, [user]);
@@ -61,7 +66,7 @@ const EditProfile = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.surname || !formData.email || !formData.telephone) {
+    if (!formData.name || !formData.surname || !formData.email || !formData.telephone || !formData.profilePhoto) {
       setError('Por favor, preencha todos os campos obrigatórios.');
       return false;
     }
@@ -99,7 +104,8 @@ const EditProfile = () => {
         surname: formData.surname,
         email: formData.email,
         telephone: formData.telephone,
-        password: formData.password || undefined
+        password: formData.password || undefined,
+        profilePhoto: formData.profilePhoto
       };
 
       await userService.updateUser(user.id, userData);
@@ -122,6 +128,188 @@ const EditProfile = () => {
     }
   };
 
+  const openSettings = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      } else {
+        await Linking.openSettings();
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível abrir as configurações');
+    }
+  };
+
+  const handleCameraPermission = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permissão da Câmera Necessária',
+        'Para tirar fotos, precisamos de acesso à sua câmera. Sem esta permissão, você não poderá tirar fotos para seu perfil.',
+        [
+          {
+            text: 'Não Permitir',
+            style: 'cancel'
+          },
+          {
+            text: 'Permitir Acesso',
+            onPress: async () => {
+              const newStatus = await ImagePicker.requestCameraPermissionsAsync();
+              if (newStatus.status === 'granted') {
+                handleTakePhoto();
+              } else {
+                Alert.alert(
+                  'Configurações',
+                  'Para permitir o acesso, você precisa ativar a permissão nas configurações do aplicativo.',
+                  [
+                    {
+                      text: 'Cancelar',
+                      style: 'cancel'
+                    },
+                    {
+                      text: 'Abrir Configurações',
+                      onPress: openSettings
+                    }
+                  ]
+                );
+              }
+            }
+          }
+        ]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const handleGalleryPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permissão da Galeria Necessária',
+        'Para selecionar fotos, precisamos de acesso à sua galeria. Sem esta permissão, você não poderá escolher fotos para seu perfil.',
+        [
+          {
+            text: 'Não Permitir',
+            style: 'cancel'
+          },
+          {
+            text: 'Permitir Acesso',
+            onPress: async () => {
+              const newStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+              if (newStatus.status === 'granted') {
+                handlePickImage();
+              } else {
+                Alert.alert(
+                  'Configurações',
+                  'Para permitir o acesso, você precisa ativar a permissão nas configurações do aplicativo.',
+                  [
+                    {
+                      text: 'Cancelar',
+                      style: 'cancel'
+                    },
+                    {
+                      text: 'Abrir Configurações',
+                      onPress: openSettings
+                    }
+                  ]
+                );
+              }
+            }
+          }
+        ]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const hasPermission = await handleCameraPermission();
+      if (!hasPermission) return;
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        await uploadAndUpdatePhoto(result.assets[0].uri);
+      }
+    } catch (error) {
+      setError('Erro ao tirar foto');
+    }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const hasPermission = await handleGalleryPermission();
+      if (!hasPermission) return;
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        await uploadAndUpdatePhoto(result.assets[0].uri);
+      }
+    } catch (error) {
+      setError('Erro ao selecionar imagem');
+    }
+  };
+
+  const uploadAndUpdatePhoto = async (imageUri: string) => {
+    setLoading(true);
+    try {
+      const imageFile = {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profile-photo.jpg'
+      };
+
+      const uploadedUrls = await uploadImages([imageFile]);
+      if (uploadedUrls.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          profilePhoto: uploadedUrls[0]
+        }));
+        setSuccess('Foto de perfil atualizada com sucesso!');
+      }
+    } catch (error) {
+      setError('Erro ao fazer upload da imagem');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImagePicker = () => {
+    Alert.alert(
+      'Escolher Foto',
+      'Como você deseja adicionar sua foto de perfil?',
+      [
+        {
+          text: 'Tirar Foto',
+          onPress: handleTakePhoto
+        },
+        {
+          text: 'Escolher da Galeria',
+          onPress: handlePickImage
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        }
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar
@@ -142,13 +330,20 @@ const EditProfile = () => {
       <ScrollView style={styles.scrollView}>
         <View style={styles.profileImageContainer}>
           <View style={styles.profileImageWrapper}>
-            <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.blue }]}>
-              <Text style={styles.profileImageText}>
-                {formData.name.charAt(0)}{formData.surname.charAt(0)}
-              </Text>
-            </View>
-            <TouchableOpacity style={styles.changePhotoButton}>
-              <Ionicons name="camera" size={24} color={colors.white} />
+            <Image
+              source={formData.profilePhoto ? { uri: formData.profilePhoto } : { uri: 'https://via.placeholder.com/120' }}
+              style={styles.profileImagePlaceholder}
+            />
+            <TouchableOpacity 
+              style={styles.changePhotoButton}
+              onPress={handleImagePicker}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.white} size="small" />
+              ) : (
+                <Ionicons name="camera" size={24} color={colors.white} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
