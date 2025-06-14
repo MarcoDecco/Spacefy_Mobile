@@ -63,25 +63,25 @@ export default function Register() {
   };
 
   return (
-    <LinearGradient
-      colors={[colors.others[100], colors.others[200]]}
-      style={[styles.container]}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={[globalStyles.container]}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 20}
-        enabled
+      <ScrollView 
+        contentContainerStyle={{ 
+          flexGrow: 1,
+          justifyContent: 'center'
+        }}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={[styles.scrollContent]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
+        <LinearGradient
+          colors={[colors.others[100], colors.others[200]]}
+          style={[styles.container]}
         >
-          <View style={loginStyles.cardContainer}>
-            <View style={imageStyles.profileImageContainer}>
-              <Image source={require('../../assets/perfil-login.png')} style={imageStyles.profileImage} />
+          <View style={[loginStyles.cardContainer, { paddingHorizontal: 12, paddingVertical: 16 }]}>
+            <View style={[imageStyles.profileImageContainer, { marginBottom: 12 }]}>
+              <Image source={require('../../assets/perfil-login.png')} style={[imageStyles.profileImage, { width: 70, height: 70 }]} />
             </View>
 
             <BaseInput
@@ -90,6 +90,7 @@ export default function Register() {
               required
               value={formData.name}
               onChangeText={(text) => setFormData({ ...formData, name: text })}
+              containerStyle={{ marginBottom: 8 }}
             />
 
             <BaseInput
@@ -98,6 +99,7 @@ export default function Register() {
               required
               value={formData.surname}
               onChangeText={(text) => setFormData({ ...formData, surname: text })}
+              containerStyle={{ marginBottom: 8 }}
             />
 
             <BaseInput
@@ -108,6 +110,7 @@ export default function Register() {
               required
               value={formData.email}
               onChangeText={(text) => setFormData({ ...formData, email: text })}
+              containerStyle={{ marginBottom: 8 }}
             />
 
             <PasswordInput
@@ -116,6 +119,7 @@ export default function Register() {
               required
               value={formData.password}
               onChangeText={(text) => setFormData({ ...formData, password: text })}
+              containerStyle={{ marginBottom: 8 }}
             />
 
             <PasswordInput
@@ -124,6 +128,7 @@ export default function Register() {
               required
               value={confirmPassword}
               onChangeText={setConfirmPassword}
+              containerStyle={{ marginBottom: 8 }}
             />
 
             <BaseInput
@@ -133,6 +138,7 @@ export default function Register() {
               required
               value={formData.telephone}
               onChangeText={(text) => setFormData({ ...formData, telephone: text })}
+              containerStyle={{ marginBottom: 12 }}
             />
 
             <Button 
@@ -153,8 +159,8 @@ export default function Register() {
               <Text style={styles.loginLink}>Login</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </LinearGradient>
+        </LinearGradient>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 } 

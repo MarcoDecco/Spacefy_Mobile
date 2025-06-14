@@ -1,31 +1,37 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from './globalStyles/colors';
+
+const { width } = Dimensions.get('window');
 
 export const registerStyles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   scrollContent: {
-    flex: 1,
+    flexGrow: 1,
     width: '100%',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
   },
 
-  
   loginText: {
     color: colors.dark_gray,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 4,
+    fontSize: 13,
   },
   
   loginLink: {
     color: colors.blue,
     textAlign: 'center',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 13,
     textDecorationLine: 'underline',
+    marginBottom: 12,
   },
 
   dividerContainer: {
@@ -33,7 +39,7 @@ export const registerStyles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginVertical: 8,
-    paddingHorizontal: 32,
+    paddingHorizontal: 20,
   },
   
   divider: {
@@ -43,7 +49,8 @@ export const registerStyles = StyleSheet.create({
   },
   
   dividerText: {
-    marginHorizontal: 8,
+    marginHorizontal: 6,
     color: colors.dark_gray,
+    fontSize: 11,
   },
 }); 

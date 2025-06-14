@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+
 import {
   View,
   Image,
@@ -60,6 +61,7 @@ const Card: React.FC<CardProps> = ({
   owner_name = '',
   owner_phone = '',
   owner_email = '',
+
   isSelected = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
