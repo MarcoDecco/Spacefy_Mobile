@@ -26,5 +26,6 @@ export const colors = {
     others: {
         100: '#C2EBFF',
         200: '#6ACDFF',
+        300: '#E0F6FF',
     }
 };

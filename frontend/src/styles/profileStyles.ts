@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './globalStyles/colors';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export const profileStyles = StyleSheet.create({
   container: {
@@ -238,13 +239,12 @@ export const profileStyles = StyleSheet.create({
 
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     // marginBottom: 20,
   },
 
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '500',
     color: colors.black,
   },
 
@@ -315,6 +315,53 @@ export const profileStyles = StyleSheet.create({
   saveButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
+
+  documentTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 8,
+  },
+
+  documentTypeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gray,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  documentTypeButtonActive: {
+    backgroundColor: colors.blue,
+    borderColor: colors.blue,
+  },
+
+  documentTypeButtonText: {
+    fontSize: 16,
+    color: colors.gray,
+    fontWeight: '500',
+  },
+
+  documentTypeButtonTextActive: {
+    color: colors.white,
+  },
+
+  paymentTerm: {
+    width: '100%',
+    flexDirection: 'row',
+    marginTop: 8,
+    padding: 10,
+    backgroundColor: colors.others[300],
+    borderRadius: 6,
+    borderWidth: 0.8,
+    borderColor: colors.blue,
+    gap: 8,
+    alignItems: 'flex-start',
+  }
 }); 

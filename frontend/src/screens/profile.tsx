@@ -14,6 +14,28 @@ import mansao from '../../assets/mansao.png';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+const formatDocument = (value: string, type: 'CPF' | 'CNPJ') => {
+  // Remove todos os caracteres não numéricos
+  const numbers = value.replace(/\D/g, '');
+  
+  if (type === 'CPF') {
+    // Aplica a máscara de CPF: 000.000.000-00
+    return numbers
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  } else {
+    // Aplica a máscara de CNPJ: 00.000.000/0000-00
+    return numbers
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  }
+};
+
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser, signOut } = useAuth();
@@ -92,6 +114,18 @@ export default function Profile() {
   const handleOpenSpaceOwnerModal = () => {
     console.log('Opening space owner modal...');
     setIsSpaceOwnerModalVisible(true);
+  };
+
+  //Formatação do documento no momento em que o usuário estiver digitando o número.
+  const handleDocumentChange = (text: string) => {
+    // Remove caracteres não numéricos antes de formatar
+    const numbers = text.replace(/\D/g, '');
+    // Limita o tamanho baseado no tipo de documento
+    const maxLength = documentType === 'CPF' ? 11 : 14;
+    const limitedNumbers = numbers.slice(0, maxLength);
+    // Aplica a formatação
+    const formatted = formatDocument(limitedNumbers, documentType);
+    setDocumentNumber(formatted);
   };
 
   if (!user) {
@@ -260,20 +294,21 @@ export default function Profile() {
         </TouchableOpacity>
       </Modal>
 
-      {/* New Space Owner Registration Modal */}
+      {/* Modal de Registro para se tornar um Locador dentro da Plataforma */}
       <Modal
         visible={isSpaceOwnerModalVisible}
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         onRequestClose={() => setIsSpaceOwnerModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.editProfileModal}>
             <View style={styles.modalHeader}>
-              <View style={{ gap: 10 }}>
+              <View>
                 <Text style={styles.modalTitle}>Registre-se como Locador(a)</Text>
-                <Text style={{ fontSize: 16 }}>Antes de continuar com o anuncio do espaço, você precisa se tornar um locador(a) em nossa plataforma.</Text>
+                <Text style={{ fontSize: 16, marginTop: 16 }}>Para cadastrar espaços em nossa plataforma, você precisa ter uma conta de locador(a).</Text>
               </View>
+
               <TouchableOpacity 
                 onPress={() => setIsSpaceOwnerModalVisible(false)}
                 style={styles.closeButton}
@@ -282,16 +317,51 @@ export default function Profile() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.editProfileContent}>
+            <View style={styles.paymentTerm}>
+              <Feather name="info" size={20} color={colors.blue} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 14, color: colors.blue, lineHeight: 20 }}>
+                  Nos informe um de seus documentos e aceite nossos termos de distribuição de pagamento:
+                </Text>
+              </View>
+            </View>
+
+            <View>
+              <View style={styles.documentTypeContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.documentTypeButton,
+                    documentType === 'CPF' && styles.documentTypeButtonActive
+                  ]}
+                  onPress={() => setDocumentType('CPF')}
+                >
+                  <Text style={[
+                    styles.documentTypeButtonText,
+                    documentType === 'CPF' && styles.documentTypeButtonTextActive
+                  ]}>CPF</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.documentTypeButton,
+                    documentType === 'CNPJ' && styles.documentTypeButtonActive
+                  ]}
+                  onPress={() => setDocumentType('CNPJ')}
+                >
+                  <Text style={[
+                    styles.documentTypeButtonText,
+                    documentType === 'CNPJ' && styles.documentTypeButtonTextActive
+                  ]}>CNPJ</Text>
+                </TouchableOpacity>
+              </View>
+
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>{documentType}</Text>
                 <TextInput
                   style={styles.input}
                   value={documentNumber}
-                  onChangeText={setDocumentNumber}
-                  placeholder={`Digite seu ${documentType}`}
+                  onChangeText={handleDocumentChange}
+                  placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
                   keyboardType="numeric"
-                  maxLength={documentType === 'CPF' ? 11 : 14}
                 />
               </View>
 
