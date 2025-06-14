@@ -4,9 +4,10 @@ import Card from "../components/card";
 import { useCards } from "../hooks/useCards";
 import { homeStyles as styles } from '../styles/homeStyles';
 import { useTheme } from '../contexts/ThemeContext';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
+import ScrollToTopButton from '../components/scrollToTopButton';
 
 // Função para mapear os dados da API para o formato esperado pelo Card
 function mapCard(item: any) {
@@ -39,6 +40,8 @@ export default function Home() {
   const { cards, loading } = useCards();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
   const [filters, setFilters] = useState<FilterOptions>({
     priceRange: '',
     spaceType: '',
@@ -135,6 +138,15 @@ export default function Home() {
     </View>
   );
 
+  const handleScroll = (event: any) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollTop(offsetY > 300);
+  };
+
+  const scrollToTop = () => {
+    flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+  };
+
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <SearchBar 
@@ -143,13 +155,17 @@ export default function Home() {
         initialValue={searchQuery} 
       />
       <FlatList
+        ref={flatListRef}
         data={filteredCards}
         keyExtractor={(item) => item._id}
         renderItem={renderCard}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.contentContainer, { alignItems: 'center' }]}
         ListEmptyComponent={EmptySearchComponent}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       />
+      <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
     </View>
   );
 }
