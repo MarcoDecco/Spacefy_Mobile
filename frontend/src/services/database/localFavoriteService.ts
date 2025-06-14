@@ -57,7 +57,7 @@ class LocalFavoriteService {
         const sanitizedWeekDays = JSON.stringify(space.week_days || []);
         const sanitizedRules = JSON.stringify(space.space_rules || []);
 
-        // Usando apenas as colunas que existem na tabela spaces
+        // Usando apenas as colunas que existem na tabela spaces, sem os campos automáticos
         const sanitizedData = {
             _id: space._id,
             space_name: space.space_name,
@@ -70,8 +70,7 @@ class LocalFavoriteService {
             max_people: space.max_people || 0,
             week_days: sanitizedWeekDays,
             space_rules: sanitizedRules,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            last_updated: new Date().toISOString()
         };
 
         console.log('✅ Dados do espaço sanitizados:', {
@@ -83,67 +82,70 @@ class LocalFavoriteService {
     }
 
     async saveFavorite(space: Space, userId: string): Promise<void> {
-        console.log('💾 Iniciando salvamento de favorito:', { spaceId: space._id, userId });
-
         try {
-            if (!userId) {
-                console.error('❌ ID do usuário não fornecido');
-                throw new Error('ID do usuário é obrigatório');
+            console.log('💾 Iniciando salvamento de favorito:', { spaceId: space._id, userId });
+
+            // Valida os dados antes de salvar
+            if (!space._id || !userId) {
+                throw new Error('ID do espaço e ID do usuário são obrigatórios');
             }
 
-            // Sanitiza os dados do espaço antes da transação
-            const spaceData = this.sanitizeSpaceData(space);
-            console.log('📝 Dados do espaço preparados:', spaceData);
-
-            // Primeiro, verifica se o usuário existe
-            const userCheck = await databaseService.executeQuery<{ user_exists: number }>(
-                'SELECT 1 as user_exists FROM users WHERE id = ?',
+            // Verifica se o usuário existe
+            const userExists = await databaseService.executeQuery<any>(
+                'SELECT id FROM users WHERE id = ?',
                 [userId]
             );
 
-            if (userCheck.length === 0) {
+            if (!userExists || userExists.length === 0) {
                 throw new Error('Usuário não encontrado');
             }
 
+            // Sanitiza os dados do espaço
+            const sanitizedSpace = this.sanitizeSpaceData(space);
+            console.log('📝 Dados do espaço preparados:', sanitizedSpace);
+
             // Insere ou atualiza o espaço
-            const spaceQuery = `
-                INSERT INTO spaces (${Object.keys(spaceData).join(', ')})
-                VALUES (${Object.keys(spaceData).map(() => '?').join(', ')})
-                ON CONFLICT(_id) DO UPDATE SET
-                ${Object.keys(spaceData).map(key => `${key} = excluded.${key}`).join(', ')};
+            const insertSpaceQuery = `
+                INSERT OR REPLACE INTO spaces (
+                    _id, space_name, image_url, location, price_per_hour,
+                    space_description, space_amenities, space_type, max_people,
+                    week_days, space_rules, last_updated
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
-            await databaseService.executeQuery(spaceQuery, Object.values(spaceData));
+            await databaseService.executeQuery(insertSpaceQuery, [
+                sanitizedSpace._id,
+                sanitizedSpace.space_name,
+                sanitizedSpace.image_url,
+                sanitizedSpace.location,
+                sanitizedSpace.price_per_hour,
+                sanitizedSpace.space_description,
+                sanitizedSpace.space_amenities,
+                sanitizedSpace.space_type,
+                sanitizedSpace.max_people,
+                sanitizedSpace.week_days,
+                sanitizedSpace.space_rules,
+                sanitizedSpace.last_updated
+            ]);
 
-            // Insere o favorito se não existir
+            // Insere o favorito
             const now = new Date().toISOString();
-            const favoriteQuery = `
-                INSERT INTO favorite_spaces (space_id, user_id, created_at, last_viewed)
-                SELECT ?, ?, ?, ?
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM favorite_spaces 
-                    WHERE space_id = ? AND user_id = ?
-                );
+            const insertFavoriteQuery = `
+                INSERT OR REPLACE INTO favorite_spaces (
+                    space_id, user_id, created_at, last_viewed
+                ) VALUES (?, ?, ?, ?)
             `;
 
-            await databaseService.executeQuery(favoriteQuery, [
+            await databaseService.executeQuery(insertFavoriteQuery, [
                 space._id,
                 userId,
                 now,
-                now,
-                space._id,
-                userId
+                now
             ]);
 
             console.log('✅ Favorito salvo com sucesso');
         } catch (error) {
-            console.error('❌ Erro ao salvar favorito:', {
-                error,
-                spaceId: space._id,
-                userId,
-                errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
-                errorStack: error instanceof Error ? error.stack : undefined
-            });
+            console.error('❌ Erro ao salvar favorito:', error);
             throw error;
         }
     }
@@ -203,19 +205,14 @@ class LocalFavoriteService {
                 _id: row._id,
                 space_name: row.space_name,
                 image_url: JSON.parse(row.image_url || '[]'),
-                location: row.location,
+                location: JSON.parse(row.location || '{}'),
                 price_per_hour: row.price_per_hour,
                 space_description: row.space_description,
                 space_amenities: JSON.parse(row.space_amenities || '[]'),
                 space_type: row.space_type,
                 max_people: row.max_people,
                 week_days: JSON.parse(row.week_days || '[]'),
-                opening_time: row.opening_time,
-                closing_time: row.closing_time,
-                space_rules: JSON.parse(row.space_rules || '[]'),
-                owner_name: row.owner_name,
-                owner_phone: row.owner_phone,
-                owner_email: row.owner_email
+                space_rules: JSON.parse(row.space_rules || '[]')
             }));
         } catch (error) {
             console.error('Erro ao buscar espaços favoritos:', error);
