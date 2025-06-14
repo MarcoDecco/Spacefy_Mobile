@@ -30,11 +30,8 @@ class LocalAuthService {
             this.validateUserData(sanitizedData);
             console.log('✅ Dados validados com sucesso');
 
-            // Executa todas as operações em uma única transação
+            // Executa a inserção/atualização sem transação explícita
             const query = `
-                BEGIN IMMEDIATE;
-                
-                -- Insere ou atualiza o usuário
                 INSERT INTO users (id, email, token, lastLogin, isLoggedIn)
                 VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
@@ -42,8 +39,6 @@ class LocalAuthService {
                     token = excluded.token,
                     lastLogin = excluded.lastLogin,
                     isLoggedIn = excluded.isLoggedIn;
-                
-                COMMIT;
             `;
 
             const params = [
@@ -56,9 +51,14 @@ class LocalAuthService {
 
             await databaseService.executeQuery(query, params);
 
-            // Verificação pós-salvamento
-            const savedUser = await databaseService.executeQuery<LocalUser>(
-                'SELECT * FROM users WHERE id = ?',
+            // Verificação pós-salvamento usando executeQuery
+            const savedUser = await databaseService.executeQuery<{
+                id: string;
+                email: string;
+                lastLogin: string;
+                isLoggedIn: number;
+            }>(
+                'SELECT id, email, lastLogin, isLoggedIn FROM users WHERE id = ?',
                 [sanitizedData.id]
             );
 
@@ -160,17 +160,13 @@ class LocalAuthService {
         try {
             console.log('🚪 Iniciando processo de logout...');
 
+            // Executa a atualização sem transação explícita
             const query = `
-                BEGIN IMMEDIATE;
-                
-                -- Atualiza o status de login do usuário
                 UPDATE users 
                 SET isLoggedIn = 0,
-                    token = NULL,
+                    token = '',
                     lastLogin = CURRENT_TIMESTAMP
                 WHERE id = ?;
-                
-                COMMIT;
             `;
 
             await databaseService.executeQuery(query, [userId]);

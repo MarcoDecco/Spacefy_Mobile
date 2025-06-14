@@ -231,70 +231,82 @@ class DatabaseService {
         const needsLock = query.trim().toLowerCase().includes('begin');
 
         try {
-            if (needsLock) {
-                await this.acquireTransactionLock();
+            // Verifica se já existe uma transação em andamento
+            const isActive = await this.checkTransactionState();
 
-                // Força um ROLLBACK antes de iniciar nova transação
+            // Se já estamos em uma transação e a query tenta iniciar outra
+            if (isActive && needsLock) {
+                console.log('[SQLITE] ⚠️ Tentativa de iniciar transação dentro de outra transação, removendo BEGIN/COMMIT');
+
+                // Remove os comandos de transação da query
+                const modifiedQuery = query
+                    .replace(/BEGIN\s+IMMEDIATE;?/i, '')
+                    .replace(/COMMIT;?/i, '')
+                    .trim();
+
+                console.log('[SQLITE] 📝 Executando query dentro de transação existente:', {
+                    originalQuery: query,
+                    modifiedQuery,
+                    params
+                });
+
+                const result = await this.db!.runAsync(modifiedQuery, params);
+                console.log('[SQLITE] ✅ Query executada com sucesso dentro da transação:', {
+                    type: modifiedQuery.trim().split(' ')[0].toUpperCase(),
+                    affectedRows: result.changes
+                });
+
+                return [];
+            }
+
+            // Se precisamos de lock e não estamos em uma transação
+            if (needsLock && !isActive) {
+                await this.acquireTransactionLock();
                 try {
-                    console.log('[SQLITE] 🔄 Forçando ROLLBACK antes de nova transação...');
-                    await this.db.runAsync('ROLLBACK;');
-                    this.transactionInProgress = false;
-                } catch (e) {
-                    // Ignora erro se não houver transação ativa
-                    console.log('[SQLITE] ℹ️ Sem transação ativa para ROLLBACK');
+                    console.log('[SQLITE] 📝 Iniciando nova transação');
+                    const result = await this.db!.runAsync(query, params);
+                    console.log('[SQLITE] ✅ Transação executada com sucesso:', {
+                        affectedRows: result.changes
+                    });
+                    return [];
+                } finally {
+                    this.releaseTransactionLock();
                 }
             }
 
-            // Verifica e limpa qualquer transação pendente
-            await this.checkTransactionState();
-
-            // Se a query já contém BEGIN TRANSACTION, executa direto
-            if (needsLock) {
-                console.log('[SQLITE] 📝 Executando query com transação explícita:', { query, params });
-                const result = await this.db!.runAsync(query, params);
-                console.log('[SQLITE] ✅ Query com transação executada com sucesso:', {
-                    type: query.trim().split(' ')[0].toUpperCase(),
-                    affectedRows: result.changes
-                });
-                return [] as T[];
-            }
-
-            // SELECT não precisa de transação
-            if (query.trim().toLowerCase().startsWith('select')) {
-                console.log('[SQLITE] 📝 Executando query SELECT:', { query, params });
-                const result = await this.db.getAllAsync(query, params);
-                console.log('[SQLITE] ✅ Query SELECT executada com sucesso:', { rowCount: result.length });
-                return result as T[];
-            }
-
-            // Se já está em transação, executa direto
-            if (inTransaction) {
-                console.log('[SQLITE] 📝 Executando query dentro de transação:', { query, params });
-                const result = await this.db!.runAsync(query, params);
-                console.log('[SQLITE] ✅ Query executada com sucesso:', {
-                    type: query.trim().split(' ')[0].toUpperCase(),
-                    affectedRows: result.changes
-                });
-                return [] as T[];
-            }
-
-            // Se não está em transação e a query não tem BEGIN, inicia uma
-            return await this.executeInTransaction(async () => {
-                return await this.executeQuery(query, params, true);
+            // Para queries normais (sem transação)
+            console.log('[SQLITE] 📝 Executando query:', {
+                type: query.trim().split(' ')[0].toUpperCase(),
+                params
             });
+
+            const result = await this.db!.getAllAsync<T>(query, params);
+            console.log('[SQLITE] ✅ Query executada com sucesso:', {
+                rowsAffected: result.length
+            });
+
+            return result;
         } catch (error) {
             console.error('[SQLITE] ❌ Erro ao executar query:', {
                 error,
-                query,
+                query: query.substring(0, 100) + '...',
                 params,
                 errorMessage: error instanceof Error ? error.message : 'Erro desconhecido',
                 errorStack: error instanceof Error ? error.stack : undefined
             });
-            throw error;
-        } finally {
-            if (needsLock) {
-                this.releaseTransactionLock();
+
+            // Se estamos em uma transação e ocorreu um erro, faz rollback
+            if (await this.checkTransactionState()) {
+                console.log('[SQLITE] ⚠️ Erro em transação, fazendo rollback...');
+                try {
+                    await this.db!.runAsync('ROLLBACK;');
+                    this.transactionInProgress = false;
+                } catch (rollbackError) {
+                    console.error('[SQLITE] ❌ Erro ao fazer rollback:', rollbackError);
+                }
             }
+
+            throw error;
         }
     }
 
@@ -386,24 +398,20 @@ class DatabaseService {
     ): Promise<void> {
         if (!this.db) throw new Error('Database not initialized');
 
+        const setClause = Object.entries(data)
+            .map(([key]) => `${key} = ?`)
+            .join(', ');
+
+        const query = `
+            UPDATE ${databaseConfig.tables[table].name}
+            SET ${setClause}
+            WHERE ${where.column} = ?
+        `;
+
+        const params = [...Object.values(data), where.value];
+
         try {
-            console.log(`[SQLITE] 📝 Iniciando atualização em ${table}:`, { data, where });
-
-            const setClause = Object.keys(data)
-                .map(key => `${key} = ?`)
-                .join(', ');
-            const values = [...Object.values(data), where.value];
-
-            const query = `
-                UPDATE ${databaseConfig.tables[table].name}
-                SET ${setClause}
-                WHERE ${where.column} = ?
-            `;
-
-            await this.executeInTransaction(async () => {
-                await this.executeQuery(query, values, true); // <-- Passe true aqui!
-            });
-
+            await this.executeQuery(query, params);
             console.log(`[SQLITE] ✅ Atualização em ${table} realizada com sucesso`);
         } catch (error) {
             console.error(`[SQLITE] ❌ Erro ao atualizar em ${table}:`, {
@@ -424,9 +432,9 @@ class DatabaseService {
         if (!this.db) throw new Error('Database not initialized');
 
         const query = `
-      DELETE FROM ${databaseConfig.tables[table].name}
-      WHERE ${where.column} = ?
-    `;
+            DELETE FROM ${databaseConfig.tables[table].name}
+            WHERE ${where.column} = ?
+        `;
 
         await this.executeQuery(query, [where.value]);
     }
@@ -438,10 +446,10 @@ class DatabaseService {
         if (!this.db) throw new Error('Database not initialized');
 
         const query = `
-      SELECT * FROM ${databaseConfig.tables[table].name}
-      WHERE ${where.column} = ?
-      LIMIT 1
-    `;
+            SELECT * FROM ${databaseConfig.tables[table].name}
+            WHERE ${where.column} = ?
+            LIMIT 1
+        `;
 
         const results = await this.executeQuery<DatabaseSchema[T]>(query, [where.value]);
         return results[0] || null;
@@ -486,7 +494,6 @@ class DatabaseService {
         }
     }
 
-    // Remova o método upsert e adicione este método updateSession:
     async updateSession<T extends keyof DatabaseSchema>(
         table: T,
         data: Partial<DatabaseSchema[T]>,
