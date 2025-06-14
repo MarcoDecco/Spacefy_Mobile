@@ -14,7 +14,14 @@ interface Space {
   space_name: string;
   image_url: string[];
   price_per_hour: number;
-  location: string;
+  location: string | {
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+    formatted_address: string;
+    place_id: string;
+  };
   space_description: string;
   space_amenities: string[];
   space_type: string;
@@ -101,7 +108,7 @@ export default function Favorites() {
       _id: item.spaceId._id,
       space_name: item.spaceId.space_name,
       image_url: item.spaceId.image_url,
-      location: item.spaceId.location,
+      location: typeof item.spaceId.location === 'object' ? item.spaceId.location.formatted_address : item.spaceId.location,
       price_per_hour: item.spaceId.price_per_hour,
       space_description: item.spaceId.space_description || '',
       space_amenities: item.spaceId.space_amenities || [],

@@ -24,25 +24,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useFavorites } from '../hooks/useFavorites';
 import { Space } from '../types/favorite';
 
-interface CardProps {
-  _id: string;
-  image_url: string[];
-  space_name: string;
-  location: string;
-  price_per_hour: number;
-  space_description: string;
-  space_amenities: string[];
-  space_type: string;
-  max_people: number;
-  week_days: string[];
-  opening_time: string;
-  closing_time: string;
-  space_rules: string[];
-  owner_name: string;
-  owner_phone: string;
-  owner_email: string;
+type CardProps = Space & {
   isSelected?: boolean;
-}
+};
 
 const Card: React.FC<CardProps> = ({
   _id,
@@ -61,7 +45,6 @@ const Card: React.FC<CardProps> = ({
   owner_name = '',
   owner_phone = '',
   owner_email = '',
-
   isSelected = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -119,7 +102,7 @@ const Card: React.FC<CardProps> = ({
         id: _id,
         images: safeImages,
         title: space_name,
-        address: location,
+        address: typeof location === 'object' ? location.formatted_address : location,
         price: `R$ ${price_per_hour.toLocaleString('pt-BR')}`,
         rating: 5.0,
         reviews: 100,
@@ -149,7 +132,11 @@ const Card: React.FC<CardProps> = ({
         _id,
         space_name,
         image_url: safeImages.map((img) => img.uri),
-        location,
+        location: typeof location === 'object' ? location : {
+          coordinates: { lat: 0, lng: 0 },
+          formatted_address: location,
+          place_id: ''
+        },
         price_per_hour,
         space_description,
         space_amenities,
@@ -240,7 +227,7 @@ const Card: React.FC<CardProps> = ({
               {space_name || 'Sem nome'}
             </Text>
             <Text style={[styles.address, { color: theme.gray }]} numberOfLines={1}>
-              {typeof location === 'string' ? location : 'Endereço não disponível'}
+              {typeof location === 'object' ? location.formatted_address : location}
             </Text>
             {space_type && (
               <Text style={[styles.spaceType, { color: theme.gray }]}>{space_type}</Text>
