@@ -5,30 +5,23 @@ import { Colors } from 'react-native/Libraries/NewAppScreen';
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.light_gray,
   },
 
   header: {
     backgroundColor: colors.blue,
     paddingTop: 60,
-    paddingBottom: 30,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingBottom: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    boxShadow: '0 5px 6px 0 rgba(0, 0, 0, 0.2),'
   },
 
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
 
   profileInfo: {
@@ -42,14 +35,7 @@ export const profileStyles = StyleSheet.create({
     backgroundColor: colors.white,
     padding: 3,
     marginBottom: 15,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    boxShadow: '0 5px 6px 0 rgba(0, 0, 0, 0.2),'
   },
 
   avatar: {
@@ -62,19 +48,21 @@ export const profileStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.white,
-    marginBottom: 5,
+    marginBottom: 4,
   },
 
   email: {
     fontSize: 16,
     color: colors.white,
-    marginBottom: 5,
+    opacity: 0.9,
+    marginBottom: 4,
   },
 
   telephone: {
     fontSize: 16,
     color: colors.white,
-    marginBottom: 15,
+    marginBottom: 8,
+    opacity: 0.9,
   },
 
   content: {
@@ -105,20 +93,18 @@ export const profileStyles = StyleSheet.create({
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 15,
     backgroundColor: colors.white,
-    borderWidth: 0.5,
-    borderColor: colors.line,
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
     boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.2)',
   },
 
   menuItemText: {
     flex: 1,
     fontSize: 16,
-    marginLeft: 15,
     color: colors.black,
+    marginLeft: 12,
   },
 
   logoutButton: {
@@ -126,7 +112,7 @@ export const profileStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 15,
-    backgroundColor: colors.white,
+    backgroundColor: colors.error,
     borderWidth: 0.8,
     borderColor: colors.error,
     borderRadius: 10,
@@ -135,7 +121,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   logoutButtonText: {
-    color: colors.error,
+    color: colors.white,
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 8,
@@ -143,9 +129,9 @@ export const profileStyles = StyleSheet.create({
   
   bannerContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    marginBottom: 22,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
   },
 
   bannerTitle: {
@@ -156,16 +142,16 @@ export const profileStyles = StyleSheet.create({
   },
 
   bannerSubtitle: {
+    fontSize: 14,
     color: colors.dark_gray,
-    fontSize: 14, 
     marginBottom: 16,
   },
 
   bannerButton: {
     backgroundColor: colors.blue,
-    borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
+    borderRadius: 8,
     alignSelf: 'flex-start',
   },
 
@@ -176,10 +162,8 @@ export const profileStyles = StyleSheet.create({
   },
 
   bannerImage: {
-    width: 80,
-    height: 80,
-    marginLeft: 16,
     flex: 1,
+    height: 100,
   },
 
   notificationIconContainer: {
@@ -293,7 +277,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   input: {
-    borderWidth: 1,
+    borderWidth: 0.8,
     borderColor: colors.gray,
     borderRadius: 8,
     padding: 12,
@@ -309,7 +293,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   saveButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.5,
   },
 
   saveButtonText: {
@@ -398,9 +382,9 @@ export const profileStyles = StyleSheet.create({
   },
 
   termsText: {
+    flex: 1,
     fontSize: 14,
     color: colors.dark_gray,
-    flex: 1,
   },
 
   termsLink: {
