@@ -29,8 +29,8 @@ import { CalendarModal } from '../components/calendarModal';
 import { LandlordCard } from '../components/LandlordCard';
 import { SpaceDetailsGrid } from '../components/SpaceDetailsGrid';
 import { TimeSelectModal } from '../components/TimeSelectModal';
-import { SpaceDetailsScroll } from '../components/SpaceDetailsScroll';
 import { SpaceDetailsModal } from '../components/SpaceDetailsModal';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 interface SpaceDetailsProps {
   route: {
@@ -1123,16 +1123,12 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       />
 
       {/* Modal de Confirmação */}
-      <Modal visible={confirmModalVisible} transparent={true} animationType="fade">
-        <View style={styles.calendarOverlay}>
-          <View style={[styles.confirmModal, isDarkMode && { backgroundColor: theme.card }]}>
-            <MaterialIcons name="check-circle" size={48} color={colors.blue} />
-            <Text style={[styles.confirmText, isDarkMode && { color: theme.text }]}>
-              Reserva realizada com sucesso!
-            </Text>
-          </View>
-        </View>
-      </Modal>
+      <ConfirmModal
+        visible={confirmModalVisible}
+        styles={styles}
+        isDarkMode={isDarkMode}
+        theme={theme}
+      />
 
       {/* Modal de Sucesso */}
       <Modal visible={successModalVisible} transparent={true} animationType="fade">
