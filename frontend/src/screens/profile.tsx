@@ -210,10 +210,12 @@ export default function Profile() {
           <Ionicons name="chevron-forward" size={24} color={colors.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={24} color={colors.error} />
-          <Text style={styles.logoutButtonText}>Sair</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomSpacing}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color={colors.error} />
+            <Text style={styles.logoutButtonText}>Sair</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <Modal
@@ -322,13 +324,6 @@ export default function Profile() {
                 
                 <Text style={styles.modalSubTittle}>Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.</Text>
 
-                {/* <View style={styles.paymentTerm}>
-                  <Feather name="info" size={20} color={colors.blue} />
-                  <Text style={styles.paymentTermText}>
-                    Nos informe um de seus documentos e aceite nossos termos de distribuição de pagamento:
-                  </Text>
-                </View> */}
-
                 <View>
                   <View style={styles.documentTypeContainer}>
                     <TouchableOpacity
@@ -414,62 +409,6 @@ export default function Profile() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
-      </Modal>
-
-      {/* Modal de Termos de Distribuição de Pagamento */}
-      <Modal
-        visible={isTermsModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setIsTermsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.termsModalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Termos de Distribuição de Pagamento</Text>
-              <TouchableOpacity 
-                onPress={() => setIsTermsModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Ionicons name="close" size={24} color={colors.black} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.termsContent}>
-              <Text style={styles.termsSectionTitle}>1. Processo de Pagamento</Text>
-              <Text style={styles.termsParagraph}>
-                A Spacefy atua como intermediadora no processo de pagamento entre locadores e locatários. 
-                Os valores são mantidos em uma conta segura até a confirmação da locação.
-              </Text>
-
-              <Text style={styles.termsSectionTitle}>2. Distribuição dos Valores</Text>
-              <Text style={styles.termsParagraph}>
-                Após a confirmação da locação, o valor é distribuído da seguinte forma:
-                {'\n\n'}• 90% do valor total é transferido para o locador
-                {'\n'}• 10% é retido como taxa de serviço da plataforma
-              </Text>
-
-              <Text style={styles.termsSectionTitle}>3. Prazo de Pagamento</Text>
-              <Text style={styles.termsParagraph}>
-                O pagamento é processado em até 5 dias úteis após a confirmação da locação. 
-                O valor será creditado na conta bancária cadastrada pelo locador.
-              </Text>
-
-              <Text style={styles.termsSectionTitle}>4. Cancelamentos</Text>
-              <Text style={styles.termsParagraph}>
-                Em caso de cancelamento, o valor é devolvido integralmente ao locatário, 
-                exceto em situações específicas definidas em nossa política de cancelamento.
-              </Text>
-            </ScrollView>
-
-            <TouchableOpacity
-              style={styles.termsCloseButton}
-              onPress={() => setIsTermsModalVisible(false)}
-            >
-              <Text style={styles.termsCloseButtonText}>Entendi</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
       </Modal>
     </View>
   );
