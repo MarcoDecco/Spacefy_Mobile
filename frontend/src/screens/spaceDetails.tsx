@@ -30,6 +30,7 @@ import { LandlordCard } from '../components/LandlordCard';
 import { SpaceDetailsGrid } from '../components/SpaceDetailsGrid';
 import { TimeSelectModal } from '../components/TimeSelectModal';
 import { SpaceDetailsScroll } from '../components/SpaceDetailsScroll';
+import { SpaceDetailsModal } from '../components/SpaceDetailsModal';
 
 interface SpaceDetailsProps {
   route: {
@@ -1146,67 +1147,16 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       </Modal>
 
       {/* Modal de Comodidades */}
-      <Modal
+      <SpaceDetailsModal
         visible={detailsModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setDetailsModalVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
-          <View style={styles.calendarOverlay}>
-            <TouchableWithoutFeedback>
-              <View
-                style={[
-                  styles.detailsModal,
-                  isDarkMode && {
-                    backgroundColor: theme.card,
-                    borderColor: theme.border,
-                    borderWidth: 1,
-                  },
-                ]}>
-                {/* Header do Modal */}
-                <View
-                  style={[
-                    styles.detailsModalHeader,
-                    isDarkMode && {
-                      backgroundColor: theme.background,
-                      borderBottomColor: theme.border,
-                    },
-                  ]}>
-                  <Text style={[styles.detailsModalTitle, isDarkMode && { color: theme.text }]}>
-                    Detalhes do Espaço
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setDetailsModalVisible(false)}
-                    style={[
-                      styles.detailsModalCloseButton,
-                      isDarkMode && {
-                        backgroundColor: theme.card,
-                        borderColor: theme.border,
-                        borderWidth: 1,
-                      },
-                    ]}>
-                    <MaterialIcons
-                      name="close"
-                      size={24}
-                      color={isDarkMode ? theme.text : colors.black}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Conteúdo Rolável */}
-                <SpaceDetailsScroll
-                  spaceDetails={spaceDetails}
-                  space={space}
-                  isDarkMode={isDarkMode}
-                  theme={theme}
-                  styles={styles}
-                  onSeeMore={() => setDetailsModalVisible(true)}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        onClose={() => setDetailsModalVisible(false)}
+        spaceDetails={spaceDetails}
+        space={space}
+        isDarkMode={isDarkMode}
+        theme={theme}
+        styles={styles}
+        onSeeMore={() => setDetailsModalVisible(true)}
+      />
     </SafeAreaView>
   );
 }
