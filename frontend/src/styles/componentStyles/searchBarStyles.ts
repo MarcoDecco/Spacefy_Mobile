@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { colors } from '../globalStyles/colors';
 
 import Constants from 'expo-constants';
-import { colors } from './colors';
 // instanciando a altura da Status Bar do dispositivo
 const statusBarHeight = Constants.statusBarHeight
 

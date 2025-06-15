@@ -1,6 +1,5 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './globalStyles/colors';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export const profileStyles = StyleSheet.create({
   container: {
@@ -203,7 +202,7 @@ export const profileStyles = StyleSheet.create({
 
   editProfileModal: {
     backgroundColor: colors.white,
-    borderRadius: 20,
+    borderRadius: 12,
     padding: 20,
     width: '90%',
     maxHeight: '80%',

@@ -43,6 +43,8 @@ export type RootStackParamList = {
   EditProfile: undefined;
   Messages: { conversation: Conversation };
   PaymentTerms: undefined;
+  SpaceWelcomeScreen: undefined;
+  SpaceInfoScreen: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

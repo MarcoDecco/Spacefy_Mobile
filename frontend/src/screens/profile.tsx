@@ -430,8 +430,8 @@ export default function Profile() {
                         );
                         return;
                       }
-                      // TODO: Implement registration logic
                       setIsSpaceOwnerModalVisible(false);
+                      navigation.navigate('SpaceWelcomeScreen' as never);
                     }}
                     disabled={!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)}
                   >

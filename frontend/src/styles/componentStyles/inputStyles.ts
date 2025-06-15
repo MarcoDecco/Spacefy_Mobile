@@ -20,8 +20,6 @@ export const inputStyles = StyleSheet.create({
 
   inputContainer: {
     width: '100%',
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.dark_gray,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -49,5 +47,13 @@ export const inputStyles = StyleSheet.create({
 
   marginBottom: {
     marginBottom: 40,
-  }
+  },
+
+  registerSpaceInput: {
+    borderWidth: 0.8,
+    borderColor: colors.line,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    backgroundColor: colors.white,
+  },
 }); 

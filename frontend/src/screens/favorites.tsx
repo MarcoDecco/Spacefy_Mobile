@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { View, FlatList, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import Card from '../components/card';
