@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, FlatList, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import Card from '../components/card';
 import Search from '../components/searchBar';

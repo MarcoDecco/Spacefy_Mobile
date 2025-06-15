@@ -2,12 +2,11 @@ import { View, Text, Image, TouchableOpacity, ScrollView, KeyboardAvoidingView, 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../navigation/types';
-import { globalStyles } from '../styles/globalStyles/globalStyles';
 import { registerStyles as styles } from '../styles/registerStyles';
 import { colors } from '../styles/globalStyles/colors';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
 import { loginStyles } from '~/styles/loginStyles';
-import Button from '../components/button';
+import Button from '../components/buttons/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { useState } from 'react';

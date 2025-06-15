@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Feather, Ionicons } from '@expo/vector-icons'
 import { View, TextInput, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
-import { searchBarStyles as styles } from '../styles/globalStyles/searchBarStyles';
+import { searchBarStyles as styles } from '../styles/componentStyles/searchBarStyles';
 import { useTheme } from '../contexts/ThemeContext';
 import Filter, { FilterOptions } from './filter';
 import { useNavigation } from '@react-navigation/native';

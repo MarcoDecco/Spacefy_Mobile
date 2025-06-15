@@ -39,11 +39,13 @@ export type RootStackParamList = {
   Settings: undefined;
   MyReservations: undefined;
   Favorites: { from?: string };
+  Rented: undefined;
   MyReviews: undefined;
   EditProfile: undefined;
   Messages: { conversation: Conversation };
   PaymentTerms: undefined;
-  Rented: { from?: string };
+  SpaceWelcomeScreen: undefined;
+  SpaceInfoScreen: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

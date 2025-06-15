@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../globalStyles/colors';
+import { colors } from '~/styles/globalStyles/colors';
 
 export const buttons = StyleSheet.create({
     blueButton: {
@@ -41,3 +41,32 @@ export const buttons = StyleSheet.create({
         textShadowRadius: 1,
     },
 })
+
+export const registerSpaceButtonStyles = StyleSheet.create({
+  button: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  primary: {
+    backgroundColor: colors.blue,
+  },
+  secondary: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.blue,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+  text: {
+    color: colors.white,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  secondaryText: {
+    color: colors.blue,
+  },
+});
