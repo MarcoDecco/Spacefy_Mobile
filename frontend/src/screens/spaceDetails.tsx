@@ -25,12 +25,13 @@ import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 import { useFavorites } from '../hooks/useFavorites';
 import { useAuth } from '../contexts/AuthContext';
-import { CalendarModal } from '../components/calendarModal';
+import { CalendarModal } from '../components/CalendarModal';
 import { LandlordCard } from '../components/LandlordCard';
 import { SpaceDetailsGrid } from '../components/SpaceDetailsGrid';
 import { TimeSelectModal } from '../components/TimeSelectModal';
 import { SpaceDetailsModal } from '../components/SpaceDetailsModal';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { CheckInDateTime } from '../components/CheckInDateTime';
 
 interface SpaceDetailsProps {
   route: {
@@ -703,116 +704,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                     },
                   ]}>
                   {/* Data e Hora de Check-in */}
-                  <View style={styles.rentalDateTimeContainer}>
-                    <View style={styles.rentalDateTimeHeader}>
-                      <View
-                        style={[
-                          styles.rentalIconCircle,
-                          isDarkMode && {
-                            backgroundColor: theme.background,
-                            borderColor: theme.border,
-                            borderWidth: 1,
-                          },
-                        ]}>
-                        <MaterialIcons
-                          name="login"
-                          size={20}
-                          color={isDarkMode ? theme.blue : colors.blue}
-                        />
-                      </View>
-                      <Text
-                        style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
-                        Check-in
-                      </Text>
-                    </View>
-                    <View style={styles.rentalDateTimeContent}>
-                      <TouchableOpacity
-                        style={[
-                          styles.rentalDateTimeBox,
-                          isDarkMode && {
-                            backgroundColor: theme.background,
-                            borderColor: theme.border,
-                          },
-                        ]}
-                        onPress={() => openPicker('checkInDate', 'date')}>
-                        <View
-                          style={[
-                            styles.rentalDateTimeIconContainer,
-                            isDarkMode && {
-                              backgroundColor: theme.card,
-                              borderColor: theme.border,
-                              borderWidth: 1,
-                            },
-                          ]}>
-                          <MaterialIcons
-                            name="calendar-today"
-                            size={20}
-                            color={isDarkMode ? theme.text : colors.gray}
-                          />
-                        </View>
-                        <View style={styles.rentalDateTimeTextContainer}>
-                          <Text
-                            style={[
-                              styles.rentalDateTimeLabel,
-                              isDarkMode && { color: theme.text },
-                            ]}>
-                            Data
-                          </Text>
-                          <Text
-                            style={[
-                              styles.rentalDateTimeText,
-                              isDarkMode && { color: theme.text },
-                            ]}>
-                            {checkInDate.toLocaleDateString()}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[
-                          styles.rentalDateTimeBox,
-                          isDarkMode && {
-                            backgroundColor: theme.background,
-                            borderColor: theme.border,
-                          },
-                        ]}
-                        onPress={() => openTimeModal('checkInTime')}>
-                        <View
-                          style={[
-                            styles.rentalDateTimeIconContainer,
-                            isDarkMode && {
-                              backgroundColor: theme.card,
-                              borderColor: theme.border,
-                              borderWidth: 1,
-                            },
-                          ]}>
-                          <MaterialIcons
-                            name="access-time"
-                            size={20}
-                            color={isDarkMode ? theme.text : colors.gray}
-                          />
-                        </View>
-                        <View style={styles.rentalDateTimeTextContainer}>
-                          <Text
-                            style={[
-                              styles.rentalDateTimeLabel,
-                              isDarkMode && { color: theme.text },
-                            ]}>
-                            Hora
-                          </Text>
-                          <Text
-                            style={[
-                              styles.rentalDateTimeText,
-                              isDarkMode && { color: theme.text },
-                            ]}>
-                            {checkInTime.toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
+                  <CheckInDateTime
+                    checkInDate={checkInDate}
+                    checkInTime={checkInTime}
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                    openPicker={openPicker}
+                    openTimeModal={openTimeModal}
+                  />
 
                   {/* Divisor */}
                   <View
