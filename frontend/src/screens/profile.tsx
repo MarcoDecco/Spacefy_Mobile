@@ -122,9 +122,8 @@ export default function Profile() {
   };
 
   const handleOpenSpaceOwnerModal = () => {
-    console.log('Tipo de usuário atual:', user?.role);
-    if (user?.role === 'locatario') {
-      navigation.navigate('Anunciar');
+    if (user?.userType === 'locador') {
+      navigation.navigate('SpaceWelcomeScreen');
     } else {
       setIsSpaceOwnerModalVisible(true);
     }
@@ -152,7 +151,7 @@ export default function Profile() {
       // Atualiza o usuário no contexto com todos os campos necessários
       await updateUser({
         ...user,
-        role: 'locatario',
+        userType: 'locador',
         documentNumber,
         documentType
       });
@@ -164,7 +163,7 @@ export default function Profile() {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Anunciar')
+            onPress: () => navigation.navigate('SpaceWelcomeScreen')
           }
         ]
       );

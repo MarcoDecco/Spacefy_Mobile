@@ -678,8 +678,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
               {/* Descrição */}
               <DescriptionSection
-                displayDescription={displayDescription}
-                shouldShowMoreButton={shouldShowMoreButton}
+                displayDescription={displayDescription || ''}
+                shouldShowMoreButton={!!shouldShowMoreButton}
                 showFullDescription={showFullDescription}
                 setShowFullDescription={setShowFullDescription}
                 isDarkMode={isDarkMode}

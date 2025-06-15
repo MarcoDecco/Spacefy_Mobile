@@ -15,7 +15,6 @@ import PaymentTerms from '../screens/paymentTerms';
 import Rented from '../screens/rented';
 import SpaceWelcomeScreen from '../screens/spaceRegister/SpaceWelcomeScreen';
 import SpaceInfoScreen from '../screens/spaceRegister/SpaceInfoScreen';
-import SpaceDashboard from '../screens/spaceDashboard';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -109,20 +108,6 @@ export default function StackNavigation() {
       <Stack.Screen
         name="SpaceInfoScreen"
         component={SpaceInfoScreen}
-        options={{
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="Anunciar"
-        component={SpaceWelcomeScreen}
-        options={{
-          headerShown: false
-        }}
-      />
-      <Stack.Screen
-        name="Dashboard"
-        component={SpaceDashboard}
         options={{
           headerShown: false
         }}

@@ -9,8 +9,9 @@ interface CheckInDateTimeProps {
   isDarkMode: boolean;
   theme: any;
   styles: any;
-  openPicker: (field: string, mode: 'date' | 'time') => void;
-  openTimeModal: (field: string) => void;
+  openPicker: (field: "checkInDate" | "checkOutDate" | "checkInTime" | "checkOutTime",
+    mode: "date" | "time") => void;
+    openTimeModal: (field: "checkInTime" | "checkOutTime") => void;
 }
 
 export const CheckInDateTime: React.FC<CheckInDateTimeProps> = ({
