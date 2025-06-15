@@ -12,6 +12,7 @@ import { RootStackParamList } from '../navigation/types';
 import { NotificationButton } from '../components/NotificationButton';
 import EditProfile from './editProfile';
 import mansao from '../../assets/mansao.png';
+import { userService } from '../services/userService';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -121,8 +122,61 @@ export default function Profile() {
   };
 
   const handleOpenSpaceOwnerModal = () => {
-    console.log('Opening space owner modal...');
-    setIsSpaceOwnerModalVisible(true);
+    console.log('Tipo de usuário atual:', user?.role);
+    if (user?.role === 'locatario') {
+      navigation.navigate('Anunciar');
+    } else {
+      setIsSpaceOwnerModalVisible(true);
+    }
+  };
+
+  const handleConfirmUserTypeChange = async () => {
+    try {
+      if (!user) {
+        Alert.alert('Erro', 'Usuário não autenticado');
+        return;
+      }
+
+      if (!isValidDocument(documentNumber, documentType)) {
+        Alert.alert(
+          'Documento Inválido',
+          `Por favor, informe um ${documentType} válido com todos os dígitos.`,
+          [{ text: 'Entendi' }]
+        );
+        return;
+      }
+
+      setLoading(true);
+      const response = await userService.updateUserType(user.id, documentNumber, documentType);
+      
+      // Atualiza o usuário no contexto com todos os campos necessários
+      await updateUser({
+        ...user,
+        role: 'locatario',
+        documentNumber,
+        documentType
+      });
+      
+      setIsSpaceOwnerModalVisible(false);
+      Alert.alert(
+        'Sucesso',
+        'Seu tipo de usuário foi alterado para locador. Agora você pode anunciar espaços!',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Anunciar')
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Erro ao atualizar tipo de usuário:', error);
+      Alert.alert(
+        'Erro',
+        'Não foi possível atualizar seu tipo de usuário. Tente novamente mais tarde.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   //Formatação do documento no momento em que o usuário estiver digitando o número.
@@ -211,7 +265,7 @@ export default function Profile() {
 
         <TouchableOpacity 
           style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
-          onPress={() => navigation.navigate('Rented', { from: 'profile' })}
+          onPress={() => navigation.navigate('Rented')}
         >
           <Ionicons name="home-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
           <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Alugados</Text>
@@ -430,18 +484,7 @@ export default function Profile() {
                       styles.saveButton, 
                       (!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)) && styles.saveButtonDisabled
                     ]}
-                    onPress={() => {
-                      if (!isValidDocument(documentNumber, documentType)) {
-                        Alert.alert(
-                          'Documento Inválido',
-                          `Por favor, informe um ${documentType} válido com todos os dígitos.`,
-                          [{ text: 'Entendi' }]
-                        );
-                        return;
-                      }
-                      setIsSpaceOwnerModalVisible(false);
-                      navigation.navigate('SpaceWelcomeScreen' as never);
-                    }}
+                    onPress={handleConfirmUserTypeChange}
                     disabled={!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)}
                   >
                     <Text style={styles.saveButtonText}>
