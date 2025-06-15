@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -311,169 +312,168 @@ const EditProfile = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <StatusBar
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
-        backgroundColor="transparent"
-        translucent
-      />
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      
+      {/* Header */}
+      <View style={[styles.header, isDarkMode && { backgroundColor: theme.background }]}>
         <TouchableOpacity 
-          style={styles.backButton}
+          style={styles.backButton} 
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
+          <Ionicons 
+            name="arrow-back" 
+            size={24} 
+            color={isDarkMode ? theme.text : colors.black} 
+          />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>Editar Perfil</Text>
+        <Text style={[styles.headerTitle, isDarkMode && { color: theme.text }]}>
+          Editar Perfil
+        </Text>
+        <View style={styles.rightPlaceholder} />
       </View>
 
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.profileImageContainer}>
-          <View style={styles.profileImageWrapper}>
-            <Image
-              source={formData.profilePhoto ? { uri: formData.profilePhoto } : { uri: 'https://via.placeholder.com/120' }}
-              style={styles.profileImagePlaceholder}
-            />
-            <TouchableOpacity 
-              style={styles.changePhotoButton}
-              onPress={handleImagePicker}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color={colors.white} size="small" />
-              ) : (
-                <Ionicons name="camera" size={24} color={colors.white} />
-              )}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoidingView}
+      >
+        <ScrollView 
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Foto de Perfil */}
+          <View style={styles.photoContainer}>
+            <TouchableOpacity onPress={handleImagePicker} style={styles.photoButton}>
+              <Image
+                source={
+                  formData.profilePhoto
+                    ? { uri: formData.profilePhoto }
+                    : { uri: 'https://via.placeholder.com/120' }
+                }
+                style={styles.profilePhoto}
+              />
+              <View style={styles.editPhotoButton}>
+                <Ionicons name="camera" size={20} color={colors.white} />
+              </View>
             </TouchableOpacity>
           </View>
-        </View>
 
-        <View style={styles.formContainer}>
-          {error ? (
-            <View style={[styles.messageContainer, styles.errorContainer]}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
-
-          {success ? (
-            <View style={[styles.messageContainer, styles.successContainer]}>
-              <Text style={styles.successText}>{success}</Text>
-            </View>
-          ) : null}
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Nome *</Text>
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: theme.card,
-                color: theme.text,
-                borderColor: theme.border
-              }]}
-              value={formData.name}
-              onChangeText={(value) => handleChange('name', value)}
-              placeholder="Seu nome"
-              placeholderTextColor={theme.text + '80'}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Sobrenome *</Text>
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: theme.card,
-                color: theme.text,
-                borderColor: theme.border
-              }]}
-              value={formData.surname}
-              onChangeText={(value) => handleChange('surname', value)}
-              placeholder="Seu sobrenome"
-              placeholderTextColor={theme.text + '80'}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Email *</Text>
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: theme.card,
-                color: theme.text,
-                borderColor: theme.border
-              }]}
-              value={formData.email}
-              onChangeText={(value) => handleChange('email', value)}
-              placeholder="seu@email.com"
-              placeholderTextColor={theme.text + '80'}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Telefone *</Text>
-            <View style={styles.phoneInputContainer}>
-              <View style={[styles.phonePrefix, { backgroundColor: theme.card, borderColor: theme.border }]}>
-                <Text style={{ color: theme.text }}>+55</Text>
-              </View>
+          {/* Campos do Formulário */}
+          <View style={styles.formContainer}>
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Nome</Text>
               <TextInput
-                style={[styles.input, styles.phoneInput, { 
+                style={[styles.input, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border
+                }]}
+                value={formData.name}
+                onChangeText={(value) => handleChange('name', value)}
+                placeholder="Seu nome"
+                placeholderTextColor={theme.gray}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Sobrenome</Text>
+              <TextInput
+                style={[styles.input, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border
+                }]}
+                value={formData.surname}
+                onChangeText={(value) => handleChange('surname', value)}
+                placeholder="Seu sobrenome"
+                placeholderTextColor={theme.gray}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Email</Text>
+              <TextInput
+                style={[styles.input, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border
+                }]}
+                value={formData.email}
+                onChangeText={(value) => handleChange('email', value)}
+                placeholder="Seu email"
+                placeholderTextColor={theme.gray}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Telefone</Text>
+              <TextInput
+                style={[styles.input, isDarkMode && { 
                   backgroundColor: theme.card,
                   color: theme.text,
                   borderColor: theme.border
                 }]}
                 value={formData.telephone}
                 onChangeText={(value) => handleChange('telephone', value)}
-                placeholder="(00) 00000-0000"
-                placeholderTextColor={theme.text + '80'}
+                placeholder="Seu telefone"
+                placeholderTextColor={theme.gray}
                 keyboardType="phone-pad"
               />
             </View>
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Nova Senha (opcional)</Text>
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: theme.card,
-                color: theme.text,
-                borderColor: theme.border
-              }]}
-              value={formData.password}
-              onChangeText={(value) => handleChange('password', value)}
-              placeholder="Mínimo de 6 caracteres"
-              placeholderTextColor={theme.text + '80'}
-              secureTextEntry
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Nova Senha (opcional)</Text>
+              <TextInput
+                style={[styles.input, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border
+                }]}
+                value={formData.password}
+                onChangeText={(value) => handleChange('password', value)}
+                placeholder="Nova senha"
+                placeholderTextColor={theme.gray}
+                secureTextEntry
+              />
+            </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: theme.text }]}>Confirme sua senha</Text>
-            <TextInput
-              style={[styles.input, { 
-                backgroundColor: theme.card,
-                color: theme.text,
-                borderColor: theme.border
-              }]}
-              value={formData.confirmPassword}
-              onChangeText={(value) => handleChange('confirmPassword', value)}
-              placeholder="Confirme sua senha"
-              placeholderTextColor={theme.text + '80'}
-              secureTextEntry
-            />
-          </View>
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, isDarkMode && { color: theme.text }]}>Confirmar Nova Senha</Text>
+              <TextInput
+                style={[styles.input, isDarkMode && { 
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border
+                }]}
+                value={formData.confirmPassword}
+                onChangeText={(value) => handleChange('confirmPassword', value)}
+                placeholder="Confirme a nova senha"
+                placeholderTextColor={theme.gray}
+                secureTextEntry
+              />
+            </View>
 
-          <TouchableOpacity 
-            style={[styles.saveButton, { backgroundColor: colors.blue }]}
-            onPress={handleUpdateProfile}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.saveButtonText}>Salvar Alterações</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {success ? <Text style={styles.successText}>{success}</Text> : null}
+
+            <TouchableOpacity
+              style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+              onPress={handleUpdateProfile}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -481,46 +481,52 @@ const EditProfile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: colors.white,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    paddingTop: Platform.OS === 'ios' ? 48 : 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.light_gray,
+    borderBottomColor: colors.line,
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginLeft: 16,
+    color: colors.black,
   },
-  profileImageContainer: {
+  rightPlaceholder: {
+    width: 40,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  photoContainer: {
     alignItems: 'center',
-    padding: 24,
+    marginVertical: 24,
   },
-  profileImageWrapper: {
+  photoButton: {
     position: 'relative',
   },
-  profileImagePlaceholder: {
+  profilePhoto: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors.light_gray,
   },
-  profileImageText: {
-    color: colors.white,
-    fontSize: 40,
-    fontWeight: 'bold',
-  },
-  changePhotoButton: {
+  editPhotoButton: {
     position: 'absolute',
     bottom: 0,
     right: 0,
@@ -528,72 +534,58 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    justifyContent: 'center',
+    borderWidth: 3,
     borderColor: colors.white,
   },
   formContainer: {
-    padding: 16,
-  },
-  messageContainer: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorContainer: {
-    backgroundColor: '#FEE2E2',
-    borderColor: '#FCA5A5',
-  },
-  successContainer: {
-    backgroundColor: '#DCFCE7',
-    borderColor: '#86EFAC',
-  },
-  errorText: {
-    color: '#DC2626',
-  },
-  successText: {
-    color: '#16A34A',
+    paddingHorizontal: 16,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    color: colors.black,
     marginBottom: 8,
+    fontWeight: '500',
   },
   input: {
+    height: 48,
     borderWidth: 1,
+    borderColor: colors.line,
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
+    backgroundColor: colors.white,
   },
-  phoneInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  errorText: {
+    color: colors.error,
+    marginBottom: 16,
+    textAlign: 'center',
   },
-  phonePrefix: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginRight: 8,
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  phoneInput: {
-    flex: 1,
+  successText: {
+    color: colors.blue,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   saveButton: {
-    padding: 16,
+    backgroundColor: colors.blue,
+    height: 48,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 24,
+    marginBottom: 32,
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
   },
   saveButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
 });
 

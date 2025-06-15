@@ -49,5 +49,13 @@ export const inputStyles = StyleSheet.create({
 
   marginBottom: {
     marginBottom: 40,
-  }
+  },
+
+  registerSpaceInput: {
+    borderWidth: 0.8,
+    borderColor: colors.line,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    backgroundColor: colors.white,
+  },
 }); 

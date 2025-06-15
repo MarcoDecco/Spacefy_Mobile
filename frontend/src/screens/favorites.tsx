@@ -8,6 +8,12 @@ import { homeStyles as styles } from '../styles/homeStyles';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import ScrollToTopButton from '../components/scrollToTopButton';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../styles/globalStyles/colors';
+import { RootStackParamList } from '../navigation/types';
+
+type FavoritesScreenRouteProp = RouteProp<RootStackParamList, 'Favorites'>;
 
 interface Space {
   _id: string;
@@ -44,6 +50,8 @@ interface Favorite {
 }
 
 export default function Favorites() {
+  const navigation = useNavigation();
+  const route = useRoute<FavoritesScreenRouteProp>();
   const { favorites, loading, error } = useFavorites();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +63,9 @@ export default function Favorites() {
     rating: '',
     sortBy: '',
   });
+
+  // Verifica se a tela foi acessada pelo perfil
+  const isFromProfile = route.params?.from === 'profile';
 
   const handleSearch = useCallback((text: string) => {
     setSearchQuery(text);
@@ -206,6 +217,7 @@ export default function Favorites() {
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
+        showBackButton={isFromProfile}
       />
       <FlatList
         ref={flatListRef}

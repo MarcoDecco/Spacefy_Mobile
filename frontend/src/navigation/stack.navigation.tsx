@@ -12,6 +12,9 @@ import MyReviews from '../screens/myReviews';
 import EditProfile from '../screens/editProfile';
 import Messages from '../screens/messages';
 import PaymentTerms from '../screens/paymentTerms';
+import Rented from '../screens/rented';
+import SpaceWelcomeScreen from '../screens/spaceRegister/SpaceWelcomeScreen';
+import SpaceInfoScreen from '../screens/spaceRegister/SpaceInfoScreen';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -42,30 +45,21 @@ export default function StackNavigation() {
         name="MyReservations"
         component={MyReservations}
         options={{
-          headerShown: true,
-          title: 'Minhas Reservas',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
         }}
       />
       <Stack.Screen
         name="Favorites"
         component={Favorites}
         options={{
-          headerShown: true,
-          title: 'Favoritos',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Rented"
+        component={Rented}
+        options={{
+          headerShown: false
         }}
       />
       <Stack.Screen
@@ -100,6 +94,20 @@ export default function StackNavigation() {
       <Stack.Screen
         name="PaymentTerms"
         component={PaymentTerms}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="SpaceWelcomeScreen"
+        component={SpaceWelcomeScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="SpaceInfoScreen"
+        component={SpaceInfoScreen}
         options={{
           headerShown: false
         }}

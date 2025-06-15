@@ -4,17 +4,22 @@ import Card from "../components/card";
 import { useCards } from "../hooks/useCards";
 import { BaseCard } from "../types/card";
 import { homeStyles as styles } from '../styles/homeStyles';
-import SearchBar from "../components/searchBar";
+import Search from "../components/searchBar";
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FilterOptions } from '../components/filter';
 import ScrollToTopButton from '../components/scrollToTopButton';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { RootStackParamList } from '../navigation/types';
+
+type RentedScreenRouteProp = RouteProp<RootStackParamList, 'Rented'>;
 
 export default function Rented() {
   const { cards: rentedCards, loading } = useCards('rented');
   const { theme, isDarkMode } = useTheme();
   const { user } = useAuth();
+  const route = useRoute<RentedScreenRouteProp>();
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const flatListRef = useRef<FlatList>(null);
@@ -24,6 +29,9 @@ export default function Rented() {
     rating: '',
     sortBy: '',
   });
+
+  // Verifica se a tela foi acessada pelo perfil
+  const isFromProfile = route.params?.from === 'profile';
 
   const handleSearch = useCallback((text: string) => {
     setSearchQuery(text);
@@ -164,10 +172,11 @@ export default function Rented() {
 
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      <SearchBar 
+      <Search 
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
+        showBackButton={isFromProfile}
       />
       <FlatList
         ref={flatListRef}

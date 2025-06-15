@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { loginStyles as styles } from '../styles/loginStyles';
 import { colors } from '~/styles/globalStyles/colors';
 import { imageStyles } from '~/styles/globalStyles/imageStyles';
-import Button from '../components/button';
+import Button from '../components/buttons/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
