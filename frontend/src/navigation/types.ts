@@ -46,6 +46,8 @@ export type RootStackParamList = {
   PaymentTerms: undefined;
   SpaceWelcomeScreen: undefined;
   SpaceInfoScreen: undefined;
+  Anunciar: undefined;
+  Dashboard: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

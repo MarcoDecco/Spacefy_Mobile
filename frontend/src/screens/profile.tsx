@@ -121,10 +121,10 @@ export default function Profile() {
     }
   };
 
-  const handleAnunciarEspaco = () => {
+  const handleOpenSpaceOwnerModal = () => {
     console.log('Tipo de usuário atual:', user?.role);
     if (user?.role === 'locatario') {
-      navigation.navigate('SpaceInfoScreen');
+      navigation.navigate('Anunciar');
     } else {
       setIsSpaceOwnerModalVisible(true);
     }
@@ -164,7 +164,7 @@ export default function Profile() {
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('SpaceInfoScreen')
+            onPress: () => navigation.navigate('Anunciar')
           }
         ]
       );
@@ -228,7 +228,7 @@ export default function Profile() {
             </Text>
             <TouchableOpacity 
               style={styles.bannerButton}
-              onPress={handleAnunciarEspaco}
+              onPress={handleOpenSpaceOwnerModal}
             >
               <Text style={styles.bannerButtonText}>Anunciar Espaço</Text>
             </TouchableOpacity>
