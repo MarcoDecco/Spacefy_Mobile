@@ -6,7 +6,7 @@ interface ImageCarouselProps {
   activeIndex: number;
   onScroll: (event: any) => void;
   onMomentumScrollEnd: (event: any) => void;
-  scrollRef: React.RefObject<ScrollView>;
+  scrollRef: React.RefObject<ScrollView | null>;
   setIsAutoPlayPaused: (paused: boolean) => void;
   styles: any;
 }
