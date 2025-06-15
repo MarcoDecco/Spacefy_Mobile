@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { View, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { inputStyles } from '../../styles/componentStyles/inputStyles';
-import { pageTexts } from '../../styles/globalStyles/pageTexts';
-import { styles } from '../../styles/spaceRegisterStyles/SpaceInfoScreenStyles';
-import RegisterSpaceInput from '../../components/inputs/registerSpaceInput';
-import RegisterSpaceButton from '../../components/buttons/registerSpaceButton';
+import { inputStyles } from '../../../styles/componentStyles/inputStyles';
+import { pageTexts } from '../../../styles/globalStyles/pageTexts';
+import { styles } from '../../../styles/spaceRegisterStyles/SpaceInfoScreenStyles';
+import RegisterSpaceInput from '../../../components/inputs/registerSpaceInput';
+import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
 
 export default function SpaceInfoScreen() {
   const navigation = useNavigation();

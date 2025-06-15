@@ -46,7 +46,7 @@ export const userService = {
         const response = await api.put(`/users/updateToLocatario/${userId}`, {
             cpfOrCnpj: documentNumber,
             documentType,
-            userType: 'locador'
+            role: 'locador'
         });
         return response.data;
     }

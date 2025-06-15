@@ -10,7 +10,6 @@ interface JwtPayload {
   surname: string;
   telephone: string;
   profilePhoto: string;
-  userType: string;
   iat: number;
   exp: number;
   role: string;
@@ -23,7 +22,6 @@ interface User {
   surname: string;
   telephone?: string;
   profilePhoto?: string;
-  userType?: string;
   role?: string;
 }
 
@@ -70,7 +68,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             surname: decodedToken.surname,
             telephone: decodedToken.telephone,
             profilePhoto: decodedToken.profilePhoto,
-            userType: decodedToken.userType,
             role: decodedToken.role
           };
           setUser(user);
@@ -101,7 +98,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         surname: decodedToken.surname,
         telephone: decodedToken.telephone,
         profilePhoto: decodedToken.profilePhoto,
-        userType: decodedToken.userType,
         role: decodedToken.role
       };
       setUser(user);
@@ -139,7 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         surname: decodedToken.surname,
         telephone: decodedToken.telephone,
         profilePhoto: decodedToken.profilePhoto,
-        userType: decodedToken.userType,
         role: decodedToken.role
       };
       setUser(user);
@@ -170,7 +165,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           surname: decodedToken.surname,
           telephone: decodedToken.telephone,
           profilePhoto: decodedToken.profilePhoto,
-          userType: decodedToken.userType,
           role: decodedToken.role
         };
         setUser(user);

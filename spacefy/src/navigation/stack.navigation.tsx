@@ -14,7 +14,7 @@ import Messages from '../screens/messages';
 import PaymentTerms from '../screens/paymentTerms';
 import Rented from '../screens/rented';
 import SpaceWelcomeScreen from '../screens/spaceRegister/SpaceWelcomeScreen';
-import SpaceInfoScreen from '../screens/spaceRegister/SpaceInfoScreen';
+import SpaceInfoScreen from '../screens/spaceRegister/etapas/etapa1';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
