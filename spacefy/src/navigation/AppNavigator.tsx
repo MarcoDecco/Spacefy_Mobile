@@ -6,6 +6,7 @@ import Profile from '../screens/profile';
 import SpaceDetails from '../screens/spaceDetails';
 import Favorites from '../screens/favorites';
 import MyReviews from '../screens/myReviews';
+import SpaceImagesScreen from '../screens/spaceRegister/etapas/etapa3';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -62,6 +63,13 @@ export default function AppNavigator() {
         component={MyReservations}
         options={{
           title: 'Minhas Reservas',
+        }}
+      />
+      <Stack.Screen 
+        name="SpaceImagesScreen" 
+        component={SpaceImagesScreen}
+        options={{
+          title: 'Imagens do Espaço',
         }}
       />
     </Stack.Navigator>

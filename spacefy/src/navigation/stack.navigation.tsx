@@ -15,6 +15,9 @@ import PaymentTerms from '../screens/paymentTerms';
 import Rented from '../screens/rented';
 import SpaceWelcomeScreen from '../screens/spaceRegister/SpaceWelcomeScreen';
 import SpaceInfoScreen from '../screens/spaceRegister/etapas/etapa1';
+import SpaceAddressScreen from '../screens/spaceRegister/etapas/etapa2';
+import SpaceNextStepScreen from '../screens/spaceRegister/etapas/etapa3';
+import SpaceAvailabilityScreen from '../screens/spaceRegister/etapas/etapa4';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -108,6 +111,27 @@ export default function StackNavigation() {
       <Stack.Screen
         name="SpaceInfoScreen"
         component={SpaceInfoScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="SpaceAddressScreen"
+        component={SpaceAddressScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="SpaceNextStepScreen"
+        component={SpaceNextStepScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="SpaceAvailabilityScreen"
+        component={SpaceAvailabilityScreen}
         options={{
           headerShown: false
         }}

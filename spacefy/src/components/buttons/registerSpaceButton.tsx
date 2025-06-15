@@ -1,6 +1,6 @@
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { colors } from '~/styles/globalStyles/colors';
-import { registerSpaceButtonStyles } from '~/styles/componentStyles/buttonStyles';
+import { colors } from '../../styles/globalStyles/colors';
+import { registerSpaceButtonStyles } from '../../styles/componentStyles/buttonStyles';
 
 interface RegisterSpaceButtonProps {
   title: string;
