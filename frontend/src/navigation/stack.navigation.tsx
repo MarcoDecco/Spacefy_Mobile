@@ -43,15 +43,7 @@ export default function StackNavigation() {
         name="MyReservations"
         component={MyReservations}
         options={{
-          headerShown: true,
-          title: 'Minhas Reservas',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
         }}
       />
       <Stack.Screen
