@@ -38,6 +38,8 @@ import { RentalTotalBar } from '../components/RentalTotalBar';
 import { DescriptionSection } from '../components/DescriptionSection';
 import { ImageCarousel } from '../components/ImageCarousel';
 import { SpaceHeader } from '../components/SpaceHeader';
+import { RatingRow } from '../components/RatingRow';
+import { SpaceDetailsRow } from '../components/SpaceDetailsRow';
 
 interface SpaceDetailsProps {
   route: {
@@ -573,68 +575,30 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               />
 
               {/* Avaliação */}
-              <View style={styles.headerRatingRow}>
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <MaterialIcons
-                    key={i}
-                    name={i <= Math.round(space.rating) ? 'star' : 'star-border'}
-                    size={22}
-                    color={isDarkMode ? theme.text : colors.black}
-                  />
-                ))}
-                <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>
-                  ({space.reviews})
-                </Text>
-              </View>
+              <RatingRow
+                rating={space.rating}
+                reviews={space.reviews}
+                theme={theme}
+                isDarkMode={isDarkMode}
+                styles={styles}
+              />
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
 
               {/* Seção de Aluguel, Tipo e Detalhes */}
-              <View style={styles.detailsRow}>
-                {/* Coluna Aluguel e Tipo */}
-                <View style={styles.detailsColLeft}>
-                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>
-                    Aluguel:
-                  </Text>
-
-                  <View style={styles.detailsValueRow}>
-                    <Text style={[styles.detailsValue, isDarkMode && { color: theme.text }]}>
-                      {aluguel}
-                    </Text>
-                    <Text style={[styles.detailsDivider, isDarkMode && { color: theme.text }]}>
-                      /Hora
-                    </Text>
-                  </View>
-
-                  {/* Divisor interno */}
-                  <View
-                    style={[
-                      styles.detailsInnerDivider,
-                      isDarkMode && { backgroundColor: theme.border },
-                    ]}
-                  />
-
-                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>
-                    Tipo:
-                  </Text>
-                  <Text style={[styles.detailsType, isDarkMode && { color: theme.text }]}>
-                    {tipo}
-                  </Text>
-                </View>
-
-                {/* Coluna Detalhes */}
-                <SpaceDetailsGrid
-                  wifi={wifi}
-                  metragem={metragem}
-                  banheiros={banheiros}
-                  capacidade={capacidade}
-                  isDarkMode={isDarkMode}
-                  theme={theme}
-                  styles={styles}
-                  onSeeMore={() => setDetailsModalVisible(true)}
-                />
-              </View>
+              <SpaceDetailsRow
+                aluguel={aluguel}
+                tipo={tipo}
+                wifi={wifi}
+                metragem={metragem}
+                banheiros={banheiros}
+                capacidade={capacidade}
+                isDarkMode={isDarkMode}
+                theme={theme}
+                styles={styles}
+                onSeeMore={() => setDetailsModalVisible(true)}
+              />
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
