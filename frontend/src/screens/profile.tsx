@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -36,13 +36,20 @@ const formatDocument = (value: string, type: 'CPF' | 'CNPJ') => {
   }
 };
 
+const isValidDocument = (document: string, type: 'CPF' | 'CNPJ'): boolean => {
+  const numbers = document.replace(/\D/g, '');
+  return type === 'CPF' ? numbers.length === 11 : numbers.length === 14;
+};
+
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser, signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSpaceOwnerModalVisible, setIsSpaceOwnerModalVisible] = useState(false);
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
   const [documentNumber, setDocumentNumber] = useState('');
   const [documentType, setDocumentType] = useState<'CPF' | 'CNPJ'>('CPF');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [editedUser, setEditedUser] = useState({
     name: '',
     surname: '',
@@ -301,83 +308,166 @@ export default function Profile() {
         transparent={true}
         onRequestClose={() => setIsSpaceOwnerModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.editProfileModal}>
-            <View style={styles.modalHeader}>
-              <View>
-                <Text style={styles.modalTitle}>Registre-se como Locador(a)</Text>
-                <Text style={{ fontSize: 16, marginTop: 16 }}>Para cadastrar espaços em nossa plataforma, você precisa ter uma conta de locador(a).</Text>
-              </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+              <View style={styles.editProfileModal}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Registre-se como Locador(a)</Text>
+                  
+                  <TouchableOpacity onPress={() => setIsSpaceOwnerModalVisible(false)} >
+                    <Ionicons name="close" size={24} color={colors.black} />
+                  </TouchableOpacity>
+                </View>
+                
+                <Text style={styles.modalSubTittle}>Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.</Text>
 
+                {/* <View style={styles.paymentTerm}>
+                  <Feather name="info" size={20} color={colors.blue} />
+                  <Text style={styles.paymentTermText}>
+                    Nos informe um de seus documentos e aceite nossos termos de distribuição de pagamento:
+                  </Text>
+                </View> */}
+
+                <View>
+                  <View style={styles.documentTypeContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.documentTypeButton,
+                        documentType === 'CPF' && styles.documentTypeButtonActive
+                      ]}
+                      onPress={() => setDocumentType('CPF')}
+                    >
+                      <Text style={[
+                        styles.documentTypeButtonText,
+                        documentType === 'CPF' && styles.documentTypeButtonTextActive
+                      ]}>CPF</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.documentTypeButton,
+                        documentType === 'CNPJ' && styles.documentTypeButtonActive
+                      ]}
+                      onPress={() => setDocumentType('CNPJ')}
+                    >
+                      <Text style={[
+                        styles.documentTypeButtonText,
+                        documentType === 'CNPJ' && styles.documentTypeButtonTextActive
+                      ]}>CNPJ</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>{documentType}</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={documentNumber}
+                      onChangeText={handleDocumentChange}
+                      placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
+                      keyboardType="numeric"
+                    />
+                  </View>
+
+                  <View style={styles.termsContainer}>
+                    <TouchableOpacity onPress={() => setAcceptedTerms(!acceptedTerms)} >
+                      <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                        {acceptedTerms && <Ionicons name="checkmark" size={16} color={colors.white} />}
+                      </View>
+                    </TouchableOpacity>
+
+                    <Text style={styles.termsText}>
+                      Eu li e concordo com os{' '}
+                      <Text 
+                        style={styles.termsLink}
+                        onPress={() => navigation.navigate('PaymentTerms')}
+                      >
+                        termos de distribuição de pagamento
+                      </Text>
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.saveButton, 
+                      (!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)) && styles.saveButtonDisabled
+                    ]}
+                    onPress={() => {
+                      if (!isValidDocument(documentNumber, documentType)) {
+                        Alert.alert(
+                          'Documento Inválido',
+                          `Por favor, informe um ${documentType} válido com todos os dígitos.`,
+                          [{ text: 'Entendi' }]
+                        );
+                        return;
+                      }
+                      // TODO: Implement registration logic
+                      setIsSpaceOwnerModalVisible(false);
+                    }}
+                    disabled={!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)}
+                  >
+                    <Text style={styles.saveButtonText}>
+                      {loading ? 'Processando...' : 'Confirmar'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Modal de Termos de Distribuição de Pagamento */}
+      <Modal
+        visible={isTermsModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsTermsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.termsModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Termos de Distribuição de Pagamento</Text>
               <TouchableOpacity 
-                onPress={() => setIsSpaceOwnerModalVisible(false)}
+                onPress={() => setIsTermsModalVisible(false)}
                 style={styles.closeButton}
               >
                 <Ionicons name="close" size={24} color={colors.black} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.paymentTerm}>
-              <Feather name="info" size={20} color={colors.blue} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, color: colors.blue, lineHeight: 20 }}>
-                  Nos informe um de seus documentos e aceite nossos termos de distribuição de pagamento:
-                </Text>
-              </View>
-            </View>
+            <ScrollView style={styles.termsContent}>
+              <Text style={styles.termsSectionTitle}>1. Processo de Pagamento</Text>
+              <Text style={styles.termsParagraph}>
+                A Spacefy atua como intermediadora no processo de pagamento entre locadores e locatários. 
+                Os valores são mantidos em uma conta segura até a confirmação da locação.
+              </Text>
 
-            <View>
-              <View style={styles.documentTypeContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.documentTypeButton,
-                    documentType === 'CPF' && styles.documentTypeButtonActive
-                  ]}
-                  onPress={() => setDocumentType('CPF')}
-                >
-                  <Text style={[
-                    styles.documentTypeButtonText,
-                    documentType === 'CPF' && styles.documentTypeButtonTextActive
-                  ]}>CPF</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.documentTypeButton,
-                    documentType === 'CNPJ' && styles.documentTypeButtonActive
-                  ]}
-                  onPress={() => setDocumentType('CNPJ')}
-                >
-                  <Text style={[
-                    styles.documentTypeButtonText,
-                    documentType === 'CNPJ' && styles.documentTypeButtonTextActive
-                  ]}>CNPJ</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.termsSectionTitle}>2. Distribuição dos Valores</Text>
+              <Text style={styles.termsParagraph}>
+                Após a confirmação da locação, o valor é distribuído da seguinte forma:
+                {'\n\n'}• 90% do valor total é transferido para o locador
+                {'\n'}• 10% é retido como taxa de serviço da plataforma
+              </Text>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>{documentType}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={documentNumber}
-                  onChangeText={handleDocumentChange}
-                  placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
-                  keyboardType="numeric"
-                />
-              </View>
+              <Text style={styles.termsSectionTitle}>3. Prazo de Pagamento</Text>
+              <Text style={styles.termsParagraph}>
+                O pagamento é processado em até 5 dias úteis após a confirmação da locação. 
+                O valor será creditado na conta bancária cadastrada pelo locador.
+              </Text>
 
-              <TouchableOpacity
-                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-                onPress={() => {
-                  // TODO: Implement registration logic
-                  setIsSpaceOwnerModalVisible(false);
-                }}
-                disabled={loading}
-              >
-                <Text style={styles.saveButtonText}>
-                  {loading ? 'Processando...' : 'Confirmar'}
-                </Text>
-              </TouchableOpacity>
-            </View>
+              <Text style={styles.termsSectionTitle}>4. Cancelamentos</Text>
+              <Text style={styles.termsParagraph}>
+                Em caso de cancelamento, o valor é devolvido integralmente ao locatário, 
+                exceto em situações específicas definidas em nossa política de cancelamento.
+              </Text>
+            </ScrollView>
+
+            <TouchableOpacity
+              style={styles.termsCloseButton}
+              onPress={() => setIsTermsModalVisible(false)}
+            >
+              <Text style={styles.termsCloseButtonText}>Entendi</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

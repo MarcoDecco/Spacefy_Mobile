@@ -229,23 +229,34 @@ export const profileStyles = StyleSheet.create({
   },
 
   editProfileModal: {
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 20,
     width: '90%',
-    minHeight: 300,
+    maxHeight: '80%',
   },
 
   modalHeader: {
     flexDirection: 'row',
-    // marginBottom: 20,
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+
+  modalTitleContainer: {
+    flex: 1,
+    marginRight: 10,
   },
 
   modalTitle: {
     fontSize: 22,
     fontWeight: '500',
     color: colors.black,
+  },
+
+  modalSubTittle: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'justify',
   },
 
   closeButton: {
@@ -302,7 +313,7 @@ export const profileStyles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: colors.blue,
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
@@ -314,7 +325,7 @@ export const profileStyles = StyleSheet.create({
 
   saveButtonText: {
     color: colors.white,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
   },
 
@@ -327,7 +338,7 @@ export const profileStyles = StyleSheet.create({
 
   documentTypeButton: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
@@ -343,7 +354,7 @@ export const profileStyles = StyleSheet.create({
   },
 
   documentTypeButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     color: colors.gray,
     fontWeight: '500',
   },
@@ -353,15 +364,99 @@ export const profileStyles = StyleSheet.create({
   },
 
   paymentTerm: {
-    width: '100%',
     flexDirection: 'row',
-    marginTop: 8,
     padding: 10,
+    marginBottom: 36,
     backgroundColor: colors.others[300],
     borderRadius: 6,
     borderWidth: 0.8,
     borderColor: colors.blue,
     gap: 8,
-    alignItems: 'flex-start',
-  }
+  },
+
+  paymentTermText: {
+    fontSize: 16,
+    color: colors.blue,
+    flexShrink: 1,
+    textAlign: 'justify',
+    paddingRight: 4,
+  },
+
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: colors.blue,
+    borderRadius: 4,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  checkboxChecked: {
+    backgroundColor: colors.blue,
+  },
+
+  termsText: {
+    fontSize: 14,
+    color: colors.dark_gray,
+    flex: 1,
+  },
+
+  termsLink: {
+    color: colors.blue,
+    textDecorationLine: 'underline',
+  },
+
+  termsModalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+  },
+
+  termsContent: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+
+  termsSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 12,
+    marginTop: 20,
+  },
+
+  termsParagraph: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+
+  termsCloseButton: {
+    backgroundColor: colors.blue,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  termsCloseButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
 }); 
