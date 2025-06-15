@@ -202,10 +202,19 @@ export default function Profile() {
 
         <TouchableOpacity 
           style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
-          onPress={() => navigation.navigate('Favorites')}
+          onPress={() => navigation.navigate('Favorites', { from: 'profile' })}
         >
           <Ionicons name="heart-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
           <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Favoritos</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
+          onPress={() => navigation.navigate('Rented', { from: 'profile' })}
+        >
+          <Ionicons name="home-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Alugados</Text>
           <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
