@@ -34,6 +34,10 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { CheckInDateTime } from '../components/CheckInDateTime';
 import { CheckOutDateTime } from '../components/CheckOutDateTime';
 import { ReviewBox } from '../components/ReviewBox';
+import { RentalTotalBar } from '../components/RentalTotalBar';
+import { DescriptionSection } from '../components/DescriptionSection';
+import { ImageCarousel } from '../components/ImageCarousel';
+import { SpaceHeader } from '../components/SpaceHeader';
 
 interface SpaceDetailsProps {
   route: {
@@ -546,72 +550,27 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled">
             {/* Carrossel de imagens */}
-            <View style={styles.imageContainer}>
-              <ScrollView
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleScroll}
-                onMomentumScrollEnd={handleMomentumScrollEnd}
-                ref={scrollRef}
-                scrollEventThrottle={16}
-                onTouchStart={() => setIsAutoPlayPaused(true)}
-                onTouchEnd={() => setIsAutoPlayPaused(false)}>
-                {space.images.map((img, index) => (
-                  <Image key={index} source={img} style={styles.image} resizeMode="cover" />
-                ))}
-              </ScrollView>
-              {/* Dots de navegação */}
-              <View style={styles.dotsContainer}>
-                {space.images.map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.dot,
-                      index === activeIndex ? styles.dotActive : styles.dotInactive,
-                    ]}
-                  />
-                ))}
-              </View>
-              {/* Contador de imagens */}
-              <View style={styles.counter}>
-                <Text style={styles.counterText}>
-                  {activeIndex + 1}/{space.images.length}
-                </Text>
-              </View>
-            </View>
+            <ImageCarousel
+              images={space.images}
+              activeIndex={activeIndex}
+              onScroll={handleScroll}
+              onMomentumScrollEnd={handleMomentumScrollEnd}
+              scrollRef={scrollRef}
+              setIsAutoPlayPaused={setIsAutoPlayPaused}
+              styles={styles}
+            />
 
             <View style={styles.content}>
               {/* Nome, endereço e favorito */}
-              <View style={styles.headerRow}>
-                <View style={styles.headerInfo}>
-                  <Text style={[styles.title, isDarkMode && { color: theme.text }]}>
-                    {space.title}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
-                      // @ts-ignore
-                      if (typeof window !== 'undefined') {
-                        window.open(url, '_blank');
-                      } else {
-                        // React Native Linking
-                        import('react-native').then(({ Linking }) => Linking.openURL(url));
-                      }
-                    }}>
-                    <Text style={[styles.headerAddress, isDarkMode && { color: theme.blue }]}>
-                      {space.address}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <TouchableOpacity onPress={handleFavoritePress}>
-                  <MaterialIcons
-                    name={isFavorite ? 'favorite' : 'favorite-border'}
-                    color={isFavorite ? colors.blue : colors.gray}
-                    size={25}
-                  />
-                </TouchableOpacity>
-              </View>
+              <SpaceHeader
+                title={space.title}
+                address={space.address}
+                isFavorite={isFavorite}
+                onFavoritePress={handleFavoritePress}
+                theme={theme}
+                isDarkMode={isDarkMode}
+                styles={styles}
+              />
 
               {/* Avaliação */}
               <View style={styles.headerRatingRow}>
@@ -738,37 +697,14 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   />
 
                   {/* Total e Botão */}
-                  <View style={styles.rentalTotalContainer}>
-                    <View style={styles.rentalTotalInfo}>
-                      <Text style={[styles.rentalTotalLabel, isDarkMode && { color: theme.text }]}>
-                        Valor Total
-                      </Text>
-                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>
-                        {calcularTotal()}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      style={[
-                        styles.rentalButton,
-                        isDarkMode && {
-                          backgroundColor: theme.blue,
-                          borderColor: theme.border,
-                          borderWidth: 1,
-                        },
-                      ]}
-                      onPress={handleRent}
-                      disabled={isLoading}>
-                      <MaterialIcons
-                        name="check-circle"
-                        size={20}
-                        color={colors.white}
-                        style={{ marginRight: 8 }}
-                      />
-                      <Text style={styles.rentalButtonText}>
-                        {isLoading ? 'Processando...' : 'Alugar'}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                  <RentalTotalBar
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                    calcularTotal={calcularTotal}
+                    handleRent={handleRent}
+                    isLoading={isLoading}
+                  />
                 </View>
               </View>
 
@@ -776,23 +712,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               <View style={styles.horizontalDivider} />
 
               {/* Descrição */}
-              <View>
-                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
-                  Descrição
-                </Text>
-                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
-                  {displayDescription}
-                </Text>
-                {shouldShowMoreButton && (
-                  <TouchableOpacity
-                    style={styles.moreButton}
-                    onPress={() => setShowFullDescription(!showFullDescription)}>
-                    <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
-                      {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
+              <DescriptionSection
+                displayDescription={displayDescription}
+                shouldShowMoreButton={shouldShowMoreButton}
+                showFullDescription={showFullDescription}
+                setShowFullDescription={setShowFullDescription}
+                isDarkMode={isDarkMode}
+                theme={theme}
+                styles={styles}
+              />
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
