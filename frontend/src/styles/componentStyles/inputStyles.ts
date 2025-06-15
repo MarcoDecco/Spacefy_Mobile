@@ -20,6 +20,8 @@ export const inputStyles = StyleSheet.create({
 
   inputContainer: {
     width: '100%',
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.dark_gray,
     flexDirection: 'row',
     alignItems: 'center',
   },
