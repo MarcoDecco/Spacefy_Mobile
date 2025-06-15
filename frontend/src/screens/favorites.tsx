@@ -210,6 +210,7 @@ export default function Favorites() {
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
+        showBackButton={true}
       />
       <FlatList
         ref={flatListRef}
