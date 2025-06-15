@@ -127,36 +127,25 @@ export const profileStyles = StyleSheet.create({
     justifyContent: 'center',
     padding: 15,
     backgroundColor: colors.white,
+    borderWidth: 0.8,
+    borderColor: colors.error,
     borderRadius: 10,
     marginTop: 20,
-    shadowColor: colors.black,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
+    boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
   },
 
   logoutButtonText: {
     color: colors.error,
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
+    fontSize: 18,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   
   bannerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
-    marginTop: 16,
-    marginBottom: 26,
-    // backgroundColor: colors.white,
-    // borderWidth: 0.5,
-    // borderColor: colors.line,
-    // borderRadius: 20,
-    // boxShadow: '0 4px 6px 0 rgba(0, 0, 0, 0.2)',
+    marginBottom: 22,
   },
 
   bannerTitle: {
@@ -458,5 +447,9 @@ export const profileStyles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+
+  bottomSpacing: {
+    paddingBottom: 60,
   },
 }); 
