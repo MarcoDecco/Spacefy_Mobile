@@ -11,7 +11,7 @@ export const SEARCH_BAR_HEIGHT = statusBarHeight + 60;
 export const searchBarStyles = StyleSheet.create({
     container: {
         position: 'absolute',
-        zIndex: 1000,
+        zIndex: 1500,
         width: '100%',
         paddingBottom: 15,
         backgroundColor: colors.light_gray,
@@ -23,6 +23,23 @@ export const searchBarStyles = StyleSheet.create({
         marginTop: statusBarHeight + 20,
         marginHorizontal: 20,
         gap: 10,
+    },
+
+    backButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 
     searchContainer: {

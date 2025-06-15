@@ -57,15 +57,7 @@ export default function StackNavigation() {
         name="Favorites"
         component={Favorites}
         options={{
-          headerShown: true,
-          title: 'Favoritos',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
         }}
       />
       <Stack.Screen

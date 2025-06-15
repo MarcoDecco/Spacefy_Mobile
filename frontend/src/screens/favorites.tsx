@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, FlatList, ActivityIndicator, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import Card from '../components/card';
 import Search from '../components/searchBar';
@@ -8,6 +8,9 @@ import { homeStyles as styles } from '../styles/homeStyles';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import ScrollToTopButton from '../components/scrollToTopButton';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../styles/globalStyles/colors';
 
 interface Space {
   _id: string;
@@ -44,6 +47,7 @@ interface Favorite {
 }
 
 export default function Favorites() {
+  const navigation = useNavigation();
   const { favorites, loading, error } = useFavorites();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
