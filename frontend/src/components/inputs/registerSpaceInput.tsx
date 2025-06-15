@@ -27,7 +27,7 @@ export default function RegisterSpaceInput({
         {required && <Text style={inputStyles.required}>*</Text>}
         {hint && <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>{hint}</Text>}
       </View>
-      <View style={inputStyles.inputContainer}>
+      <View style={inputStyles.inputContainerNoBorder}>
         <TextInput
           style={[
             inputStyles.input,

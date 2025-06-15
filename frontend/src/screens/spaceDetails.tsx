@@ -716,7 +716,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                 setNewComment={setNewComment}
                 handleAddReview={handleAddReview}
                 onClear={() => {
-                  // lógica para limpar ou abrir detalhes do locador
+                  setNewRating(0);
+                  setNewComment('');
                 }}
               />
 

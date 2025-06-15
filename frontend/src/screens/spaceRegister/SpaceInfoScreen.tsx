@@ -11,7 +11,6 @@ export default function SpaceInfoScreen() {
   const navigation = useNavigation();
   const [name, setName] = useState('');
   const [capacity, setCapacity] = useState('');
-  const [location, setLocation] = useState('');
   const [type, setType] = useState('');
   const [description, setDescription] = useState('');
 
@@ -36,6 +35,12 @@ export default function SpaceInfoScreen() {
           value={name}
           onChangeText={setName}
         />
+
+        <Text style={pageTexts.labelInput}>Tipo de espaço</Text>
+          <TouchableOpacity style={styles.typeButton}>
+          <Text style={styles.typeButtonText}>Escolher tipo</Text>
+        </TouchableOpacity>
+
         <RegisterSpaceInput
           label="Capacidade máxima de pessoas"
           placeholder="Insira o número máximo de pessoas"
@@ -43,17 +48,7 @@ export default function SpaceInfoScreen() {
           onChangeText={setCapacity}
           keyboardType="numeric"
         />
-        <RegisterSpaceInput
-          label="Localização"
-          placeholder="Insira a URL do Google Maps"
-          value={location}
-          onChangeText={setLocation}
-          hint="URL do MAPS"
-        />
-        <Text style={pageTexts.labelInput}>Tipo de espaço</Text>
-        <TouchableOpacity style={styles.typeButton}>
-          <Text style={styles.typeButtonText}>Escolher tipo</Text>
-        </TouchableOpacity>
+
         <RegisterSpaceInput
           label="Breve descrição do espaço"
           placeholder="Descreva como é o seu espaço"
@@ -64,17 +59,20 @@ export default function SpaceInfoScreen() {
           hint="MAX 250 caracteres"
         />
       </View>
+
       <View style={styles.buttonRowFixed}>
         <RegisterSpaceButton
           title="Voltar"
           onPress={() => navigation.goBack()}
           variant="secondary"
         />
+
         <RegisterSpaceButton
           title="Prosseguir"
           onPress={() => navigation.navigate('SpaceNextStepScreen' as never)}
         />
+        
       </View>
     </SafeAreaView>
   );
-} 
+}

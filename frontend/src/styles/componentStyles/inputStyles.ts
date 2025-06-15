@@ -58,4 +58,10 @@ export const inputStyles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: colors.white,
   },
+
+  inputContainerNoBorder: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 }); 
