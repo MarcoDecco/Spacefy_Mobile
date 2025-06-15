@@ -42,6 +42,7 @@ export type RootStackParamList = {
   MyReviews: undefined;
   EditProfile: undefined;
   Messages: { conversation: Conversation };
+  PaymentTerms: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

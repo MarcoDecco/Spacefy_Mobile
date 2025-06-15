@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './globalStyles/colors';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export const profileStyles = StyleSheet.create({
   container: {
@@ -228,24 +229,34 @@ export const profileStyles = StyleSheet.create({
   },
 
   editProfileModal: {
-    justifyContent: 'space-between',
     backgroundColor: colors.white,
-    borderRadius: 12,
+    borderRadius: 20,
     padding: 20,
     width: '90%',
-    minHeight: 300,
+    maxHeight: '80%',
   },
 
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // marginBottom: 20,
+    marginBottom: 16,
+  },
+
+  modalTitleContainer: {
+    flex: 1,
+    marginRight: 10,
   },
 
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '500',
     color: colors.black,
+  },
+
+  modalSubTittle: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'justify',
   },
 
   closeButton: {
@@ -302,7 +313,7 @@ export const profileStyles = StyleSheet.create({
 
   saveButton: {
     backgroundColor: colors.blue,
-    padding: 15,
+    padding: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
@@ -314,7 +325,138 @@ export const profileStyles = StyleSheet.create({
 
   saveButtonText: {
     color: colors.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+
+  documentTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 8,
+  },
+
+  documentTypeButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gray,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  documentTypeButtonActive: {
+    backgroundColor: colors.blue,
+    borderColor: colors.blue,
+  },
+
+  documentTypeButtonText: {
+    fontSize: 17,
+    color: colors.gray,
+    fontWeight: '500',
+  },
+
+  documentTypeButtonTextActive: {
+    color: colors.white,
+  },
+
+  paymentTerm: {
+    flexDirection: 'row',
+    padding: 10,
+    marginBottom: 36,
+    backgroundColor: colors.others[300],
+    borderRadius: 6,
+    borderWidth: 0.8,
+    borderColor: colors.blue,
+    gap: 8,
+  },
+
+  paymentTermText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.blue,
+    flexShrink: 1,
+    textAlign: 'justify',
+    paddingRight: 4,
+  },
+
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: colors.blue,
+    borderRadius: 4,
+    marginRight: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  checkboxChecked: {
+    backgroundColor: colors.blue,
+  },
+
+  termsText: {
+    fontSize: 14,
+    color: colors.dark_gray,
+    flex: 1,
+  },
+
+  termsLink: {
+    color: colors.blue,
+    textDecorationLine: 'underline',
+  },
+
+  termsModalContent: {
+    backgroundColor: colors.white,
+    borderRadius: 20,
+    padding: 20,
+    width: '90%',
+    maxHeight: '80%',
+  },
+
+  termsContent: {
+    marginTop: 20,
+    marginBottom: 20,
+  },
+
+  termsSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 12,
+    marginTop: 20,
+  },
+
+  termsParagraph: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+
+  termsCloseButton: {
+    backgroundColor: colors.blue,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  termsCloseButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 
