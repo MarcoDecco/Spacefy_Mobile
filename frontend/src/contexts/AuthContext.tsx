@@ -10,6 +10,7 @@ interface JwtPayload {
   surname: string;
   telephone: string;
   profilePhoto: string;
+  userType: string;
   iat: number;
   exp: number;
 }
@@ -21,6 +22,7 @@ interface User {
   surname?: string;
   telephone?: string;
   profilePhoto?: string;
+  userType?: string;
 }
 
 interface AuthContextData {
@@ -66,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             surname: decodedToken.surname,
             telephone: decodedToken.telephone,
             profilePhoto: decodedToken.profilePhoto,
+            userType: decodedToken.userType,
           });
         }
       } else {
@@ -93,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: decodedToken.email,
         surname: decodedToken.surname,
         profilePhoto: decodedToken.profilePhoto,
+        userType: decodedToken.userType,
       });
     } catch (error) {
       console.error('❌ Erro no login:', error);
@@ -126,6 +130,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
+        userType: decodedToken.userType,
       });
     } catch (error) {
       console.error('❌ Erro no registro:', error);
@@ -139,14 +144,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Usuário não autenticado');
       }
       
-      console.log('📝 Iniciando atualização do usuário...');
+      console.log('📝 Iniciando atualização do usuário...', userData);
       const response = await authService.update(user.id, userData);
       console.log('✅ Atualização bem sucedida:', response);
       
-      setUser(prevUser => ({
-        ...prevUser!,
-        ...userData,
-      }));
+      // Atualiza o token se necessário
+      if (response.token) {
+        await AsyncStorage.setItem('token', response.token);
+        const decodedToken = jwtDecode<JwtPayload>(response.token);
+        setUser({
+          ...decodedToken,
+          ...userData
+        });
+      } else {
+        setUser(prevUser => ({
+          ...prevUser!,
+          ...userData,
+        }));
+      }
     } catch (error) {
       console.error('❌ Erro na atualização:', error);
       throw error;
