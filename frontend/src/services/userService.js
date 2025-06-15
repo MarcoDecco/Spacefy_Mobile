@@ -39,6 +39,16 @@ export const userService = {
     async updateUser(userId, userData) {
         const response = await api.put(`/users/updateUser/${userId}`, userData);
         return response.data;
+    },
+
+    // Atualizar tipo de usuário
+    async updateUserType(userId, documentNumber, documentType) {
+        const response = await api.put(`/users/updateToLocatario/${userId}`, {
+            cpfOrCnpj: documentNumber,
+            documentType,
+            userType: 'locador'
+        });
+        return response.data;
     }
 
 };
