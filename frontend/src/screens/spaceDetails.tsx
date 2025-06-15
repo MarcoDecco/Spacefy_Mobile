@@ -1,5 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, SafeAreaView, StatusBar, Modal, TouchableWithoutFeedback, FlatList, TextInput, KeyboardAvoidingView, Platform, Keyboard, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Modal,
+  TouchableWithoutFeedback,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  Alert,
+} from 'react-native';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
 import { Calendar } from 'react-native-calendars';
@@ -9,6 +25,10 @@ import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 import { useFavorites } from '../hooks/useFavorites';
 import { useAuth } from '../contexts/AuthContext';
+import { CalendarModal } from '../components/calendarModal';
+import { LandlordCard } from '../components/LandlordCard';
+import { SpaceDetailsGrid } from '../components/SpaceDetailsGrid';
+import { TimeSelectModal } from '../components/TimeSelectModal';
 
 interface SpaceDetailsProps {
   route: {
@@ -28,9 +48,9 @@ interface SpaceDetailsProps {
         hasWifi?: boolean;
         capacity?: string;
         bathrooms?: string;
-      }
-    }
-  }
+      };
+    };
+  };
 }
 
 interface Review {
@@ -66,14 +86,20 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [checkOutTime, setCheckOutTime] = useState(new Date());
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
-  const [pickerTarget, setPickerTarget] = useState<'checkInDate' | 'checkOutDate' | 'checkInTime' | 'checkOutTime'>('checkInDate');
+  const [pickerTarget, setPickerTarget] = useState<
+    'checkInDate' | 'checkOutDate' | 'checkInTime' | 'checkOutTime'
+  >('checkInDate');
 
   // Estados para modal do calendário customizado
   const [calendarVisible, setCalendarVisible] = useState(false);
-  const [calendarTarget, setCalendarTarget] = useState<'checkInDate' | 'checkOutDate'>('checkInDate');
+  const [calendarTarget, setCalendarTarget] = useState<'checkInDate' | 'checkOutDate'>(
+    'checkInDate'
+  );
 
   const [timeModalVisible, setTimeModalVisible] = useState(false);
-  const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>('checkInTime');
+  const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>(
+    'checkInTime'
+  );
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
@@ -101,32 +127,43 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [newComment, setNewComment] = useState('');
 
   const MAX_DESCRIPTION_LENGTH = 150;
-  const shouldShowMoreButton = space.description && space.description.length > MAX_DESCRIPTION_LENGTH;
+  const shouldShowMoreButton =
+    space.description && space.description.length > MAX_DESCRIPTION_LENGTH;
   const displayDescription = showFullDescription
     ? space.description
     : space.description?.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
 
   const MAX_REVIEW_LENGTH = 120;
   const toggleReview = (id: number) => {
-    setReviews(reviews.map(r =>
-      r.id === id ? { ...r, expanded: !r.expanded } : r
-    ));
+    setReviews(reviews.map((r) => (r.id === id ? { ...r, expanded: !r.expanded } : r)));
   };
   const renderReview = (review: any) => (
-    <View key={review.id} style={[styles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
+    <View
+      key={review.id}
+      style={[styles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
         {review.avatar ? (
-          <Image source={review.avatar} style={{ width: 36, height: 36, borderRadius: 18, marginRight: 8 }} />
+          <Image
+            source={review.avatar}
+            style={{ width: 36, height: 36, borderRadius: 18, marginRight: 8 }}
+          />
         ) : (
-          <MaterialIcons name="account-circle" size={36} color={colors.gray} style={{ marginRight: 8 }} />
+          <MaterialIcons
+            name="account-circle"
+            size={36}
+            color={colors.gray}
+            style={{ marginRight: 8 }}
+          />
         )}
         <View>
-      <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>{review.user}</Text>
+          <Text style={[styles.reviewUser, isDarkMode && { color: theme.text }]}>
+            {review.user}
+          </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
             {[...Array(5)].map((_, index) => (
               <MaterialIcons
                 key={index}
-                name={index < review.rating ? "star" : "star-border"}
+                name={index < review.rating ? 'star' : 'star-border'}
                 size={16}
                 color={index < review.rating ? colors.blue : colors.gray}
                 style={{ marginRight: 2 }}
@@ -166,7 +203,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     const newIndex = Math.max(0, Math.min(index, space.images.length - 1));
     scrollRef.current?.scrollTo({
       x: newIndex * windowWidth,
-      animated: true
+      animated: true,
     });
     setActiveIndex(newIndex);
   };
@@ -231,7 +268,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         checkInDate.getDate(),
         checkInTime.getHours(),
         checkInTime.getMinutes(),
-        0, 0
+        0,
+        0
       );
 
       // Junta data e hora de check-out
@@ -241,16 +279,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         checkOutDate.getDate(),
         checkOutTime.getHours(),
         checkOutTime.getMinutes(),
-        0, 0
+        0,
+        0
       );
 
       // Verifica se a data de check-out é posterior ao check-in
       if (checkOut <= checkIn) {
-        Alert.alert(
-          "Data Inválida",
-          "A data de check-out deve ser posterior à data de check-in.",
-          [{ text: "OK" }]
-        );
+        Alert.alert('Data Inválida', 'A data de check-out deve ser posterior à data de check-in.', [
+          { text: 'OK' },
+        ]);
         return;
       }
 
@@ -258,22 +295,19 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         spaceId: space.id,
         checkIn: checkIn.toISOString(),
         checkOut: checkOut.toISOString(),
-        totalValue: calcularTotal()
+        totalValue: calcularTotal(),
       };
 
       await api.post('/reservations', reservationData);
-      
+
       setConfirmModalVisible(true);
       setTimeout(() => {
         setConfirmModalVisible(false);
       }, 2000);
-
     } catch (error) {
-      Alert.alert(
-        "Erro",
-        "Não foi possível realizar a reserva. Tente novamente mais tarde.",
-        [{ text: "OK" }]
-      );
+      Alert.alert('Erro', 'Não foi possível realizar a reserva. Tente novamente mais tarde.', [
+        { text: 'OK' },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -284,13 +318,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     const periods = {
       manha: { start: 6, end: 12 },
       tarde: { start: 12, end: 18 },
-      noite: { start: 18, end: 24 }
+      noite: { start: 18, end: 24 },
     };
 
     const timeGroups = {
       manha: [] as string[],
       tarde: [] as string[],
-      noite: [] as string[]
+      noite: [] as string[],
     };
 
     // Primeiro, geramos os horários normais
@@ -299,7 +333,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         const hour = h.toString().padStart(2, '0');
         const min = m.toString().padStart(2, '0');
         const timeStr = `${hour}:${min}`;
-        
+
         if (h >= periods.manha.start && h < periods.manha.end) {
           timeGroups.manha.push(timeStr);
         } else if (h >= periods.tarde.start && h < periods.tarde.end) {
@@ -344,7 +378,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       checkInDate.getDate(),
       checkInTime.getHours(),
       checkInTime.getMinutes(),
-      0, 0
+      0,
+      0
     );
     // Junta data e hora de check-out
     const checkOut = new Date(
@@ -353,7 +388,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       checkOutDate.getDate(),
       checkOutTime.getHours(),
       checkOutTime.getMinutes(),
-      0, 0
+      0,
+      0
     );
 
     // Verifica se a data de check-out é posterior ao check-in
@@ -367,22 +403,22 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     const diffMinutos = diffMs / (1000 * 60);
     // Converte para horas com decimais (ex: 1.5 para 1 hora e 30 minutos)
     const diffHoras = diffMinutos / 60;
-    
+
     // Extrai o valor numérico do preço do espaço (remove R$, espaços e converte vírgula para ponto)
     const precoPorHora = parseFloat(space.price.replace(/[R$\s.]/g, '').replace(',', '.'));
-    
+
     // Calcula o preço por minuto
     const precoPorMinuto = precoPorHora / 60;
-    
+
     // Calcula o total usando os minutos exatos
     const total = diffMinutos * precoPorMinuto;
-    
+
     // Formata para moeda brasileira
-    return total.toLocaleString('pt-BR', { 
-      style: 'currency', 
+    return total.toLocaleString('pt-BR', {
+      style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     });
   }
 
@@ -398,7 +434,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   // Adicionar verificação de dados do espaço
   const spaceDetails = {
-    amenities: space.amenities || ['Wi-Fi', 'Ar Condicionado', 'Cozinha', 'Estacionamento', 'Acessibilidade'],
+    amenities: space.amenities || [
+      'Wi-Fi',
+      'Ar Condicionado',
+      'Cozinha',
+      'Estacionamento',
+      'Acessibilidade',
+    ],
     type: space.type || 'Não especificado',
     area: space.area || 'Não especificado',
     capacity: space.capacity || 'Não especificado',
@@ -410,9 +452,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const handleAddReview = () => {
     if (newRating === 0) {
       Alert.alert(
-        "Avaliação Incompleta",
-        "Por favor, selecione uma avaliação com as estrelas antes de enviar.",
-        [{ text: "OK" }]
+        'Avaliação Incompleta',
+        'Por favor, selecione uma avaliação com as estrelas antes de enviar.',
+        [{ text: 'OK' }]
       );
       return;
     }
@@ -430,7 +472,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setNewRating(0);
     setNewComment('');
     setSuccessModalVisible(true);
-    
+
     setTimeout(() => {
       setSuccessModalVisible(false);
     }, 1500);
@@ -452,7 +494,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       const spaceData = {
         _id: space.id,
         space_name: space.title,
-        image_url: space.images.map(img => typeof img === 'string' ? img : img.uri),
+        image_url: space.images.map((img) => (typeof img === 'string' ? img : img.uri)),
         location: space.address,
         price_per_hour: parseFloat(space.price.replace(/[^0-9.-]+/g, '')),
         space_description: space.description || '',
@@ -465,7 +507,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         space_rules: [],
         owner_name: '',
         owner_phone: '',
-        owner_email: ''
+        owner_email: '',
       };
 
       await toggleFavorite(spaceData);
@@ -475,81 +517,72 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     }
   };
 
-  const isFavorite = favorites.some(fav => fav.spaceId?._id === space.id);
+  const isFavorite = favorites.some((fav) => fav.spaceId?._id === space.id);
 
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
       <StatusBar
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
         translucent
       />
       <View style={styles.statusBarGradient} />
       {/* Botão de voltar fixo */}
-          <TouchableOpacity
-        style={styles.backButtonFixed}
-            onPress={() => navigation.goBack()}
-          >
-            <MaterialIcons name="arrow-back" size={24} color={colors.white} />
-          </TouchableOpacity>
+      <TouchableOpacity style={styles.backButtonFixed} onPress={() => navigation.goBack()}>
+        <MaterialIcons name="arrow-back" size={24} color={colors.white} />
+      </TouchableOpacity>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
-      >
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <ScrollView
             style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
             showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-          {/* Carrossel de imagens */}
+            keyboardShouldPersistTaps="handled">
+            {/* Carrossel de imagens */}
             <View style={styles.imageContainer}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            onMomentumScrollEnd={handleMomentumScrollEnd}
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={handleScroll}
+                onMomentumScrollEnd={handleMomentumScrollEnd}
                 ref={scrollRef}
-            scrollEventThrottle={16}
-            onTouchStart={() => setIsAutoPlayPaused(true)}
-            onTouchEnd={() => setIsAutoPlayPaused(false)}
-          >
+                scrollEventThrottle={16}
+                onTouchStart={() => setIsAutoPlayPaused(true)}
+                onTouchEnd={() => setIsAutoPlayPaused(false)}>
                 {space.images.map((img, index) => (
-              <Image
-                key={index}
-                    source={img}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            ))}
-          </ScrollView>
+                  <Image key={index} source={img} style={styles.image} resizeMode="cover" />
+                ))}
+              </ScrollView>
               {/* Dots de navegação */}
-          <View style={styles.dotsContainer}>
-            {space.images.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === activeIndex ? styles.dotActive : styles.dotInactive
-                ]}
-              />
-            ))}
-          </View>
-          {/* Contador de imagens */}
-          <View style={styles.counter}>
-            <Text style={styles.counterText}>
-              {activeIndex + 1}/{space.images.length}
-            </Text>
-          </View>
-        </View>
+              <View style={styles.dotsContainer}>
+                {space.images.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.dot,
+                      index === activeIndex ? styles.dotActive : styles.dotInactive,
+                    ]}
+                  />
+                ))}
+              </View>
+              {/* Contador de imagens */}
+              <View style={styles.counter}>
+                <Text style={styles.counterText}>
+                  {activeIndex + 1}/{space.images.length}
+                </Text>
+              </View>
+            </View>
 
-        <View style={styles.content}>
+            <View style={styles.content}>
               {/* Nome, endereço e favorito */}
               <View style={styles.headerRow}>
                 <View style={styles.headerInfo}>
-          <Text style={[styles.title, isDarkMode && { color: theme.text }]}>{space.title}</Text>
+                  <Text style={[styles.title, isDarkMode && { color: theme.text }]}>
+                    {space.title}
+                  </Text>
                   <TouchableOpacity
                     onPress={() => {
                       const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(space.address)}`;
@@ -560,18 +593,15 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         // React Native Linking
                         import('react-native').then(({ Linking }) => Linking.openURL(url));
                       }
-                    }}
-                  >
+                    }}>
                     <Text style={[styles.headerAddress, isDarkMode && { color: theme.blue }]}>
                       {space.address}
                     </Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  onPress={handleFavoritePress}
-                >
+                <TouchableOpacity onPress={handleFavoritePress}>
                   <MaterialIcons
-                    name={isFavorite ? "favorite" : "favorite-border"}
+                    name={isFavorite ? 'favorite' : 'favorite-border'}
                     color={isFavorite ? colors.blue : colors.gray}
                     size={25}
                   />
@@ -580,7 +610,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
               {/* Avaliação */}
               <View style={styles.headerRatingRow}>
-                {[1,2,3,4,5].map(i => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <MaterialIcons
                     key={i}
                     name={i <= Math.round(space.rating) ? 'star' : 'star-border'}
@@ -588,7 +618,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                     color={isDarkMode ? theme.text : colors.black}
                   />
                 ))}
-                <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>({space.reviews})</Text>
+                <Text style={[styles.headerReviews, isDarkMode && { color: theme.text }]}>
+                  ({space.reviews})
+                </Text>
               </View>
 
               {/* Divisor horizontal */}
@@ -598,86 +630,58 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               <View style={styles.detailsRow}>
                 {/* Coluna Aluguel e Tipo */}
                 <View style={styles.detailsColLeft}>
-                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>Aluguel:</Text>
+                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>
+                    Aluguel:
+                  </Text>
 
                   <View style={styles.detailsValueRow}>
-                    <Text style={[styles.detailsValue, isDarkMode && { color: theme.text }]}>{aluguel}</Text>
-                    <Text style={[styles.detailsDivider, isDarkMode && { color: theme.text }]}>/Hora</Text>
+                    <Text style={[styles.detailsValue, isDarkMode && { color: theme.text }]}>
+                      {aluguel}
+                    </Text>
+                    <Text style={[styles.detailsDivider, isDarkMode && { color: theme.text }]}>
+                      /Hora
+                    </Text>
                   </View>
 
                   {/* Divisor interno */}
-                  <View style={[styles.detailsInnerDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                  <View
+                    style={[
+                      styles.detailsInnerDivider,
+                      isDarkMode && { backgroundColor: theme.border },
+                    ]}
+                  />
 
-                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>Tipo:</Text>
-                  <Text style={[styles.detailsType, isDarkMode && { color: theme.text }]}>{tipo}</Text>
+                  <Text style={[styles.detailsLabel, isDarkMode && { color: theme.text }]}>
+                    Tipo:
+                  </Text>
+                  <Text style={[styles.detailsType, isDarkMode && { color: theme.text }]}>
+                    {tipo}
+                  </Text>
                 </View>
-                
+
                 {/* Coluna Detalhes */}
-                <View style={styles.detailsColRight}>
-                  <Text style={[styles.detailsLabel, { marginBottom: 8 }, isDarkMode && { color: theme.text }]}>Detalhes:</Text>
-
-                  <View style={[styles.detailsGrid, { flexDirection: 'column', gap: 16 }]}>
-                    {/* Linha de cima */}
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 16 }}>
-                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
-                        <Feather 
-                          name="wifi" 
-                          size={20} 
-                          color={isDarkMode ? theme.text : colors.gray} 
-                          style={{ marginRight: 8 }} 
-                        />
-                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{wifi}</Text>
-                      </View>
-
-                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
-                        <MaterialIcons 
-                          name="crop-square" 
-                          size={20} 
-                          color={isDarkMode ? theme.text : colors.gray} 
-                          style={{ marginRight: 8 }} 
-                        />
-                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{metragem}</Text>
-                      </View>
-
-                      <View style={[styles.detailsGridItem, { flex: 1 }]}>
-                        <MaterialIcons 
-                          name="wc" 
-                          size={20} 
-                          color={isDarkMode ? theme.text : colors.gray} 
-                          style={{ marginRight: 8 }} 
-                        />
-                        <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{banheiros}</Text>
-                      </View>
-                    </View>
-
-                    {/* Linha de baixo */}
-                    <View style={styles.detailsGridItem}>
-                      <MaterialIcons 
-                        name="groups" 
-                        size={20} 
-                        color={isDarkMode ? theme.text : colors.gray} 
-                        style={{ marginRight: 8 }} 
-                      />
-                      <Text style={[styles.detailsInfoTextNoMargin, isDarkMode && { color: theme.text }]}>{capacidade}</Text>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity onPress={() => setDetailsModalVisible(true)}>
-                    <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
-                  </TouchableOpacity>
-                </View>
+                <SpaceDetailsGrid
+                  wifi={wifi}
+                  metragem={metragem}
+                  banheiros={banheiros}
+                  capacidade={capacidade}
+                  isDarkMode={isDarkMode}
+                  theme={theme}
+                  styles={styles}
+                  onSeeMore={() => setDetailsModalVisible(true)}
+                />
               </View>
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
-              
+
               {/* Seção de aluguel do espaço */}
               <View style={styles.rentalSection}>
                 <View style={styles.rentalHeader}>
-                  <MaterialIcons 
-                    name="event-available" 
-                    size={28} 
-                    color={isDarkMode ? theme.blue : colors.blue} 
+                  <MaterialIcons
+                    name="event-available"
+                    size={28}
+                    color={isDarkMode ? theme.blue : colors.blue}
                   />
                   <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
                     Reserve Este Espaço
@@ -687,81 +691,121 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   Selecione o período desejado para sua reserva
                 </Text>
 
-                <View style={[styles.rentalCard, isDarkMode && { 
-                  backgroundColor: theme.card,
-                  borderColor: theme.border,
-                  borderWidth: 1
-                }]}>
+                <View
+                  style={[
+                    styles.rentalCard,
+                    isDarkMode && {
+                      backgroundColor: theme.card,
+                      borderColor: theme.border,
+                      borderWidth: 1,
+                    },
+                  ]}>
                   {/* Data e Hora de Check-in */}
                   <View style={styles.rentalDateTimeContainer}>
                     <View style={styles.rentalDateTimeHeader}>
-                      <View style={[styles.rentalIconCircle, isDarkMode && { 
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        borderWidth: 1
-                      }]}>
-                        <MaterialIcons 
-                          name="login" 
-                          size={20} 
-                          color={isDarkMode ? theme.blue : colors.blue} 
+                      <View
+                        style={[
+                          styles.rentalIconCircle,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                            borderWidth: 1,
+                          },
+                        ]}>
+                        <MaterialIcons
+                          name="login"
+                          size={20}
+                          color={isDarkMode ? theme.blue : colors.blue}
                         />
                       </View>
-                      <Text style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
+                      <Text
+                        style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
                         Check-in
                       </Text>
                     </View>
                     <View style={styles.rentalDateTimeContent}>
                       <TouchableOpacity
-                        style={[styles.rentalDateTimeBox, isDarkMode && { 
-                          backgroundColor: theme.background,
-                          borderColor: theme.border
-                        }]}
-                        onPress={() => openPicker('checkInDate', 'date')}
-                      >
-                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border,
-                          borderWidth: 1
-                        }]}>
-                          <MaterialIcons 
-                            name="calendar-today" 
-                            size={20} 
-                            color={isDarkMode ? theme.text : colors.gray} 
+                        style={[
+                          styles.rentalDateTimeBox,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                          },
+                        ]}
+                        onPress={() => openPicker('checkInDate', 'date')}>
+                        <View
+                          style={[
+                            styles.rentalDateTimeIconContainer,
+                            isDarkMode && {
+                              backgroundColor: theme.card,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                          ]}>
+                          <MaterialIcons
+                            name="calendar-today"
+                            size={20}
+                            color={isDarkMode ? theme.text : colors.gray}
                           />
                         </View>
                         <View style={styles.rentalDateTimeTextContainer}>
-                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeLabel,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             Data
                           </Text>
-                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeText,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             {checkInDate.toLocaleDateString()}
                           </Text>
                         </View>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={[styles.rentalDateTimeBox, isDarkMode && { 
-                          backgroundColor: theme.background,
-                          borderColor: theme.border
-                        }]}
-                        onPress={() => openTimeModal('checkInTime')}
-                      >
-                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border,
-                          borderWidth: 1
-                        }]}>
-                          <MaterialIcons 
-                            name="access-time" 
-                            size={20} 
-                            color={isDarkMode ? theme.text : colors.gray} 
+                        style={[
+                          styles.rentalDateTimeBox,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                          },
+                        ]}
+                        onPress={() => openTimeModal('checkInTime')}>
+                        <View
+                          style={[
+                            styles.rentalDateTimeIconContainer,
+                            isDarkMode && {
+                              backgroundColor: theme.card,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                          ]}>
+                          <MaterialIcons
+                            name="access-time"
+                            size={20}
+                            color={isDarkMode ? theme.text : colors.gray}
                           />
                         </View>
                         <View style={styles.rentalDateTimeTextContainer}>
-                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeLabel,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             Hora
                           </Text>
-                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
-                            {checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <Text
+                            style={[
+                              styles.rentalDateTimeText,
+                              isDarkMode && { color: theme.text },
+                            ]}>
+                            {checkInTime.toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -769,78 +813,116 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   </View>
 
                   {/* Divisor */}
-                  <View style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                  <View
+                    style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
+                  />
 
                   {/* Data e Hora de Check-out */}
                   <View style={styles.rentalDateTimeContainer}>
                     <View style={styles.rentalDateTimeHeader}>
-                      <View style={[styles.rentalIconCircle, isDarkMode && { 
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        borderWidth: 1
-                      }]}>
-                        <MaterialIcons 
-                          name="logout" 
-                          size={20} 
-                          color={isDarkMode ? theme.blue : colors.blue} 
+                      <View
+                        style={[
+                          styles.rentalIconCircle,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                            borderWidth: 1,
+                          },
+                        ]}>
+                        <MaterialIcons
+                          name="logout"
+                          size={20}
+                          color={isDarkMode ? theme.blue : colors.blue}
                         />
                       </View>
-                      <Text style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
+                      <Text
+                        style={[styles.rentalDateTimeTitle, isDarkMode && { color: theme.text }]}>
                         Check-out
                       </Text>
                     </View>
                     <View style={styles.rentalDateTimeContent}>
                       <TouchableOpacity
-                        style={[styles.rentalDateTimeBox, isDarkMode && { 
-                          backgroundColor: theme.background,
-                          borderColor: theme.border
-                        }]}
-                        onPress={() => openPicker('checkOutDate', 'date')}
-                      >
-                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border,
-                          borderWidth: 1
-                        }]}>
-                          <MaterialIcons 
-                            name="calendar-today" 
-                            size={20} 
-                            color={isDarkMode ? theme.text : colors.gray} 
+                        style={[
+                          styles.rentalDateTimeBox,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                          },
+                        ]}
+                        onPress={() => openPicker('checkOutDate', 'date')}>
+                        <View
+                          style={[
+                            styles.rentalDateTimeIconContainer,
+                            isDarkMode && {
+                              backgroundColor: theme.card,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                          ]}>
+                          <MaterialIcons
+                            name="calendar-today"
+                            size={20}
+                            color={isDarkMode ? theme.text : colors.gray}
                           />
                         </View>
                         <View style={styles.rentalDateTimeTextContainer}>
-                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeLabel,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             Data
                           </Text>
-                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeText,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             {checkOutDate.toLocaleDateString()}
                           </Text>
                         </View>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        style={[styles.rentalDateTimeBox, isDarkMode && { 
-                          backgroundColor: theme.background,
-                          borderColor: theme.border
-                        }]}
-                        onPress={() => openTimeModal('checkOutTime')}
-                      >
-                        <View style={[styles.rentalDateTimeIconContainer, isDarkMode && { 
-                          backgroundColor: theme.card,
-                          borderColor: theme.border,
-                          borderWidth: 1
-                        }]}>
-                          <MaterialIcons 
-                            name="access-time" 
-                            size={20} 
-                            color={isDarkMode ? theme.text : colors.gray} 
+                        style={[
+                          styles.rentalDateTimeBox,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
+                            borderColor: theme.border,
+                          },
+                        ]}
+                        onPress={() => openTimeModal('checkOutTime')}>
+                        <View
+                          style={[
+                            styles.rentalDateTimeIconContainer,
+                            isDarkMode && {
+                              backgroundColor: theme.card,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                          ]}>
+                          <MaterialIcons
+                            name="access-time"
+                            size={20}
+                            color={isDarkMode ? theme.text : colors.gray}
                           />
                         </View>
                         <View style={styles.rentalDateTimeTextContainer}>
-                          <Text style={[styles.rentalDateTimeLabel, isDarkMode && { color: theme.text }]}>
+                          <Text
+                            style={[
+                              styles.rentalDateTimeLabel,
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             Hora
                           </Text>
-                          <Text style={[styles.rentalDateTimeText, isDarkMode && { color: theme.text }]}>
-                            {checkOutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <Text
+                            style={[
+                              styles.rentalDateTimeText,
+                              isDarkMode && { color: theme.text },
+                            ]}>
+                            {checkOutTime.toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </Text>
                         </View>
                       </TouchableOpacity>
@@ -848,7 +930,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   </View>
 
                   {/* Divisor */}
-                  <View style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]} />
+                  <View
+                    style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
+                  />
 
                   {/* Total e Botão */}
                   <View style={styles.rentalTotalContainer}>
@@ -860,20 +944,22 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                         {calcularTotal()}
                       </Text>
                     </View>
-                    <TouchableOpacity 
-                      style={[styles.rentalButton, isDarkMode && { 
-                        backgroundColor: theme.blue,
-                        borderColor: theme.border,
-                        borderWidth: 1
-                      }]} 
+                    <TouchableOpacity
+                      style={[
+                        styles.rentalButton,
+                        isDarkMode && {
+                          backgroundColor: theme.blue,
+                          borderColor: theme.border,
+                          borderWidth: 1,
+                        },
+                      ]}
                       onPress={handleRent}
-                      disabled={isLoading}
-                    >
-                      <MaterialIcons 
-                        name="check-circle" 
-                        size={20} 
-                        color={colors.white} 
-                        style={{ marginRight: 8 }} 
+                      disabled={isLoading}>
+                      <MaterialIcons
+                        name="check-circle"
+                        size={20}
+                        color={colors.white}
+                        style={{ marginRight: 8 }}
                       />
                       <Text style={styles.rentalButtonText}>
                         {isLoading ? 'Processando...' : 'Alugar'}
@@ -886,33 +972,36 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
 
-          {/* Descrição */}
+              {/* Descrição */}
               <View>
-            <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Descrição</Text>
-            <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
-              {displayDescription}
-            </Text>
-            {shouldShowMoreButton && (
-              <TouchableOpacity
-                style={styles.moreButton}
-                onPress={() => setShowFullDescription(!showFullDescription)}
-              >
-                <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
-                  {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
+                  Descrição
                 </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
+                  {displayDescription}
+                </Text>
+                {shouldShowMoreButton && (
+                  <TouchableOpacity
+                    style={styles.moreButton}
+                    onPress={() => setShowFullDescription(!showFullDescription)}>
+                    <Text style={[styles.moreButtonText, isDarkMode && { color: theme.blue }]}>
+                      {showFullDescription ? 'Mostrar menos' : 'Mostrar mais'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
 
               {/* Divisor horizontal */}
               <View style={styles.horizontalDivider} />
 
               {/* Avaliações */}
               <View>
-                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>Avaliações do Espaço</Text>
+                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
+                  Avaliações do Espaço
+                </Text>
                 <FlatList
                   data={reviews}
-                  keyExtractor={item => item.id.toString()}
+                  keyExtractor={(item) => item.id.toString()}
                   renderItem={({ item }) => renderReview(item)}
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -921,7 +1010,12 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               </View>
 
               {/* Bloco de avaliação do local */}
-              <View style={[styles.reviewBox, { marginTop: 24 }, isDarkMode && { backgroundColor: theme.card }]}> 
+              <View
+                style={[
+                  styles.reviewBox,
+                  { marginTop: 24 },
+                  isDarkMode && { backgroundColor: theme.card },
+                ]}>
                 <View style={styles.reviewBoxHeader}>
                   <Text style={[styles.reviewBoxTitle, isDarkMode && { color: theme.text }]}>
                     Avalie este local também
@@ -929,13 +1023,14 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   <TouchableOpacity
                     style={[
                       styles.clearButton,
-                      isDarkMode && { 
+                      isDarkMode && {
                         backgroundColor: theme.background,
-                        borderColor: theme.border
-                      }
+                        borderColor: theme.border,
+                      },
                     ]}
-                    onPress={() => {/* lógica para abrir detalhes do locador */}}
-                  >
+                    onPress={() => {
+                      /* lógica para abrir detalhes do locador */
+                    }}>
                     <MaterialIcons
                       name="delete"
                       size={20}
@@ -944,24 +1039,24 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.reviewStarsRow}>
-                  {[1,2,3,4,5].map(i => (
+                  {[1, 2, 3, 4, 5].map((i) => (
                     <TouchableOpacity key={i} onPress={() => setNewRating(i)}>
                       <MaterialIcons
                         name={newRating >= i ? 'star' : 'star-border'}
                         size={24}
-                        color={newRating >= i ? colors.blue : (isDarkMode ? theme.text : colors.gray)}
+                        color={newRating >= i ? colors.blue : isDarkMode ? theme.text : colors.gray}
                       />
                     </TouchableOpacity>
-              ))}
-            </View>
+                  ))}
+                </View>
                 <TextInput
                   style={[
                     styles.reviewInput,
                     isDarkMode && {
                       backgroundColor: theme.background,
                       color: theme.text,
-                      borderColor: theme.border
-                    }
+                      borderColor: theme.border,
+                    },
                   ]}
                   placeholder="Digite seu comentário aqui..."
                   placeholderTextColor={isDarkMode ? theme.text : colors.gray}
@@ -970,12 +1065,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   onChangeText={setNewComment}
                 />
                 <TouchableOpacity
-                  style={[
-                    styles.reviewButton,
-                    isDarkMode && { backgroundColor: theme.blue }
-                  ]}
-                  onPress={handleAddReview}
-                >
+                  style={[styles.reviewButton, isDarkMode && { backgroundColor: theme.blue }]}
+                  onPress={handleAddReview}>
                   <Text style={styles.reviewButtonText}>COMENTAR</Text>
                 </TouchableOpacity>
               </View>
@@ -984,201 +1075,53 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
               <View style={styles.horizontalDivider} />
 
               {/* Bloco de apresentação do locador do espaço */}
-              <View style={{ alignItems: 'center', marginBottom: 80 }}>
-                <Text style={[styles.sectionTitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
-                  Conheça o locador do espaço
-                </Text>
-                <Text style={[styles.rentalSubtitle, { textAlign: 'center' }, isDarkMode && { color: theme.text }]}>
-                  Clique para ver mais
-                  </Text>
-                <TouchableOpacity
-                  style={[
-                    styles.rentalCard,
-                    {
-                      width: 320,
-                      alignItems: 'center',
-                      padding: 24,
-                    },
-                    isDarkMode && { backgroundColor: theme.card }
-                  ]}
-                  activeOpacity={0.85}
-                  onPress={() => {/* lógica para abrir detalhes do locador */}}
-                >
-                  <View style={{ alignItems: 'center', marginBottom: 8 }}>
-                    <Image
-                      source={require('../../assets/perfil-login.png')}
-                      style={{ width: 70, height: 70, borderRadius: 35, marginBottom: 8, backgroundColor: '#e6f0fa' }}
-                    />
-                    <Text style={[styles.rentalTitle, { marginBottom: 4 }, isDarkMode && { color: theme.text }]}>
-                      Ricardo Penne
-                  </Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                    <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>10</Text>
-                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>avaliações</Text>
-                    </View>
-                    <View style={{ alignItems: 'center', flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>4,8</Text>
-                        <MaterialIcons name="star" size={16} color={isDarkMode ? theme.text : colors.gray} style={{ marginLeft: 2 }} />
-                      </View>
-                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>estrelas</Text>
-                    </View>
-                    <View style={{ alignItems: 'center', flex: 1 }}>
-                      <Text style={[styles.rentalTotalValue, isDarkMode && { color: theme.text }]}>4</Text>
-                      <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>espaços</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+              <LandlordCard
+                name="Ricardo Penne"
+                reviews={10}
+                rating={4.8}
+                spaces={4}
+                isDarkMode={isDarkMode}
+                theme={theme}
+                styles={styles}
+                onPress={() => {
+                  // lógica para abrir detalhes do locador
+                }}
+              />
+            </View>
+          </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
 
       {/* Modal do Calendário */}
-      <Modal
+      <CalendarModal
         visible={calendarVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setCalendarVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setCalendarVisible(false)}>
-          <View style={styles.calendarOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={[styles.calendarModal, isDarkMode && { backgroundColor: theme.card }]}>
-                <Calendar
-                  onDayPress={handleCalendarSelect}
-                  markedDates={{
-                    [checkInDate.toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue },
-                    [checkOutDate.toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue }
-                  }}
-                  theme={{
-                    backgroundColor: isDarkMode ? theme.card : colors.white,
-                    calendarBackground: isDarkMode ? theme.card : colors.white,
-                    textSectionTitleColor: isDarkMode ? theme.text : colors.black,
-                    selectedDayBackgroundColor: colors.blue,
-                    selectedDayTextColor: colors.white,
-                    todayTextColor: colors.blue,
-                    dayTextColor: isDarkMode ? theme.text : colors.black,
-                    textDisabledColor: isDarkMode ? theme.border : colors.gray,
-                    monthTextColor: isDarkMode ? theme.text : colors.black,
-                    arrowColor: colors.blue,
-                  }}
-                />
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        onClose={() => setCalendarVisible(false)}
+        onDayPress={handleCalendarSelect}
+        markedDates={{
+          [checkInDate.toISOString().split('T')[0]]: { selected: true, selectedColor: colors.blue },
+          [checkOutDate.toISOString().split('T')[0]]: {
+            selected: true,
+            selectedColor: colors.blue,
+          },
+        }}
+        theme={theme}
+        styles={styles}
+        isDarkMode={isDarkMode}
+      />
 
       {/* Modal de Horário */}
-      <Modal
+      <TimeSelectModal
         visible={timeModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setTimeModalVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setTimeModalVisible(false)}>
-          <View style={styles.calendarOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={[
-                styles.timeModal,
-                isDarkMode && { 
-                  backgroundColor: theme.card,
-                  borderColor: theme.border
-                }
-              ]}>
-                <View style={[
-                  styles.timeModalHeader,
-                  isDarkMode && { 
-                    borderBottomColor: theme.border,
-                    backgroundColor: theme.background
-                  }
-                ]}>
-                  <Text style={[
-                    styles.timeModalTitle,
-                    isDarkMode && { color: theme.text }
-                  ]}>
-                    Selecione o horário
-                  </Text>
-                  <TouchableOpacity 
-                    onPress={() => setTimeModalVisible(false)}
-                    style={[
-                      styles.timeModalCloseButton,
-                      isDarkMode && { 
-                        backgroundColor: theme.card,
-                        borderColor: theme.border,
-                        borderWidth: 1
-                      }
-                    ]}
-                  >
-                    <MaterialIcons 
-                      name="close" 
-                      size={24} 
-                      color={isDarkMode ? theme.text : colors.black} 
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView 
-                  style={styles.timeModalContent}
-                  contentContainerStyle={{ paddingBottom: 40 }}
-                  showsVerticalScrollIndicator={false}
-                >
-                  {Object.entries(timeGroups).map(([period, times], index, array) => (
-                    <View 
-                      key={period} 
-                      style={[
-                        styles.timePeriodContainer,
-                        index === array.length - 1 && { marginBottom: 40 }
-                      ]}
-                    >
-                      <Text style={[
-                        styles.timePeriodTitle,
-                        isDarkMode && { color: theme.text }
-                      ]}>
-                        {period === 'manha' ? 'Manhã' : 
-                         period === 'tarde' ? 'Tarde' : 'Noite'}
-                      </Text>
-                      <View style={styles.timeGrid}>
-                        {times.map((time) => (
-                          <TouchableOpacity
-                            key={time}
-                            style={[
-                              styles.timeItem,
-                              isDarkMode && { 
-                                backgroundColor: theme.background,
-                                borderColor: theme.border
-                              }
-                            ]}
-                            onPress={() => handleTimeSelect(time)}
-                          >
-                            <Text style={[
-                              styles.timeText,
-                              isDarkMode && { color: theme.text }
-                            ]}>
-                              {time}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  ))}
-                </ScrollView>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+        onClose={() => setTimeModalVisible(false)}
+        timeGroups={timeGroups}
+        onSelect={handleTimeSelect}
+        styles={styles}
+        isDarkMode={isDarkMode}
+        theme={theme}
+      />
 
       {/* Modal de Confirmação */}
-      <Modal
-        visible={confirmModalVisible}
-        transparent={true}
-        animationType="fade"
-      >
+      <Modal visible={confirmModalVisible} transparent={true} animationType="fade">
         <View style={styles.calendarOverlay}>
           <View style={[styles.confirmModal, isDarkMode && { backgroundColor: theme.card }]}>
             <MaterialIcons name="check-circle" size={48} color={colors.blue} />
@@ -1190,11 +1133,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       </Modal>
 
       {/* Modal de Sucesso */}
-      <Modal
-        visible={successModalVisible}
-        transparent={true}
-        animationType="fade"
-      >
+      <Modal visible={successModalVisible} transparent={true} animationType="fade">
         <View style={styles.calendarOverlay}>
           <View style={[styles.successModal, isDarkMode && { backgroundColor: theme.card }]}>
             <MaterialIcons name="check-circle" size={48} color={colors.blue} />
@@ -1210,97 +1149,98 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         visible={detailsModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setDetailsModalVisible(false)}
-      >
+        onRequestClose={() => setDetailsModalVisible(false)}>
         <TouchableWithoutFeedback onPress={() => setDetailsModalVisible(false)}>
           <View style={styles.calendarOverlay}>
             <TouchableWithoutFeedback>
-              <View style={[
-                styles.detailsModal, 
-                isDarkMode && { 
-                  backgroundColor: theme.card,
-                  borderColor: theme.border,
-                  borderWidth: 1
-                }
-              ]}> 
-                {/* Header do Modal */}
-                <View style={[
-                  styles.detailsModalHeader,
-                  isDarkMode && { 
-                    backgroundColor: theme.background, 
-                    borderBottomColor: theme.border 
-                  }
+              <View
+                style={[
+                  styles.detailsModal,
+                  isDarkMode && {
+                    backgroundColor: theme.card,
+                    borderColor: theme.border,
+                    borderWidth: 1,
+                  },
                 ]}>
-                  <Text style={[
-                    styles.detailsModalTitle,
-                    isDarkMode && { color: theme.text }
+                {/* Header do Modal */}
+                <View
+                  style={[
+                    styles.detailsModalHeader,
+                    isDarkMode && {
+                      backgroundColor: theme.background,
+                      borderBottomColor: theme.border,
+                    },
                   ]}>
+                  <Text style={[styles.detailsModalTitle, isDarkMode && { color: theme.text }]}>
                     Detalhes do Espaço
                   </Text>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => setDetailsModalVisible(false)}
                     style={[
                       styles.detailsModalCloseButton,
                       isDarkMode && {
                         backgroundColor: theme.card,
                         borderColor: theme.border,
-                        borderWidth: 1
-                      }
-                    ]}
-                  >
-                    <MaterialIcons 
-                      name="close" 
-                      size={24} 
-                      color={isDarkMode ? theme.text : colors.black} 
+                        borderWidth: 1,
+                      },
+                    ]}>
+                    <MaterialIcons
+                      name="close"
+                      size={24}
+                      color={isDarkMode ? theme.text : colors.black}
                     />
                   </TouchableOpacity>
                 </View>
 
                 {/* Conteúdo Rolável */}
-                <ScrollView 
+                <ScrollView
                   style={styles.detailsModalScrollView}
                   contentContainerStyle={styles.detailsModalContent}
-                  showsVerticalScrollIndicator={false}
-                >
+                  showsVerticalScrollIndicator={false}>
                   {/* Informações Básicas */}
                   <View style={styles.detailsModalGrid}>
                     {[
                       { icon: 'crop-square', label: 'Área', value: spaceDetails.area },
                       { icon: 'groups', label: 'Capacidade', value: spaceDetails.capacity },
                       { icon: 'wifi', label: 'WiFi', value: spaceDetails.hasWifi ? 'Sim' : 'Não' },
-                      { icon: 'wc', label: 'Banheiros', value: spaceDetails.bathrooms }
+                      { icon: 'wc', label: 'Banheiros', value: spaceDetails.bathrooms },
                     ].map((item, index) => (
-                      <View key={index} style={[
-                        styles.detailsModalGridItem,
-                        isDarkMode && {
-                          backgroundColor: theme.background,
-                          borderColor: theme.border
-                        }
-                      ]}>
-                        <View style={[
-                          styles.detailsModalIconContainer,
-                          isDarkMode && { 
-                            backgroundColor: theme.card,
+                      <View
+                        key={index}
+                        style={[
+                          styles.detailsModalGridItem,
+                          isDarkMode && {
+                            backgroundColor: theme.background,
                             borderColor: theme.border,
-                            borderWidth: 1
-                          }
+                          },
                         ]}>
-                          <MaterialIcons 
-                            name={item.icon as any} 
-                            size={24} 
-                            color={isDarkMode ? theme.blue : colors.blue} 
+                        <View
+                          style={[
+                            styles.detailsModalIconContainer,
+                            isDarkMode && {
+                              backgroundColor: theme.card,
+                              borderColor: theme.border,
+                              borderWidth: 1,
+                            },
+                          ]}>
+                          <MaterialIcons
+                            name={item.icon as any}
+                            size={24}
+                            color={isDarkMode ? theme.blue : colors.blue}
                           />
                         </View>
-                        <Text style={[
-                          styles.detailsModalGridLabel,
-                          isDarkMode && { color: theme.text }
-                        ]}>
+                        <Text
+                          style={[
+                            styles.detailsModalGridLabel,
+                            isDarkMode && { color: theme.text },
+                          ]}>
                           {item.label}
                         </Text>
-                        <Text style={[
-                          styles.detailsModalGridValue,
-                          isDarkMode && { color: theme.text }
-                        ]}>
+                        <Text
+                          style={[
+                            styles.detailsModalGridValue,
+                            isDarkMode && { color: theme.text },
+                          ]}>
                           {item.value}
                         </Text>
                       </View>
@@ -1308,51 +1248,58 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   </View>
 
                   {/* Comodidades */}
-                  <View style={[
-                    styles.detailsModalAmenities,
-                    isDarkMode && { 
-                      borderTopColor: theme.border,
-                      backgroundColor: theme.background
-                    }
-                  ]}>
-                    <Text style={[
-                      styles.detailsModalSectionTitle,
-                      isDarkMode && { color: theme.text }
+                  <View
+                    style={[
+                      styles.detailsModalAmenities,
+                      isDarkMode && {
+                        borderTopColor: theme.border,
+                        backgroundColor: theme.background,
+                      },
                     ]}>
+                    <Text
+                      style={[
+                        styles.detailsModalSectionTitle,
+                        isDarkMode && { color: theme.text },
+                      ]}>
                       Comodidades ({space.amenities?.length || 0})
                     </Text>
-                    
+
                     <View style={styles.detailsModalAmenitiesList}>
-                      {space.amenities && Array.isArray(space.amenities) && space.amenities.length > 0 ? (
+                      {space.amenities &&
+                      Array.isArray(space.amenities) &&
+                      space.amenities.length > 0 ? (
                         space.amenities.map((amenity, index) => (
-                          <Text 
+                          <Text
                             key={`${amenity}-${index}`}
                             style={[
                               styles.detailsModalAmenityText,
-                              isDarkMode && { color: theme.text }
-                            ]}
-                          >
+                              isDarkMode && { color: theme.text },
+                            ]}>
                             • {amenity}
                           </Text>
                         ))
                       ) : (
-                        <Text style={[
-                          styles.detailsModalAmenityText,
-                          isDarkMode && { color: theme.text }
-                        ]}>
-                          {!space.amenities ? 'Carregando comodidades...' : 
-                           !Array.isArray(space.amenities) ? 'Erro ao carregar comodidades' :
-                           'Nenhuma comodidade disponível'}
+                        <Text
+                          style={[
+                            styles.detailsModalAmenityText,
+                            isDarkMode && { color: theme.text },
+                          ]}>
+                          {!space.amenities
+                            ? 'Carregando comodidades...'
+                            : !Array.isArray(space.amenities)
+                              ? 'Erro ao carregar comodidades'
+                              : 'Nenhuma comodidade disponível'}
                         </Text>
                       )}
                     </View>
                   </View>
 
-                  <TouchableOpacity 
-                    onPress={() => setDetailsModalVisible(true)} 
-                    style={styles.detailsModalMoreButton}
-                  >
-                    <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>Ver mais</Text>
+                  <TouchableOpacity
+                    onPress={() => setDetailsModalVisible(true)}
+                    style={styles.detailsModalMoreButton}>
+                    <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>
+                      Ver mais
+                    </Text>
                   </TouchableOpacity>
                 </ScrollView>
               </View>
@@ -1362,4 +1309,4 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       </Modal>
     </SafeAreaView>
   );
-} 
+}
