@@ -13,16 +13,18 @@ interface JwtPayload {
   userType: string;
   iat: number;
   exp: number;
+  role: string;
 }
 
 interface User {
   id: string;
   name: string;
   email: string;
-  surname?: string;
+  surname: string;
   telephone?: string;
   profilePhoto?: string;
   userType?: string;
+  role?: string;
 }
 
 interface AuthContextData {
@@ -61,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
         } else {
           console.log('✅ Token válido, configurando usuário...');
-          setUser({
+          const user: User = {
             id: decodedToken.id,
             name: decodedToken.name,
             email: decodedToken.email,
@@ -69,7 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             telephone: decodedToken.telephone,
             profilePhoto: decodedToken.profilePhoto,
             userType: decodedToken.userType,
-          });
+            role: decodedToken.role
+          };
+          setUser(user);
         }
       } else {
         console.log('❌ Nenhum token encontrado');
@@ -90,14 +94,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const decodedToken = jwtDecode<JwtPayload>(response.token);
       console.log('📝 Token decodificado:', decodedToken);
       
-      setUser({
+      const user: User = {
         id: decodedToken.id,
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
+        telephone: decodedToken.telephone,
         profilePhoto: decodedToken.profilePhoto,
         userType: decodedToken.userType,
-      });
+        role: decodedToken.role
+      };
+      setUser(user);
     } catch (error) {
       console.error('❌ Erro no login:', error);
       throw error;
@@ -125,13 +132,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const decodedToken = jwtDecode<JwtPayload>(response.token);
       console.log('📝 Token decodificado:', decodedToken);
       
-      setUser({
+      const user: User = {
         id: decodedToken.id,
         name: decodedToken.name,
         email: decodedToken.email,
         surname: decodedToken.surname,
+        telephone: decodedToken.telephone,
+        profilePhoto: decodedToken.profilePhoto,
         userType: decodedToken.userType,
-      });
+        role: decodedToken.role
+      };
+      setUser(user);
     } catch (error) {
       console.error('❌ Erro no registro:', error);
       throw error;
@@ -152,10 +163,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.token) {
         await AsyncStorage.setItem('token', response.token);
         const decodedToken = jwtDecode<JwtPayload>(response.token);
-        setUser({
-          ...decodedToken,
-          ...userData
-        });
+        const user: User = {
+          id: decodedToken.id,
+          name: decodedToken.name,
+          email: decodedToken.email,
+          surname: decodedToken.surname,
+          telephone: decodedToken.telephone,
+          profilePhoto: decodedToken.profilePhoto,
+          userType: decodedToken.userType,
+          role: decodedToken.role
+        };
+        setUser(user);
       } else {
         setUser(prevUser => ({
           ...prevUser!,
