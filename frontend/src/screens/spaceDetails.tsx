@@ -563,6 +563,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             />
 
             <View style={styles.content}>
+
               {/* Nome, endereço e favorito */}
               <SpaceHeader
                 title={space.title}
