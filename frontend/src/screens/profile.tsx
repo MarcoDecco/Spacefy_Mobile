@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import * as ImagePicker from 'expo-image-picker';
 import { profileStyles as styles } from '../styles/profileStyles';
 import { colors } from '../styles/globalStyles/colors';
@@ -44,6 +45,7 @@ const isValidDocument = (document: string, type: 'CPF' | 'CNPJ'): boolean => {
 export default function Profile() {
   const navigation = useNavigation<NavigationProp>();
   const { user, updateUser, signOut } = useAuth();
+  const { theme, isDarkMode } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [isSpaceOwnerModalVisible, setIsSpaceOwnerModalVisible] = useState(false);
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
@@ -144,13 +146,13 @@ export default function Profile() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <NotificationButton notifications={[]} />
         </View>
         <View style={styles.profileInfo}>
-          <View style={styles.avatarContainer}>
+          <View style={[styles.avatarContainer, isDarkMode && { backgroundColor: theme.card }]}>
             <Image
               source={user.profilePhoto ? { uri: user.profilePhoto } : { uri: 'https://via.placeholder.com/120' }}
               style={styles.avatar}
@@ -164,10 +166,10 @@ export default function Profile() {
 
       <ScrollView style={styles.content}>
         {/* Banner para anunciar espaço */}
-        <View style={styles.bannerContainer}>
+        <View style={[styles.bannerContainer, isDarkMode && { backgroundColor: theme.card }]}>
           <View style={{ flex: 2 }}>
-            <Text style={styles.bannerTitle}>Anuncie seu Espaço na Spacefy</Text>
-            <Text style={styles.bannerSubtitle}>
+            <Text style={[styles.bannerTitle, isDarkMode && { color: theme.text }]}>Anuncie seu Espaço na Spacefy</Text>
+            <Text style={[styles.bannerSubtitle, isDarkMode && { color: theme.text }]}>
               Veja fica mais fácil anunciar o seu local para aluguel.
             </Text>
             <TouchableOpacity 
@@ -180,39 +182,54 @@ export default function Profile() {
           <Image source={mansao} style={styles.bannerImage} resizeMode="contain" />
         </View>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditProfile')}>
-          <Ionicons name="person-outline" size={24} color={colors.black} />
-          <Text style={styles.menuItemText}>Editar Perfil</Text>
-          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
+          onPress={() => navigation.navigate('EditProfile')}
+        >
+          <Ionicons name="person-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Editar Perfil</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyReservations')}>
-          <Ionicons name="calendar" size={24} color={colors.black} />
-          <Text style={styles.menuItemText}>Minhas Reservas</Text>
-          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
+          onPress={() => navigation.navigate('MyReservations')}
+        >
+          <Ionicons name="calendar" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Minhas Reservas</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Favorites')}>
-          <Ionicons name="heart-outline" size={24} color={colors.black} />
-          <Text style={styles.menuItemText}>Favoritos</Text>
-          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
+          onPress={() => navigation.navigate('Favorites')}
+        >
+          <Ionicons name="heart-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Favoritos</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('MyReviews')}>
-          <Ionicons name="star-outline" size={24} color={colors.black} />
-          <Text style={styles.menuItemText}>Minhas Avaliações</Text>
-          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
+          onPress={() => navigation.navigate('MyReviews')}
+        >
+          <Ionicons name="star-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Minhas Avaliações</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Settings')}>
-          <Ionicons name="settings-outline" size={24} color={colors.black} />
-          <Text style={styles.menuItemText}>Configurações</Text>
-          <Ionicons name="chevron-forward" size={24} color={colors.black} />
+        <TouchableOpacity 
+          style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]}
+          onPress={() => navigation.navigate('Settings')}
+        >
+          <Ionicons name="settings-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
+          <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Configurações</Text>
+          <Ionicons name="chevron-forward" size={24} color={isDarkMode ? theme.text : colors.black} />
         </TouchableOpacity>
 
         <View style={styles.bottomSpacing}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={24} color={colors.error} />
+          <TouchableOpacity style={[styles.logoutButton, isDarkMode && { backgroundColor: theme.card }]} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color={colors.white} />
             <Text style={styles.logoutButtonText}>Sair</Text>
           </TouchableOpacity>
         </View>
@@ -313,52 +330,70 @@ export default function Profile() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-              <View style={styles.editProfileModal}>
+              <View style={[styles.editProfileModal, isDarkMode && { backgroundColor: theme.card }]}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Registre-se como Locador(a)</Text>
+                  <Text style={[styles.modalTitle, isDarkMode && { color: theme.text }]}>Registre-se como Locador(a)</Text>
                   
                   <TouchableOpacity onPress={() => setIsSpaceOwnerModalVisible(false)} >
-                    <Ionicons name="close" size={24} color={colors.black} />
+                    <Ionicons name="close" size={24} color={isDarkMode ? theme.text : colors.black} />
                   </TouchableOpacity>
                 </View>
                 
-                <Text style={styles.modalSubTittle}>Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.</Text>
+                <Text style={[styles.modalSubTittle, isDarkMode && { color: theme.text }]}>
+                  Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.
+                </Text>
 
                 <View>
                   <View style={styles.documentTypeContainer}>
                     <TouchableOpacity
                       style={[
                         styles.documentTypeButton,
-                        documentType === 'CPF' && styles.documentTypeButtonActive
+                        documentType === 'CPF' && styles.documentTypeButtonActive,
+                        isDarkMode && documentType !== 'CPF' && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }
                       ]}
                       onPress={() => setDocumentType('CPF')}
                     >
                       <Text style={[
                         styles.documentTypeButtonText,
-                        documentType === 'CPF' && styles.documentTypeButtonTextActive
+                        documentType === 'CPF' && styles.documentTypeButtonTextActive,
+                        isDarkMode && documentType !== 'CPF' && { color: colors.white }
                       ]}>CPF</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[
                         styles.documentTypeButton,
-                        documentType === 'CNPJ' && styles.documentTypeButtonActive
+                        documentType === 'CNPJ' && styles.documentTypeButtonActive,
+                        isDarkMode && documentType !== 'CNPJ' && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }
                       ]}
                       onPress={() => setDocumentType('CNPJ')}
                     >
                       <Text style={[
                         styles.documentTypeButtonText,
-                        documentType === 'CNPJ' && styles.documentTypeButtonTextActive
+                        documentType === 'CNPJ' && styles.documentTypeButtonTextActive,
+                        isDarkMode && documentType !== 'CNPJ' && { color: colors.white }
                       ]}>CNPJ</Text>
                     </TouchableOpacity>
                   </View>
 
                   <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>{documentType}</Text>
+                    <Text style={[styles.inputLabel, isDarkMode && { color: theme.text }]}>{documentType}</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, isDarkMode && { 
+                        backgroundColor: theme.background,
+                        color: theme.text,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }]}
                       value={documentNumber}
                       onChangeText={handleDocumentChange}
                       placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
+                      placeholderTextColor={isDarkMode ? theme.gray : colors.gray}
                       keyboardType="numeric"
                     />
                   </View>
@@ -370,7 +405,7 @@ export default function Profile() {
                       </View>
                     </TouchableOpacity>
 
-                    <Text style={styles.termsText}>
+                    <Text style={[styles.termsText, isDarkMode && { color: theme.text }]}>
                       Eu li e concordo com os{' '}
                       <Text 
                         style={styles.termsLink}
