@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 import { authService } from '../services/authService';
+import { localAuthService } from '../services/database/localAuthService';
+import api from '../services/api';
 
 interface JwtPayload {
   id: string;
@@ -48,7 +50,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('🔄 Carregando dados armazenados...');
       const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
       
+      console.log('🔑 Dados do AsyncStorage:', { hasToken: !!token, userId });
+
       if (token) {
         console.log('✅ Token encontrado, decodificando...');
         const decodedToken = jwtDecode<JwtPayload>(token);
@@ -57,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const currentTime = Date.now() / 1000;
         if (decodedToken.exp < currentTime) {
           console.log('⚠️ Token expirado, removendo...');
-          await AsyncStorage.removeItem('token');
+          await AsyncStorage.multiRemove(['token', 'userId']);
           setUser(null);
         } else {
           console.log('✅ Token válido, configurando usuário...');
@@ -73,10 +78,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(user);
         }
       } else {
-        console.log('❌ Nenhum token encontrado');
+        // Se não tem token no AsyncStorage, tenta buscar do banco local
+        console.log('🔍 Buscando usuário no banco local...');
+        const currentUser = await localAuthService.getCurrentUser();
+        
+        if (currentUser && currentUser.isLoggedIn) {
+          console.log('✅ Usuário encontrado no banco local:', {
+            id: currentUser.id,
+            email: currentUser.email,
+            isLoggedIn: currentUser.isLoggedIn
+          });
+          
+          // Salva no AsyncStorage para manter consistência
+          await AsyncStorage.setItem('token', currentUser.token);
+          await AsyncStorage.setItem('userId', currentUser.id);
+          
+          // Como o LocalUser tem menos campos que o User, usamos valores padrão
+          const user: User = {
+            id: currentUser.id,
+            email: currentUser.email,
+            name: '', // Campo não disponível no LocalUser
+            surname: '', // Campo não disponível no LocalUser
+            telephone: '', // Campo não disponível no LocalUser
+            profilePhoto: '', // Campo não disponível no LocalUser
+            role: 'user' // Campo não disponível no LocalUser
+          };
+          setUser(user);
+        } else {
+          console.log('❌ Nenhum usuário encontrado');
+          setUser(null);
+        }
       }
     } catch (error) {
       console.error('❌ Erro ao carregar dados:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -90,6 +125,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const decodedToken = jwtDecode<JwtPayload>(response.token);
       console.log('📝 Token decodificado:', decodedToken);
+      
+      // Salva o token e userId no AsyncStorage
+      await AsyncStorage.setItem('token', response.token);
+      await AsyncStorage.setItem('userId', decodedToken.id);
+      console.log('💾 Dados salvos no AsyncStorage');
       
       const user: User = {
         id: decodedToken.id,
@@ -110,9 +150,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   async function signOut() {
     try {
       console.log('🚪 Iniciando processo de logout...');
-      await authService.logout();
+      const userId = await AsyncStorage.getItem('userId');
+      
+      if (userId) {
+        // Atualiza o banco local
+        await localAuthService.logout(userId);
+        console.log('✅ Status atualizado no banco local');
+      }
+
+      // Remove do AsyncStorage
+      await AsyncStorage.multiRemove(['token', 'userId']);
+      console.log('✅ Dados removidos do AsyncStorage');
+      
+      // Limpa o estado
       setUser(null);
-      console.log('✅ Logout realizado com sucesso');
+      console.log('✅ Estado do usuário limpo');
+      
+      // Limpa o token do axios
+      delete api.defaults.headers.common['Authorization'];
+      console.log('✅ Token removido do axios');
     } catch (error) {
       console.error('❌ Erro no logout:', error);
       throw error;
@@ -127,6 +183,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const decodedToken = jwtDecode<JwtPayload>(response.token);
       console.log('📝 Token decodificado:', decodedToken);
+      
+      // Salva o token e userId no AsyncStorage
+      await AsyncStorage.setItem('token', response.token);
+      await AsyncStorage.setItem('userId', decodedToken.id);
+      console.log('💾 Dados salvos no AsyncStorage');
       
       const user: User = {
         id: decodedToken.id,

@@ -1,10 +1,20 @@
 import * as SQLite from 'expo-sqlite';
 import { databaseConfig, getCreateTableQueries } from '../../config/database';
-import { DatabaseSchema, LocalUser } from '../../types/database';
+import { DatabaseSchema, LocalUser, LocalSpace } from '../../types/database';
 
 interface TransactionStatus {
     transaction_status: number;
 }
+
+interface CountResult {
+    count: number;
+}
+
+interface LastUpdateResult {
+    last_update: string;
+}
+
+type SQLiteBindValue = string | number | null | Uint8Array;
 
 class DatabaseService {
     private db: SQLite.SQLiteDatabase | null = null;
@@ -180,14 +190,9 @@ class DatabaseService {
         if (!this.db) throw new Error('Database not initialized');
 
         try {
-            console.log('[SQLITE] 📝 Criando/verificando tabelas...');
+            console.log('[SQLITE] 📝 Verificando tabelas...');
 
-            // Dropa as tabelas existentes para recriar com a estrutura correta
-            await this.db.runAsync('DROP TABLE IF EXISTS favorite_spaces');
-            await this.db.runAsync('DROP TABLE IF EXISTS spaces');
-            await this.db.runAsync('DROP TABLE IF EXISTS users');
-
-            // Cria a tabela de usuários
+            // Cria a tabela de usuários se não existir
             await this.db.runAsync(`
                 CREATE TABLE IF NOT EXISTS users (
                     id TEXT PRIMARY KEY,
@@ -199,7 +204,7 @@ class DatabaseService {
                 )
             `);
 
-            // Cria a tabela de espaços
+            // Cria a tabela de espaços se não existir
             await this.db.runAsync(`
                 CREATE TABLE IF NOT EXISTS spaces (
                     _id TEXT PRIMARY KEY,
@@ -219,7 +224,7 @@ class DatabaseService {
                 )
             `);
 
-            // Cria a tabela de favoritos
+            // Cria a tabela de favoritos se não existir
             await this.db.runAsync(`
                 CREATE TABLE IF NOT EXISTS favorite_spaces (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -233,9 +238,9 @@ class DatabaseService {
                 )
             `);
 
-            console.log('[SQLITE] ✅ Tabelas recriadas com sucesso');
+            console.log('[SQLITE] ✅ Tabelas verificadas com sucesso');
         } catch (error) {
-            console.error('[SQLITE] ❌ Erro ao criar tabelas:', error);
+            console.error('[SQLITE] ❌ Erro ao verificar tabelas:', error);
             throw error;
         }
     }
@@ -459,20 +464,60 @@ class DatabaseService {
         await this.executeQuery(query, [where.value]);
     }
 
-    async findOne<T extends keyof DatabaseSchema>(
-        table: T,
-        where: { column: string; value: any }
-    ): Promise<DatabaseSchema[T] | null> {
-        if (!this.db) throw new Error('Database not initialized');
+    private processRetrievedData(table: string, data: any): any {
+        if (!data) {
+            console.log('[SQLITE] ⚠️ Dados nulos ou indefinidos recebidos para processamento');
+            return data;
+        }
 
-        const query = `
-            SELECT * FROM ${databaseConfig.tables[table].name}
-            WHERE ${where.column} = ?
-            LIMIT 1
-        `;
+        // Se for um array, processa cada item
+        if (Array.isArray(data)) {
+            console.log(`[SQLITE] 📦 Processando array com ${data.length} itens`);
+            return data.map(item => this.processRetrievedData(table, item));
+        }
 
-        const results = await this.executeQuery<DatabaseSchema[T]>(query, [where.value]);
-        return results[0] || null;
+        // Se for um objeto, processa os campos específicos
+        if (typeof data === 'object') {
+            console.log('[SQLITE] 🔍 Processando objeto:', { table, data });
+            const processed = { ...data };
+
+            // Campos que devem ser convertidos de string JSON para array
+            const arrayFields = ['image_url', 'space_amenities', 'week_days', 'space_rules'];
+
+            arrayFields.forEach(field => {
+                console.log(`[SQLITE] 🔄 Processando campo ${field}:`, processed[field]);
+                if (processed[field] && typeof processed[field] === 'string') {
+                    try {
+                        const parsed = JSON.parse(processed[field]);
+                        console.log(`[SQLITE] ✅ Campo ${field} convertido com sucesso:`, parsed);
+                        processed[field] = parsed;
+                    } catch (error) {
+                        console.log(`[SQLITE] ❌ Erro ao converter campo ${field} de JSON:`, error);
+                        console.log(`[SQLITE] 📝 Valor original do campo ${field}:`, processed[field]);
+                        processed[field] = [];
+                    }
+                } else if (!processed[field]) {
+                    console.log(`[SQLITE] ⚠️ Campo ${field} não encontrado ou vazio`);
+                    processed[field] = [];
+                }
+            });
+
+            // Campo location que pode ser um objeto
+            if (processed.location && typeof processed.location === 'string') {
+                try {
+                    processed.location = JSON.parse(processed.location);
+                    console.log('[SQLITE] ✅ Campo location convertido com sucesso:', processed.location);
+                } catch (error) {
+                    console.log('[SQLITE] ❌ Erro ao converter campo location de JSON:', error);
+                    console.log('[SQLITE] 📝 Valor original do campo location:', processed.location);
+                }
+            }
+
+            console.log('[SQLITE] ✅ Objeto processado:', processed);
+            return processed;
+        }
+
+        return data;
     }
 
     async findAll<T extends keyof DatabaseSchema>(
@@ -489,7 +534,30 @@ class DatabaseService {
             params.push(where.value);
         }
 
-        return this.executeQuery<DatabaseSchema[T]>(query, params);
+        const result = await this.executeQuery<DatabaseSchema[T]>(query, params);
+        console.log(`[SQLITE] 🔍 Buscando todos os registros na tabela ${table}:`, result.length);
+
+        // Processa os dados antes de retornar
+        return this.processRetrievedData(table, result);
+    }
+
+    async findOne<T extends keyof DatabaseSchema>(
+        table: T,
+        where: { column: string; value: any }
+    ): Promise<DatabaseSchema[T] | null> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        const query = `
+            SELECT * FROM ${databaseConfig.tables[table].name}
+            WHERE ${where.column} = ?
+            LIMIT 1
+        `;
+
+        const result = await this.executeQuery<DatabaseSchema[T]>(query, [where.value]);
+        console.log(`[SQLITE] 🔍 Buscando registro na tabela ${table}:`, result.length > 0 ? 'encontrado' : 'não encontrado');
+
+        // Processa os dados antes de retornar
+        return this.processRetrievedData(table, result[0]) || null;
     }
 
     async close(): Promise<void> {
@@ -526,6 +594,159 @@ class DatabaseService {
 
         console.log(`🔄 Atualizando registro em ${table} onde ${uniqueColumn} = ${whereValue}`);
         await this.update(table, data, { column: uniqueColumn, value: whereValue });
+    }
+
+    // Método para verificar se há dados locais disponíveis
+    async hasLocalData(table: string): Promise<boolean> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        try {
+            const result = await this.db.getAllAsync<CountResult>(`SELECT COUNT(*) as count FROM ${table}`);
+            return result[0].count > 0;
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao verificar dados locais da tabela ${table}:`, error);
+            return false;
+        }
+    }
+
+    // Método para verificar se os dados locais estão atualizados
+    async isLocalDataUpToDate(table: string, lastUpdateTimestamp: string): Promise<boolean> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        try {
+            const result = await this.db.getAllAsync<LastUpdateResult>(
+                `SELECT MAX(last_updated) as last_update FROM ${table}`
+            );
+            const localLastUpdate = result[0].last_update;
+            return localLastUpdate >= lastUpdateTimestamp;
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao verificar atualização dos dados locais da tabela ${table}:`, error);
+            return false;
+        }
+    }
+
+    async saveData<T extends keyof DatabaseSchema>(table: T, data: DatabaseSchema[T][]): Promise<void> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        try {
+            console.log(`[SQLITE] 💾 Iniciando salvamento de ${data.length} registros na tabela ${table}`);
+
+            // Define a ordem correta dos campos para cada tabela
+            const tableColumns: Record<string, string[]> = {
+                spaces: [
+                    '_id',
+                    'space_name',
+                    'image_url',
+                    'location',
+                    'price_per_hour',
+                    'space_description',
+                    'space_amenities',
+                    'space_type',
+                    'max_people',
+                    'week_days',
+                    'space_rules',
+                    'last_updated'
+                ]
+            };
+
+            // Função para processar valores antes de salvar
+            const processValue = (value: any, field: string): string => {
+                console.log(`[SQLITE] 🔄 Processando valor do campo ${field}:`, value);
+
+                // Se for undefined ou null, retorna array vazio para campos específicos
+                if (value === undefined || value === null) {
+                    if (['space_amenities', 'image_url', 'week_days', 'space_rules'].includes(field)) {
+                        console.log(`[SQLITE] ⚠️ Campo ${field} é undefined/null, retornando array vazio`);
+                        return '[]';
+                    }
+                    console.log(`[SQLITE] ⚠️ Campo ${field} é undefined/null, retornando string vazia`);
+                    return '';
+                }
+
+                // Se for array ou objeto, converte para JSON
+                if (Array.isArray(value) || typeof value === 'object') {
+                    // Garante que arrays vazios sejam salvos como '[]' e não como '""'
+                    if (Array.isArray(value) && value.length === 0) {
+                        console.log(`[SQLITE] 📝 Campo ${field} é um array vazio, retornando '[]'`);
+                        return '[]';
+                    }
+                    const jsonString = JSON.stringify(value);
+                    console.log(`[SQLITE] ✅ Campo ${field} convertido para JSON:`, jsonString);
+                    return jsonString;
+                }
+
+                const stringValue = String(value);
+                console.log(`[SQLITE] ✅ Campo ${field} convertido para string:`, stringValue);
+                return stringValue;
+            };
+
+            // Prepara a query de inserção usando a ordem correta dos campos
+            const columns = tableColumns[table] || Object.keys(data[0] || {}).filter(key => key !== '_id');
+            const placeholders = columns.map(() => '?').join(', ');
+            const query = `
+                INSERT OR REPLACE INTO ${databaseConfig.tables[table].name}
+                (${columns.join(', ')})
+                VALUES (${placeholders})
+            `;
+
+            // Processa e salva cada item
+            for (const item of data) {
+                try {
+                    console.log(`[SQLITE] 📝 Processando item para salvar:`, item);
+
+                    // Garante que space_amenities seja sempre um array apenas para a tabela spaces
+                    if (table === 'spaces' && 'space_amenities' in item) {
+                        const spaceItem = item as LocalSpace;
+                        if (!spaceItem.space_amenities || spaceItem.space_amenities === '') {
+                            console.log('[SQLITE] ⚠️ space_amenities vazio, definindo valor padrão');
+                            spaceItem.space_amenities = ['Sem amenities cadastradas'];
+                        }
+                    }
+
+                    // Usa a ordem correta dos campos para os valores
+                    const values = columns.map(column => {
+                        const value = (item as any)[column];
+                        console.log(`[SQLITE] 🔍 Valor original do campo ${column}:`, value);
+                        return processValue(value, column);
+                    });
+
+                    console.log(`[SQLITE] 💾 Salvando item na tabela ${table}:`, {
+                        item,
+                        values,
+                        query
+                    });
+
+                    await this.db.runAsync(query, values);
+                    console.log(`[SQLITE] ✅ Item salvo com sucesso na tabela ${table}`);
+                } catch (error) {
+                    console.error('[SQLITE] ❌ Erro ao salvar item:', {
+                        error,
+                        item,
+                        values: columns.map(column => processValue((item as any)[column], column))
+                    });
+                    throw error;
+                }
+            }
+
+            console.log(`[SQLITE] ✅ Todos os ${data.length} registros foram salvos com sucesso na tabela ${table}`);
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao salvar dados na tabela ${table}:`, error);
+            throw error;
+        }
+    }
+
+    async getData(table: string): Promise<any[]> {
+        if (!this.db) throw new Error('Database not initialized');
+
+        try {
+            console.log(`[SQLITE] 🔍 Buscando dados da tabela ${table}...`);
+            const result = await this.db.getAllAsync(`SELECT * FROM ${table};`);
+            console.log(`[SQLITE] ✅ ${result.length} registros encontrados na tabela ${table}`);
+            return result;
+        } catch (error) {
+            console.error(`[SQLITE] ❌ Erro ao buscar dados da tabela ${table}:`, error);
+            throw error;
+        }
     }
 }
 

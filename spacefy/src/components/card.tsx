@@ -30,7 +30,7 @@ type CardProps = Space & {
 
 const Card: React.FC<CardProps> = ({
   _id,
-  image_url = [],
+  image_url,
   space_name,
   location,
   price_per_hour,
@@ -57,11 +57,20 @@ const Card: React.FC<CardProps> = ({
 
   const isFavorite = favorites.some((fav) => fav.spaceId && fav.spaceId._id === _id);
 
+  // Garantir que image_url seja sempre um array válido
+  const validImageUrl = Array.isArray(image_url) ? image_url : 
+    (typeof image_url === 'string' ? [image_url] : []);
+
   // Garantir que sempre haja pelo menos uma imagem válida
-  const safeImages =
-    image_url && image_url.length > 0
-      ? image_url.map((url) => ({ uri: url }))
-      : [{ uri: 'https://via.placeholder.com/350x180?text=Sem+imagem' }];
+  const safeImages = validImageUrl.length > 0
+    ? validImageUrl.map((url) => ({ uri: url }))
+    : [{ uri: 'https://via.placeholder.com/350x180?text=Sem+imagem' }];
+
+  console.log('[Card] Dados das imagens:', {
+    originalImageUrl: image_url,
+    validImageUrl,
+    safeImages
+  });
 
   const handleScroll = (event: any) => {
     const slideSize = event.nativeEvent.layoutMeasurement.width;
@@ -102,7 +111,7 @@ const Card: React.FC<CardProps> = ({
         id: _id,
         images: safeImages,
         title: space_name,
-        address: typeof location === 'object' ? location.formatted_address : location,
+        address: location ? (typeof location === 'object' ? location.formatted_address : location) : '',
         price: `R$ ${price_per_hour.toLocaleString('pt-BR')}`,
         rating: 5.0,
         reviews: 100,
@@ -159,6 +168,34 @@ const Card: React.FC<CardProps> = ({
         [{ text: 'OK' }]
       );
     }
+  };
+
+  const handleLocationPress = () => {
+    if (!location) return;
+
+    let url;
+    if (typeof location === 'object' && 'coordinates' in location) {
+      // Se tiver coordenadas no formato correto
+      url = `https://www.google.com/maps/search/?api=1&query=${location.coordinates.lat},${location.coordinates.lng}`;
+    } else if (typeof location === 'string') {
+      // Se for uma string (endereço)
+      url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+    } else {
+      return; // Não tem localização válida
+    }
+
+    // @ts-ignore
+    if (typeof window !== 'undefined') {
+      window.open(url, '_blank');
+    } else {
+      import('react-native').then(({ Linking }) => Linking.openURL(url));
+    }
+  };
+
+  const getLocationDisplay = () => {
+    if (!location) return 'Endereço não disponível';
+    if (typeof location === 'string') return location;
+    return location.formatted_address || 'Endereço não disponível';
   };
 
   return (
@@ -226,9 +263,11 @@ const Card: React.FC<CardProps> = ({
             <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
               {space_name || 'Sem nome'}
             </Text>
-            <Text style={[styles.address, { color: theme.gray }]} numberOfLines={1}>
-              {typeof location === 'object' ? location.formatted_address : location}
-            </Text>
+            <TouchableOpacity onPress={handleLocationPress}>
+              <Text style={[styles.address, isDarkMode && { color: theme.text }]} numberOfLines={1}>
+                {getLocationDisplay()}
+              </Text>
+            </TouchableOpacity>
             {space_type && (
               <Text style={[styles.spaceType, { color: theme.gray }]}>{space_type}</Text>
             )}

@@ -1,6 +1,7 @@
 import { databaseService } from './databaseService';
 import { LocalSpace, LocalFavorite } from '../../types/database';
 import { Space } from '../../types/favorite';
+import { localAuthService } from './localAuthService';
 
 class LocalFavoriteService {
     private validateSpaceData(space: Space): void {
@@ -171,51 +172,87 @@ class LocalFavoriteService {
 
     async getFavorites(userId: string): Promise<LocalFavorite[]> {
         try {
+            console.log('🔍 Buscando favoritos para usuário:', userId);
+
             if (!userId) {
+                console.error('❌ ID do usuário não fornecido');
                 throw new Error('ID do usuário é obrigatório');
             }
 
-            return await databaseService.findAll('favorite_spaces', {
+            const favorites = await databaseService.findAll('favorite_spaces', {
                 column: 'user_id',
                 value: userId
             });
+
+            console.log('📚 Favoritos encontrados:', favorites.length);
+            return favorites;
         } catch (error) {
-            console.error('Erro ao buscar favoritos:', error);
+            console.error('❌ Erro ao buscar favoritos:', error);
             throw error;
         }
     }
 
-    async getFavoriteSpaces(userId: string): Promise<Space[]> {
+    async getFavoriteSpaces(userId: string): Promise<LocalSpace[]> {
         try {
+            console.log('🔍 Buscando espaços favoritos para usuário:', userId);
+
             if (!userId) {
+                console.error('❌ ID do usuário não fornecido');
                 throw new Error('ID do usuário é obrigatório');
             }
 
-            const query = `
-                SELECT s.*, f.created_at, f.last_viewed
-                FROM spaces s
-                INNER JOIN favorite_spaces f ON s._id = f.space_id
-                WHERE f.user_id = ?
-                ORDER BY f.created_at DESC
-            `;
+            // Verifica se o usuário existe no banco local
+            const user = await localAuthService.getCurrentUser();
+            console.log('👤 Usuário encontrado no banco local:', user ? {
+                id: user.id,
+                email: user.email,
+                isLoggedIn: user.isLoggedIn
+            } : 'Nenhum usuário encontrado');
 
-            const results = await databaseService.executeQuery<any>(query, [userId]);
+            // Se não encontrou o usuário específico, mas tem um usuário logado, usa ele
+            if (!user || user.id !== userId) {
+                const currentUser = await localAuthService.getCurrentUser();
+                if (currentUser && currentUser.isLoggedIn) {
+                    console.log('✅ Usando usuário logado do banco local');
+                    userId = currentUser.id;
+                } else {
+                    console.error('❌ Nenhum usuário autenticado encontrado');
+                    throw new Error('Usuário não autenticado');
+                }
+            }
 
-            return results.map(row => ({
-                _id: row._id,
-                space_name: row.space_name,
-                image_url: JSON.parse(row.image_url || '[]'),
-                location: JSON.parse(row.location || '{}'),
-                price_per_hour: row.price_per_hour,
-                space_description: row.space_description,
-                space_amenities: JSON.parse(row.space_amenities || '[]'),
-                space_type: row.space_type,
-                max_people: row.max_people,
-                week_days: JSON.parse(row.week_days || '[]'),
-                space_rules: JSON.parse(row.space_rules || '[]')
-            }));
+            // Busca os favoritos do usuário
+            const favorites = await this.getFavorites(userId);
+            console.log('📚 Favoritos encontrados:', favorites.length);
+
+            if (favorites.length === 0) {
+                console.log('ℹ️ Nenhum favorito encontrado');
+                return [];
+            }
+
+            // Busca os detalhes dos espaços
+            const spaces: LocalSpace[] = [];
+            for (const favorite of favorites) {
+                try {
+                    const space = await databaseService.findOne('spaces', {
+                        column: '_id',
+                        value: favorite.space_id
+                    });
+
+                    if (space) {
+                        spaces.push(space);
+                    } else {
+                        console.log('⚠️ Espaço não encontrado:', favorite.space_id);
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao buscar espaço:', favorite.space_id, error);
+                }
+            }
+
+            console.log('✅ Espaços favoritos recuperados:', spaces.length);
+            return spaces;
         } catch (error) {
-            console.error('Erro ao buscar espaços favoritos:', error);
+            console.error('❌ Erro ao buscar espaços favoritos:', error);
             throw error;
         }
     }

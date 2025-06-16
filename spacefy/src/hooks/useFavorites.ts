@@ -5,6 +5,8 @@ import { Favorite, Space } from '../types/favorite';
 import { localFavoriteService } from '../services/database/localFavoriteService';
 import { databaseService } from '../services/database/databaseService'; // Importe o databaseService
 import NetInfo from '@react-native-community/netinfo';
+import { localAuthService } from '../services/database/localAuthService';
+import { LocalSpace } from '../types/database';
 
 export const useFavorites = () => {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -29,43 +31,120 @@ export const useFavorites = () => {
       // Inicialize o banco de dados antes de qualquer operação
       await databaseService.init();
 
+      // Tenta obter o usuário atual do banco local primeiro
+      const currentUser = await localAuthService.getCurrentUser();
+      console.log('👤 Usuário atual:', currentUser ? {
+        id: currentUser.id,
+        email: currentUser.email,
+        isLoggedIn: currentUser.isLoggedIn
+      } : 'Nenhum usuário encontrado');
+
+      // Se não encontrou no banco local, tenta do AsyncStorage
       const userId = await AsyncStorage.getItem('userId');
       const token = await AsyncStorage.getItem('token');
+      console.log('🔑 Dados do AsyncStorage:', { userId, hasToken: !!token });
 
-      if (!userId) {
-        throw new Error('Usuário não autenticado');
+      // Se não tem usuário em nenhum lugar, lança erro
+      if (!currentUser && (!userId || !token)) {
+        throw new Error('Usuário não autenticado. Faça login para acessar seus favoritos.');
       }
 
-      try {
-        // Tenta buscar do servidor primeiro
-        if (token) {
-          const response = await api.get(`/users/favorites/${userId}`, {
+      // Define o ID do usuário a ser usado
+      const effectiveUserId = currentUser?.id || userId;
+      if (!effectiveUserId) {
+        throw new Error('ID do usuário não encontrado');
+      }
+
+      // Se está online e tem token, tenta sincronizar com o servidor
+      if (isOnline && token) {
+        try {
+          console.log('🌐 Tentando sincronizar favoritos online...');
+          const response = await api.get(`/users/favorites/${effectiveUserId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
 
           // Atualiza o banco local com os dados do servidor
-          for (const favorite of response.data) {
-            if (favorite.spaceId && favorite.spaceId._id) {
-              await localFavoriteService.saveFavorite(favorite.spaceId, userId);
+          if (response.data && Array.isArray(response.data)) {
+            console.log('✅ Dados recebidos do servidor:', response.data.length, 'favoritos');
+            for (const favorite of response.data) {
+              if (favorite.spaceId && favorite.spaceId._id) {
+                await localFavoriteService.saveFavorite(favorite.spaceId, effectiveUserId);
+              }
             }
           }
+        } catch (err) {
+          console.log('⚠️ Erro ao sincronizar favoritos online:', err);
+          // Continua mesmo com erro, tentando usar dados locais
         }
-      } catch (err) {
-        console.log('Usando dados locais devido a erro na API:', err);
       }
 
-      // Busca do banco local (seja após sincronização ou em caso de erro)
-      const localSpaces = await localFavoriteService.getFavoriteSpaces(userId);
-      setFavorites(localSpaces.map(space => ({
-        _id: space._id, // Adiciona o _id do espaço ao objeto Favorite
-        spaceId: space,
-        userId,
-        createdAt: new Date(),
-        lastViewed: new Date()
-      })));
+      // Busca do banco local
+      const localSpaces = await localFavoriteService.getFavoriteSpaces(effectiveUserId);
+      console.log('💫 Favoritos encontrados localmente:', localSpaces.length);
+
+      // Converte LocalSpace para Space
+      const favorites: Favorite[] = localSpaces.map((localSpace: LocalSpace) => {
+        // Garante que image_url seja sempre um array
+        const imageUrl = Array.isArray(localSpace.image_url)
+          ? localSpace.image_url
+          : typeof localSpace.image_url === 'string'
+            ? [localSpace.image_url]
+            : [];
+
+        // Garante que arrays sejam sempre arrays
+        const amenities = Array.isArray(localSpace.space_amenities)
+          ? localSpace.space_amenities
+          : typeof localSpace.space_amenities === 'string'
+            ? JSON.parse(localSpace.space_amenities)
+            : [];
+
+        const weekDays = Array.isArray(localSpace.week_days)
+          ? localSpace.week_days
+          : typeof localSpace.week_days === 'string'
+            ? JSON.parse(localSpace.week_days)
+            : [];
+
+        const rules = Array.isArray(localSpace.space_rules)
+          ? localSpace.space_rules
+          : typeof localSpace.space_rules === 'string'
+            ? JSON.parse(localSpace.space_rules)
+            : [];
+
+        // Converte o espaço local para o formato Space
+        const space: Space = {
+          _id: localSpace._id,
+          space_name: localSpace.space_name,
+          image_url: imageUrl,
+          location: localSpace.location,
+          price_per_hour: localSpace.price_per_hour,
+          space_description: localSpace.space_description,
+          space_amenities: amenities,
+          space_type: localSpace.space_type,
+          max_people: localSpace.max_people,
+          week_days: weekDays,
+          space_rules: rules,
+          // Campos não disponíveis no LocalSpace, usando valores padrão
+          opening_time: '',
+          closing_time: '',
+          owner_name: '',
+          owner_phone: '',
+          owner_email: '',
+          updatedAt: localSpace.last_updated
+        };
+
+        return {
+          _id: localSpace._id,
+          spaceId: space,
+          userId: effectiveUserId,
+          createdAt: new Date(),
+          lastViewed: new Date()
+        };
+      });
+
+      setFavorites(favorites);
     } catch (err: any) {
       const errorMessage = err.message || 'Erro ao carregar favoritos';
-      console.error('Erro ao buscar favoritos:', errorMessage);
+      console.error('❌ Erro ao buscar favoritos:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);

@@ -11,28 +11,89 @@ import ScrollToTopButton from '../components/scrollToTopButton';
 
 // Função para mapear os dados da API para o formato esperado pelo Card
 function mapCard(item: any) {
-  // Trata o campo location que pode vir como objeto
-  const location = typeof item.location === 'object' && item.location !== null
-    ? item.location.formatted_address || 'Endereço não disponível'
-    : item.location || 'Endereço não disponível';
+  console.log('[mapCard] Dados recebidos:', item);
+
+  // Trata o campo location que pode vir em diferentes formatos
+  let location: string | {
+    coordinates: {
+      lat: number;
+      lng: number;
+    };
+    formatted_address: string;
+    place_id: string;
+  } = 'Endereço não disponível';
+
+  if (item.location) {
+    if (typeof item.location === 'object' && item.location !== null) {
+      if ('coordinates' in item.location) {
+        // Já está no formato correto
+        location = item.location;
+      } else if (item.location.lat && item.location.lng) {
+        // Tem lat/lng mas não está no formato correto
+        location = {
+          coordinates: {
+            lat: item.location.lat,
+            lng: item.location.lng
+          },
+          formatted_address: item.location.formatted_address || `${item.location.lat}, ${item.location.lng}`,
+          place_id: item.location.place_id || ''
+        };
+      } else if (item.location.formatted_address) {
+        // Tem apenas o endereço formatado
+        location = item.location.formatted_address;
+      }
+    } else if (typeof item.location === 'string') {
+      try {
+        // Tenta fazer parse se for JSON
+        const parsedLocation = JSON.parse(item.location);
+        if ('coordinates' in parsedLocation) {
+          location = parsedLocation;
+        } else if (parsedLocation.lat && parsedLocation.lng) {
+          location = {
+            coordinates: {
+              lat: parsedLocation.lat,
+              lng: parsedLocation.lng
+            },
+            formatted_address: parsedLocation.formatted_address || `${parsedLocation.lat}, ${parsedLocation.lng}`,
+            place_id: parsedLocation.place_id || ''
+          };
+        } else {
+          location = parsedLocation.formatted_address || item.location;
+        }
+      } catch {
+        // Se não for JSON, usa a string como está
+        location = item.location;
+      }
+    }
+  }
+
+  // Garantir que image_url seja sempre um array válido
+  let image_url = item.image_url;
+  if (!image_url) {
+    image_url = [];
+  } else if (typeof image_url === 'string') {
+    try {
+      // Tenta fazer parse se for uma string JSON
+      image_url = JSON.parse(image_url);
+    } catch {
+      // Se não for JSON, trata como uma única URL
+      image_url = [image_url];
+    }
+  } else if (!Array.isArray(image_url)) {
+    image_url = [];
+  }
+
+  console.log('[mapCard] Dados processados:', {
+    originalLocation: item.location,
+    processedLocation: location,
+    originalImageUrl: item.image_url,
+    processedImageUrl: image_url
+  });
 
   return {
-    _id: item._id,
-    image_url: item.image_url || [],
-    space_name: item.space_name || 'Sem nome',
+    ...item,
     location,
-    price_per_hour: item.price_per_hour || 0,
-    space_description: item.space_description || '',
-    space_amenities: item.space_amenities || [],
-    space_type: item.space_type || '',
-    max_people: item.max_people || 0,
-    week_days: item.week_days || [],
-    opening_time: item.opening_time || '',
-    closing_time: item.closing_time || '',
-    space_rules: item.space_rules || [],
-    owner_name: item.owner_name || '',
-    owner_phone: item.owner_phone || '',
-    owner_email: item.owner_email || ''
+    image_url
   };
 }
 
@@ -93,7 +154,7 @@ export default function Home() {
         const searchLower = searchQuery.toLowerCase();
         const matchesSearch = searchQuery === '' || (
           card.space_name.toLowerCase().includes(searchLower) ||
-          card.location.toLowerCase().includes(searchLower)
+          card.location.formatted_address.toLowerCase().includes(searchLower)
         );
 
         const matchesPrice = filterByPrice(card.price_per_hour, filters.priceRange);

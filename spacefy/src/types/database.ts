@@ -9,15 +9,22 @@ export interface LocalUser {
 export interface LocalSpace {
     _id: string;
     space_name: string;
-    image_url: string;
-    location: string;
+    image_url: string[] | string;
+    location: string | {
+        coordinates: {
+            lat: number;
+            lng: number;
+        };
+        formatted_address: string;
+        place_id: string;
+    };
     price_per_hour: number;
     space_description: string;
-    space_amenities: string;
+    space_amenities: string[] | string;
     space_type: string;
     max_people: number;
-    week_days: string;
-    space_rules: string;
+    week_days: string[] | string;
+    space_rules: string[] | string;
     last_updated: string;
 }
 

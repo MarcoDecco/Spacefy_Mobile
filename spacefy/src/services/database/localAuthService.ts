@@ -23,12 +23,27 @@ class LocalAuthService {
                 email: this.sanitizeString(userData.email, 'email'),
                 token: this.sanitizeString(userData.token, 'token'),
                 lastLogin: now,
-                isLoggedIn: 1
+                isLoggedIn: 1 // Garante que isLoggedIn é sempre 1 ao salvar
             };
 
             // Validação adicional
             this.validateUserData(sanitizedData);
-            console.log('✅ Dados validados com sucesso');
+            console.log('✅ Dados validados com sucesso:', {
+                id: sanitizedData.id,
+                email: sanitizedData.email,
+                hasToken: !!sanitizedData.token,
+                isLoggedIn: sanitizedData.isLoggedIn,
+                lastLogin: sanitizedData.lastLogin
+            });
+
+            // Verifica se o usuário já existe
+            const existingUser = await this.getUserSession(sanitizedData.id);
+            console.log('🔍 Usuário existente:', existingUser ? {
+                id: existingUser.id,
+                email: existingUser.email,
+                isLoggedIn: existingUser.isLoggedIn,
+                lastLogin: existingUser.lastLogin
+            } : 'Não encontrado');
 
             // Executa a inserção/atualização sem transação explícita
             const query = `
@@ -50,41 +65,24 @@ class LocalAuthService {
             ];
 
             await databaseService.executeQuery(query, params);
+            console.log('✅ Dados salvos no banco');
 
-            // Verificação pós-salvamento usando executeQuery
-            const savedUser = await databaseService.executeQuery<{
-                id: string;
-                email: string;
-                lastLogin: string;
-                isLoggedIn: number;
-            }>(
-                'SELECT id, email, lastLogin, isLoggedIn FROM users WHERE id = ?',
-                [sanitizedData.id]
-            );
+            // Verifica se os dados foram salvos corretamente
+            const savedUser = await this.getUserSession(sanitizedData.id);
+            console.log('🔍 Verificação pós-salvamento:', savedUser ? {
+                id: savedUser.id,
+                email: savedUser.email,
+                isLoggedIn: savedUser.isLoggedIn,
+                lastLogin: savedUser.lastLogin,
+                hasToken: !!savedUser.token
+            } : 'Usuário não encontrado');
 
-            console.log('🔍 Verificação pós-salvamento:', {
-                encontrado: savedUser.length > 0,
-                dados: savedUser[0] ? {
-                    id: savedUser[0].id,
-                    email: savedUser[0].email,
-                    lastLogin: savedUser[0].lastLogin,
-                    isLoggedIn: savedUser[0].isLoggedIn
-                } : null
-            });
-
-        } catch (error: unknown) {
-            const errorMessage = (error instanceof Error) ? error.message : 'Erro desconhecido';
-            const errorStack = (error instanceof Error) ? error.stack : undefined;
-            console.error('❌ Erro ao salvar sessão do usuário:', {
-                error,
-                userData: {
-                    id: userData.id,
-                    email: userData.email,
-                    tokenLength: userData.token.length
-                },
-                message: errorMessage,
-                stack: errorStack
-            });
+            if (!savedUser || savedUser.isLoggedIn !== 1) {
+                console.error('❌ Erro: Usuário não foi salvo corretamente ou isLoggedIn não está 1');
+                throw new Error('Falha ao salvar sessão do usuário');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao salvar sessão:', error);
             throw error;
         }
     }
@@ -151,26 +149,109 @@ class LocalAuthService {
         return databaseService.findOne('users', { column: 'id', value: userId });
     }
 
-    async getCurrentUser(): Promise<LocalUser | null> {
-        const users = await databaseService.findAll('users', { column: 'isLoggedIn', value: 1 });
-        return users[0] || null;
+    async getCurrentUser(email?: string): Promise<LocalUser | null> {
+        try {
+            console.log('🔍 Buscando usuário atual...', { email });
+
+            // Busca todos os usuários ou filtra por email se fornecido
+            const query = email
+                ? 'SELECT * FROM users WHERE LOWER(email) = LOWER(?)'
+                : 'SELECT * FROM users';
+            const params = email ? [email] : [];
+
+            console.log('📝 Query:', { query, params });
+            const users = await databaseService.executeQuery<LocalUser>(query, params);
+            console.log('👥 Usuários encontrados:', users.length);
+
+            // Log detalhado de cada usuário
+            users.forEach((user, index) => {
+                console.log(`👤 Usuário ${index + 1}:`, {
+                    id: user.id,
+                    email: user.email,
+                    isLoggedIn: user.isLoggedIn,
+                    lastLogin: user.lastLogin,
+                    hasToken: !!user.token
+                });
+            });
+
+            if (users.length === 0) {
+                console.log('❌ Nenhum usuário encontrado');
+                return null;
+            }
+
+            // Se não foi fornecido email, retorna o primeiro usuário logado
+            if (!email) {
+                const loggedInUser = users.find(user => user.isLoggedIn === 1);
+                console.log('🔑 Usuário logado:', loggedInUser ? {
+                    id: loggedInUser.id,
+                    email: loggedInUser.email,
+                    isLoggedIn: loggedInUser.isLoggedIn,
+                    lastLogin: loggedInUser.lastLogin,
+                    hasToken: !!loggedInUser.token
+                } : 'Nenhum');
+                return loggedInUser || null;
+            }
+
+            // Se foi fornecido email, retorna o usuário correspondente
+            const currentUser = users[0];
+            console.log('👤 Usuário encontrado:', {
+                id: currentUser.id,
+                email: currentUser.email,
+                isLoggedIn: currentUser.isLoggedIn,
+                lastLogin: currentUser.lastLogin
+            });
+
+            // Verifica se o token é válido
+            if (!currentUser.token) {
+                console.log('❌ Token não encontrado');
+                return null;
+            }
+
+            // Verifica se a sessão expirou (30 dias)
+            const lastLogin = new Date(currentUser.lastLogin);
+            const now = new Date();
+            const diffDays = Math.floor((now.getTime() - lastLogin.getTime()) / (1000 * 60 * 60 * 24));
+            console.log('⏰ Verificação de expiração:', {
+                lastLogin: lastLogin.toISOString(),
+                now: now.toISOString(),
+                diffDays
+            });
+
+            if (diffDays > 30) {
+                console.log('❌ Sessão expirada (mais de 30 dias)');
+                await this.logout(currentUser.id);
+                return null;
+            }
+
+            console.log('✅ Usuário atual encontrado e válido');
+            return currentUser;
+        } catch (error) {
+            console.error('❌ Erro ao buscar usuário atual:', error);
+            return null;
+        }
     }
 
     async logout(userId: string): Promise<void> {
         try {
             console.log('🚪 Iniciando processo de logout...');
 
-            // Executa a atualização sem transação explícita
+            // Busca o usuário atual antes de fazer logout
+            const currentUser = await this.getUserSession(userId);
+            if (!currentUser) {
+                console.log('❌ Usuário não encontrado');
+                return;
+            }
+
+            // Executa a atualização mantendo o token e apenas alterando o status de login
             const query = `
                 UPDATE users 
                 SET isLoggedIn = 0,
-                    token = '',
                     lastLogin = CURRENT_TIMESTAMP
                 WHERE id = ?;
             `;
 
             await databaseService.executeQuery(query, [userId]);
-            console.log('✅ Logout realizado com sucesso');
+            console.log('✅ Logout realizado com sucesso, mantendo dados para login offline');
         } catch (error) {
             console.error('❌ Erro ao fazer logout:', error);
             throw error;
