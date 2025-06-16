@@ -44,6 +44,7 @@ import { blockedDatesService } from '../services/blockedDates';
 import { Space, ReceivedSpace } from '../types/space';
 import { spaceService } from '../services/spaceService';
 import { useSpaceDetails } from '../hooks/useSpaceDetails';
+import { userService } from '../services/userService';
 
 interface SpaceDetailsProps {
   route: {
@@ -132,6 +133,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   ]);
   const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState('');
+  const [ownerSpaces, setOwnerSpaces] = useState<number>(0);
+  const [ownerName, setOwnerName] = useState<string>('Locador');
 
   const MAX_DESCRIPTION_LENGTH = 150;
   const shouldShowMoreButton =
@@ -496,6 +499,37 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     return images.map(url => ({ uri: url }));
   }, [space?.image_url]);
 
+  useEffect(() => {
+    const fetchOwnerSpaces = async () => {
+      if (space?.owner_id) {
+        try {
+          const spaces = await spaceService.getSpacesByOwnerId(space.owner_id);
+          setOwnerSpaces(spaces.length);
+        } catch (error) {
+          setOwnerSpaces(0);
+        }
+      }
+    };
+    fetchOwnerSpaces();
+  }, [space?.owner_id]);
+
+  useEffect(() => {
+    const fetchOwnerName = async () => {
+      try {
+        if (space?.owner_id) {
+          const ownerData = await userService.getUserById(space.owner_id);
+          setOwnerName(`${ownerData.name} ${ownerData.surname}`);
+        }
+      } catch (error) {
+        setOwnerName('Locador');
+        console.error('Erro ao buscar dados do proprietário:', error);
+      }
+    };
+    if (space?.owner_id) {
+      fetchOwnerName();
+    }
+  }, [space?.owner_id]);
+
   if (isLoading || !space) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -706,10 +740,10 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
                   {/* Bloco de apresentação do locador do espaço */}
                   <LandlordCard
-                    name="Ricardo Penne"
-                    reviews={10}
-                    rating={4.8}
-                    spaces={4}
+                    name={ownerName}
+                    reviews={space?.rating ? Math.round(space.rating * 2) : 0}
+                    rating={space?.rating || 0}
+                    spaces={ownerSpaces}
                     isDarkMode={isDarkMode}
                     theme={theme}
                     styles={styles}
