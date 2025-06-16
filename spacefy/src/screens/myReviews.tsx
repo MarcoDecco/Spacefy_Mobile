@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { homeStyles as styles } from '../styles/homeStyles';
 import { assessmentService } from '../services/assessmentService';
 import { useAuth } from '../contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Space {
   _id: string;
@@ -19,7 +20,7 @@ interface Assessment {
   spaceID: Space;
 }
 
-export default function MyReviews() {
+export default function MyReviews({ navigation }: any) {
   const { theme, isDarkMode } = useTheme();
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -97,7 +98,18 @@ export default function MyReviews() {
   }
 
   return (
-    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background, flex: 1 }]}>
+      {/* Header Manual */}
+      <View style={localStyles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </TouchableOpacity>
+        <View style={localStyles.headerCenter}>
+          <Text style={[localStyles.headerTitle, { color: theme.text }]}>Minhas Avaliações</Text>
+        </View>
+        <View style={{ width: 24 }} />
+      </View>
+
       <FlatList
         data={assessments}
         keyExtractor={(item) => item._id}
@@ -112,13 +124,33 @@ export default function MyReviews() {
           </Text>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const localStyles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 8,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   listContainer: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 32,
   },
   reviewCard: {
     backgroundColor: '#fff',
@@ -163,6 +195,7 @@ const localStyles = StyleSheet.create({
   loadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    flex: 1,
   },
   emptyText: {
     textAlign: 'center',
@@ -170,4 +203,4 @@ const localStyles = StyleSheet.create({
     color: '#666',
     marginTop: 20,
   },
-}); 
+});
