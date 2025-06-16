@@ -11,6 +11,7 @@ import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const tiposEspaco = [
   { id: '1', label: 'Espaço para Eventos' },
@@ -64,6 +65,7 @@ const tiposEspaco = [
 const Etapa1 = () => {
   const navigation = useNavigation();
   const { formData, updateFormData } = useSpaceRegister();
+  const { isDarkMode, theme } = useTheme();
   const [space_name, setSpaceName] = useState(formData.space_name);
   const [space_description, setSpaceDescription] = useState(formData.space_description);
   const [space_type, setSpaceType] = useState(formData.space_type);
@@ -124,8 +126,8 @@ const Etapa1 = () => {
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={styles.container}>
-          <View style={styles.progressContainer}>
+        <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+          <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
             <ProgressBar progress={0.125} currentStep={1} totalSteps={8} />
           </View>
 
@@ -136,8 +138,8 @@ const Etapa1 = () => {
             contentContainerStyle={{ flexGrow: 1 }}
           >
             <View style={styles.header}>
-              <Text style={styles.title}>Informações Básicas</Text>
-              <Text style={styles.description}>
+              <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Informações Básicas</Text>
+              <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
                 Preencha as informações básicas do seu espaço
               </Text>
             </View>
@@ -164,12 +166,19 @@ const Etapa1 = () => {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Tipo do Espaço</Text>
+                <Text style={[styles.inputLabel, isDarkMode && { color: theme.text }]}>Tipo do Espaço</Text>
                 <TouchableOpacity
-                  style={[styles.input, !space_type && styles.inputError]}
+                  style={[
+                    styles.input, 
+                    !space_type && styles.inputError,
+                    isDarkMode && { 
+                      backgroundColor: theme.card,
+                      borderColor: theme.border
+                    }
+                  ]}
                   onPress={() => setModalVisible(true)}
                 >
-                  <Text style={{ color: space_type ? colors.black : colors.gray }}>
+                  <Text style={{ color: space_type ? (isDarkMode ? theme.text : colors.black) : colors.gray }}>
                     {space_type || 'Selecione o tipo de espaço'}
                   </Text>
                 </TouchableOpacity>
@@ -202,17 +211,17 @@ const Etapa1 = () => {
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View style={modalStyles.centeredView}>
                 <TouchableWithoutFeedback>
-                  <View style={modalStyles.modalView}>
-                    <Text style={modalStyles.modalTitle}>Escolha o tipo do espaço</Text>
+                  <View style={[modalStyles.modalView, isDarkMode && { backgroundColor: theme.card }]}>
+                    <Text style={[modalStyles.modalTitle, isDarkMode && { color: theme.text }]}>Escolha o tipo do espaço</Text>
                     <FlatList
                       data={tiposEspaco}
                       keyExtractor={(item) => item.id}
                       renderItem={({ item }) => (
                         <TouchableOpacity
-                          style={modalStyles.modalOption}
+                          style={[modalStyles.modalOption, isDarkMode && { borderBottomColor: theme.border }]}
                           onPress={() => handleTypeSelect(item.label)}
                         >
-                          <Text style={modalStyles.modalOptionText}>{item.label}</Text>
+                          <Text style={[modalStyles.modalOptionText, isDarkMode && { color: theme.text }]}>{item.label}</Text>
                         </TouchableOpacity>
                       )}
                     />

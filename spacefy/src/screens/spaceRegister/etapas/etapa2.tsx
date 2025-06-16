@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  StatusBar
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
@@ -25,6 +26,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface ViaCepResponse {
   cep: string;
@@ -74,6 +76,7 @@ const estados = [
 const Etapa2 = () => {
   const navigation = useNavigation<NavigationProps>();
   const { formData, updateFormData } = useSpaceRegister();
+  const { isDarkMode, theme } = useTheme();
   const [street, setStreet] = useState(formData.street || '');
   const [number, setNumber] = useState(formData.number || '');
   const [complement, setComplement] = useState(formData.complement || '');
@@ -226,8 +229,13 @@ const Etapa2 = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
+    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
+      <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
         <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
       </View>
 
@@ -244,24 +252,24 @@ const Etapa2 = () => {
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View>
               <View style={styles.header}>
-                <Text style={styles.title}>Localização</Text>
-                <Text style={styles.description}>
+                <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Localização</Text>
+                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
                   Informe o endereço completo do seu espaço
                 </Text>
               </View>
 
               <View style={styles.formContainer}>
-                <View style={styles.addressContainer}>
+                <View style={[styles.addressContainer, isDarkMode && { backgroundColor: theme.card }]}>
                   <View style={styles.addressRow}>
                     <MaterialIcons name="location-on" size={24} color={colors.blue} style={styles.addressIcon} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.addressLabel}>Endereço</Text>
-                      <Text style={styles.addressText}>
+                      <Text style={[styles.addressLabel, isDarkMode && { color: theme.text }]}>Endereço</Text>
+                      <Text style={[styles.addressText, isDarkMode && { color: theme.text }]}>
                         {street ? `${street}, ${number}` : 'Endereço não informado'}
                       </Text>
                     </View>
                     <TouchableOpacity 
-                      style={styles.useCurrentLocationButton}
+                      style={[styles.useCurrentLocationButton, isDarkMode && { backgroundColor: theme.card }]}
                       onPress={async () => {
                         try {
                           setLoading(true);
@@ -308,7 +316,7 @@ const Etapa2 = () => {
                   </View>
                 </View>
 
-                <View style={styles.mapContainer}>
+                <View style={[styles.mapContainer, isDarkMode && { backgroundColor: theme.card }]}>
                   {mapLoading ? (
                     <View style={styles.mapLoadingContainer}>
                       <ActivityIndicator size="large" color={colors.blue} />

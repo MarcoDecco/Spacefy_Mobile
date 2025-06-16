@@ -66,5 +66,11 @@ export const spaceService = {
             console.error('Erro ao buscar espaços alugados:', error);
             throw error;
         }
+    },
+
+    // Buscar avaliações de um espaço pelo ID
+    async getReviewsBySpaceId(spaceId) {
+        const response = await api.get(`/spaces/${spaceId}/reviews`);
+        return response.data;
     }
 };

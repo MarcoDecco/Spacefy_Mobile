@@ -45,6 +45,8 @@ import { Space, ReceivedSpace } from '../types/space';
 import { spaceService } from '../services/spaceService';
 import { useSpaceDetails } from '../hooks/useSpaceDetails';
 import { userService } from '../services/userService';
+import { RentalConfirmationModal } from '../components/RentalConfirmationModal';
+import { rentalService } from '../services/rentalService';
 
 interface SpaceDetailsProps {
   route: {
@@ -85,6 +87,22 @@ interface BlockedDatesResponse {
   rented_dates: RentedDate[];
 }
 
+// Função utilitária para arredondar para o próximo intervalo de 30 minutos
+function roundToNextHalfHour(date = new Date()): Date {
+  const result = new Date(date);
+  const minutes = result.getMinutes();
+  if (minutes === 0 || minutes === 30) {
+    result.setSeconds(0, 0);
+    return result;
+  }
+  if (minutes < 30) {
+    result.setMinutes(30, 0, 0);
+  } else {
+    result.setHours(result.getHours() + 1, 0, 0, 0);
+  }
+  return result;
+}
+
 export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const { space: receivedSpace } = route.params;
   const { space, isLoading } = useSpaceDetails(receivedSpace.id);
@@ -99,8 +117,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const scrollRef = useRef<ScrollView>(null);
   const [checkInDate, setCheckInDate] = useState(new Date());
   const [checkOutDate, setCheckOutDate] = useState(new Date());
-  const [checkInTime, setCheckInTime] = useState(new Date());
-  const [checkOutTime, setCheckOutTime] = useState(new Date());
+  const [checkInTime, setCheckInTime] = useState(roundToNextHalfHour());
+  const [checkOutTime, setCheckOutTime] = useState(roundToNextHalfHour());
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date');
   const [pickerTarget, setPickerTarget] = useState<
@@ -113,6 +131,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>('checkInTime');
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [rentalConfirmationVisible, setRentalConfirmationVisible] = useState(false);
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -295,23 +314,74 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         return;
       }
 
-      const reservationData = {
-        spaceId: space?._id,
-        checkIn: checkIn.toISOString(),
-        checkOut: checkOut.toISOString(),
-        totalValue: calcularTotal(),
-      };
-
-      await api.post('/reservations', reservationData);
-
-      setConfirmModalVisible(true);
-      setTimeout(() => {
-        setConfirmModalVisible(false);
-      }, 2000);
+      setRentalConfirmationVisible(true);
     } catch (error) {
       Alert.alert('Erro', 'Não foi possível realizar a reserva. Tente novamente mais tarde.', [
         { text: 'OK' },
       ]);
+    }
+  };
+
+  const handleConfirmRental = async () => {
+    try {
+      if (!user?.id || !space?._id) {
+        Alert.alert('Erro', 'Dados do usuário ou espaço não encontrados.');
+        return;
+      }
+
+      // Formata as datas no formato YYYY-MM-DD
+      const start_date = checkInDate.toISOString().split('T')[0];
+      const end_date = checkOutDate.toISOString().split('T')[0];
+
+      // Formata os horários no formato HH:mm
+      const startTime = checkInTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const endTime = checkOutTime.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+
+      // Remove o símbolo da moeda e converte para número
+      const totalValue = calcularTotal().replace(/[^\d,]/g, '').replace(',', '.');
+
+      console.log('📅 Datas formatadas:', {
+        start_date,
+        end_date,
+        startTime,
+        endTime,
+        totalValue
+      });
+
+      const reservationData = {
+        userId: user.id,
+        spaceId: space._id,
+        start_date,
+        end_date,
+        startTime,
+        endTime,
+        value: totalValue
+      };
+
+      console.log('📝 Enviando dados da reserva:', reservationData);
+
+      await rentalService.createRental(reservationData);
+
+      setRentalConfirmationVisible(false);
+      setConfirmModalVisible(true);
+      setTimeout(() => {
+        setConfirmModalVisible(false);
+      }, 2000);
+    } catch (error: any) {
+      console.error('❌ Erro ao criar reserva:', error);
+      Alert.alert(
+        'Erro ao criar reserva',
+        error.message || 'Não foi possível realizar a reserva. Tente novamente mais tarde.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -362,8 +432,33 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     const [hour, minute] = timeStr.split(':').map(Number);
     const selected = new Date();
     selected.setHours(hour, minute, 0, 0);
-    if (timeModalTarget === 'checkInTime') setCheckInTime(selected);
-    if (timeModalTarget === 'checkOutTime') setCheckOutTime(selected);
+
+    if (timeModalTarget === 'checkInTime') {
+      setCheckInTime(selected);
+
+      // Se o novo check-in for maior ou igual ao check-out, ajuste o check-out
+      if (
+        checkOutDate.toISOString().split('T')[0] === checkInDate.toISOString().split('T')[0] &&
+        (selected.getTime() >= checkOutTime.getTime())
+      ) {
+        // Adiciona 30 minutos ao check-in para sugerir um check-out válido
+        const newCheckOut = new Date(selected.getTime() + 30 * 60000);
+        setCheckOutTime(newCheckOut);
+      }
+    }
+
+    if (timeModalTarget === 'checkOutTime') {
+      // Não permitir check-out menor ou igual ao check-in
+      if (
+        checkOutDate.toISOString().split('T')[0] === checkInDate.toISOString().split('T')[0] &&
+        (selected.getTime() <= checkInTime.getTime())
+      ) {
+        alert('O horário de check-out deve ser maior que o de check-in.');
+        return;
+      }
+      setCheckOutTime(selected);
+    }
+
     setTimeModalVisible(false);
   };
 
@@ -580,7 +675,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   {/* Nome, endereço e favorito */}
                   <SpaceHeader
                     title={space.space_name || 'Sem título'}
-                    address={space.location?.formatted_address || 'Endereço não disponível'}
+                    address={typeof space.location === 'string' ? space.location : space.location?.formatted_address || 'Endereço não disponível'}
                     isFavorite={isFavorite}
                     onFavoritePress={handleFavoritePress}
                     theme={theme}
@@ -781,11 +876,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       <TimeSelectModal
         visible={timeModalVisible}
         onClose={() => setTimeModalVisible(false)}
-        timeGroups={timeGroups}
         onSelect={handleTimeSelect}
         styles={styles}
         isDarkMode={isDarkMode}
         theme={theme}
+        weekly_days={space?.weekly_days || []}
+        selectedDate={timeModalTarget === 'checkInTime' ? checkInDate.toISOString().split('T')[0] : checkOutDate.toISOString().split('T')[0]}
+        spaceId={space?._id}
       />
 
       {/* Modal de Confirmação */}
@@ -818,6 +915,21 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         theme={theme}
         styles={styles}
         onSeeMore={() => setDetailsModalVisible(true)}
+      />
+
+      {/* Modal de Confirmação de Reserva */}
+      <RentalConfirmationModal
+        visible={rentalConfirmationVisible}
+        onClose={() => setRentalConfirmationVisible(false)}
+        onConfirm={handleConfirmRental}
+        spaceName={space?.space_name || 'Sem título'}
+        checkInDate={checkInDate}
+        checkOutDate={checkOutDate}
+        checkInTime={checkInTime}
+        checkOutTime={checkOutTime}
+        totalValue={calcularTotal()}
+        isDarkMode={isDarkMode}
+        theme={theme}
       />
     </SafeAreaView>
   );
