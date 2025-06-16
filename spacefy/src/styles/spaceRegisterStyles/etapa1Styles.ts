@@ -15,34 +15,19 @@ export const styles = StyleSheet.create({
   progressContainer: {
     marginBottom: 16,
   },
-  progressText: {
-    fontSize: 13,
-    color: colors.dark_gray,
-    marginBottom: 4,
-  },
-  progressBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 6,
-    marginBottom: 16,
-    gap: 6,
-  },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.blue,
-    flex: 1,
-  },
-  progressBarInactive: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.gray,
-    flex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.black,
+    marginBottom: 24,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: colors.dark_gray,
+    marginBottom: 24,
+  },
+  formContainer: {
+    flex: 1,
     marginBottom: 24,
   },
   mapsHint: {
@@ -77,6 +62,9 @@ export const styles = StyleSheet.create({
   textArea: {
     minHeight: 60,
     textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    marginTop: 24,
   },
   buttonRow: {
     flexDirection: 'row',

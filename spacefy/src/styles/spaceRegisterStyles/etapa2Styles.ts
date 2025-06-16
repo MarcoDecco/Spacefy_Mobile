@@ -60,11 +60,11 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
     formContainer: {
-        paddingBottom: 100,
+        paddingBottom: 120,
     },
     rowContainer: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 16,
     },
     halfInput: {
         flex: 1,
@@ -74,6 +74,7 @@ export const styles = StyleSheet.create({
         borderRadius: 6,
         paddingVertical: 8,
         paddingHorizontal: 16,
+        alignSelf: 'flex-start',
         marginBottom: 8,
         marginTop: 4,
         shadowColor: '#000',
@@ -107,6 +108,39 @@ export const styles = StyleSheet.create({
         color: colors.gray,
         lineHeight: 20,
     },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 24,
+        gap: 12,
+    },
+    backButton: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: colors.blue,
+        backgroundColor: colors.white,
+        borderRadius: 6,
+        alignItems: 'center',
+        paddingVertical: 10,
+        marginRight: 8,
+    },
+    backButtonText: {
+        color: colors.blue,
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    proceedButton: {
+        flex: 1,
+        backgroundColor: colors.blue,
+        borderRadius: 6,
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    proceedButtonText: {
+        color: colors.white,
+        fontSize: 16,
+        fontWeight: '600',
+    },
     buttonRowFixed: {
         position: 'absolute',
         left: 0,
@@ -126,7 +160,7 @@ export const styles = StyleSheet.create({
     },
     modalView: {
         width: '90%',
-        maxHeight: '80%',
+        maxHeight: '70%',
         backgroundColor: colors.white,
         borderRadius: 20,
         padding: 20,
@@ -153,6 +187,7 @@ export const styles = StyleSheet.create({
         padding: 15,
         borderBottomWidth: 1,
         borderBottomColor: colors.light_gray,
+        width: '100%',
     },
     modalItemText: {
         fontSize: 16,
@@ -170,5 +205,19 @@ export const styles = StyleSheet.create({
         color: colors.white,
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    mapsHint: {
+        fontSize: 12,
+        color: colors.gray,
+        fontWeight: '400',
+    },
+    descHint: {
+        fontSize: 12,
+        color: colors.gray,
+        fontWeight: '400',
+    },
+    textArea: {
+        minHeight: 60,
+        textAlignVertical: 'top',
     },
 }); 

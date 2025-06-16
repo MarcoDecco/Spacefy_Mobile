@@ -8,6 +8,8 @@ import {
   Alert,
   Modal,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
@@ -15,17 +17,20 @@ import { NavigationProps } from '../../../navigation/types';
 import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa3Styles';
 import { colors } from '../../../styles/globalStyles/colors';
+import { ProgressBar } from '../../../components/ProgressBar';
+import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 
 const MAX_IMAGES = 10;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const Etapa3 = () => {
   const navigation = useNavigation<NavigationProps>();
-  const [images, setImages] = useState<string[]>([]);
+  const { formData, updateFormData } = useSpaceRegister();
+  const [fotos, setFotos] = useState<string[]>(formData.image_url || []);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const pickImage = async () => {
-    if (images.length >= MAX_IMAGES) {
+    if (fotos.length >= MAX_IMAGES) {
       Alert.alert('Limite atingido', `Você pode adicionar no máximo ${MAX_IMAGES} imagens.`);
       return;
     }
@@ -56,7 +61,7 @@ const Etapa3 = () => {
         return;
       }
 
-      setImages([...images, newImage]);
+      setFotos([...fotos, newImage]);
     }
   };
 
@@ -73,98 +78,115 @@ const Etapa3 = () => {
           text: 'Remover',
           style: 'destructive',
           onPress: () => {
-            const newImages = [...images];
+            const newImages = [...fotos];
             newImages.splice(index, 1);
-            setImages(newImages);
+            setFotos(newImages);
           },
         },
       ]
     );
   };
 
-  const handleNext = () => {
-    if (images.length === 0) {
-      Alert.alert('Atenção', 'Selecione pelo menos uma imagem.');
+  // Função para validar os campos da etapa
+  const validarEtapa = () => {
+    const erros = [];
+    
+    if (fotos.length === 0) {
+      erros.push('É necessário adicionar pelo menos uma foto do espaço');
+    }
+
+    if (fotos.length > MAX_IMAGES) {
+      erros.push(`O número máximo de fotos é ${MAX_IMAGES}`);
+    }
+
+    return {
+      valido: erros.length === 0,
+      erros
+    };
+  };
+
+  const handleProsseguir = () => {
+    const validacao = validarEtapa();
+    
+    if (!validacao.valido) {
+      Alert.alert(
+        'Campos Obrigatórios',
+        validacao.erros.join('\n'),
+        [{ text: 'OK' }]
+      );
       return;
     }
+
+    updateFormData({
+      image_url: fotos,
+    });
     navigation.navigate('SpaceAvailabilityScreen' as never);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
-        <Text style={styles.progressText}>Etapa 3 de 8</Text>
-        <View style={styles.progressBarContainer}>
-          <View style={[styles.progressBar, { width: '16%' }]} />
-          <View style={[styles.progressBar, { width: '16%' }]} />
-          <View style={[styles.progressBar, { width: '16%' }]} />
-          <View style={styles.progressBarInactive} />
-          <View style={styles.progressBarInactive} />
-          <View style={styles.progressBarInactive} />
-          <View style={styles.progressBarInactive} />
-          <View style={styles.progressBarInactive} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.progressContainer}>
+          <ProgressBar progress={0.375} currentStep={3} totalSteps={8} />
         </View>
-      </View>
+        <Text style={styles.title}>Fotos do Espaço</Text>
+        <Text style={styles.subtitle}>
+          Adicione fotos do seu espaço para que os usuários possam conhecê-lo melhor
+        </Text>
 
-      <Text style={styles.title}>Adicione fotos do seu espaço</Text>
-      <Text style={styles.subtitle}>
-        Adicione até 10 fotos do seu espaço. A primeira foto será a foto principal.
-      </Text>
-
-      <ScrollView style={styles.imageContainer}>
-        <View style={styles.imageGrid}>
-          {images.map((image, index) => (
-            <View key={index} style={styles.imageWrapper}>
-              <Image source={{ uri: image }} style={styles.image} />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeImage(index)}
-              >
-                <Text style={styles.removeButtonText}>X</Text>
-              </TouchableOpacity>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.formContainer}>
+            <View style={styles.imageContainer}>
+              <View style={styles.imageGrid}>
+                {fotos.map((image, index) => (
+                  <View key={index} style={styles.imageWrapper}>
+                    <Image source={{ uri: image }} style={styles.image} />
+                    <TouchableOpacity
+                      style={styles.removeButton}
+                      onPress={() => removeImage(index)}
+                    >
+                      <Text style={styles.removeButtonText}>X</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                {fotos.length < MAX_IMAGES && (
+                  <TouchableOpacity style={styles.addButton} onPress={pickImage}>
+                    <Text style={styles.addButtonText}>+</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          ))}
-          {images.length < MAX_IMAGES && (
-            <TouchableOpacity style={styles.addButton} onPress={pickImage}>
-              <Text style={styles.addButtonText}>+</Text>
-            </TouchableOpacity>
-          )}
+          </View>
+        </ScrollView>
+
+        <View style={styles.buttonRowFixed}>
+          <RegisterSpaceButton
+            title="Voltar"
+            onPress={() => navigation.goBack()}
+            variant="secondary"
+          />
+          <RegisterSpaceButton
+            title="Continuar"
+            onPress={handleProsseguir}
+            variant="primary"
+          />
         </View>
-      </ScrollView>
 
-      <View style={styles.buttonRowFixed}>
-        <RegisterSpaceButton
-          title="Voltar"
-          onPress={() => navigation.goBack()}
-          variant="secondary"
-        />
-        <RegisterSpaceButton
-          title="Continuar"
-          onPress={handleNext}
-          variant="primary"
-        />
-      </View>
-
-      <Modal
-        visible={!!selectedImage}
-        transparent={true}
-        onRequestClose={() => setSelectedImage(null)}
-      >
-        <TouchableOpacity
-          style={styles.modalContainer}
-          activeOpacity={1}
-          onPress={() => setSelectedImage(null)}
+        <Modal
+          visible={!!selectedImage}
+          transparent={true}
+          onRequestClose={() => setSelectedImage(null)}
         >
-          {selectedImage && (
-            <Image
-              source={{ uri: selectedImage }}
-              style={styles.modalImage}
-              resizeMode="contain"
-            />
-          )}
-        </TouchableOpacity>
-      </Modal>
-    </SafeAreaView>
+          <TouchableWithoutFeedback onPress={() => setSelectedImage(null)}>
+            <View style={styles.modalContainer}>
+              {selectedImage && (
+                <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

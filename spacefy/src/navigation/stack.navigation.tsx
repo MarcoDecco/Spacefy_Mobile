@@ -18,6 +18,10 @@ import SpaceInfoScreen from '../screens/spaceRegister/etapas/etapa1';
 import SpaceAddressScreen from '../screens/spaceRegister/etapas/etapa2';
 import SpaceNextStepScreen from '../screens/spaceRegister/etapas/etapa3';
 import SpaceAvailabilityScreen from '../screens/spaceRegister/etapas/etapa4';
+import Etapa5 from '../screens/spaceRegister/etapas/etapa5';
+import Etapa6 from '../screens/spaceRegister/etapas/etapa6';
+import Etapa7 from '../screens/spaceRegister/etapas/etapa7';
+import Etapa8 from '../screens/spaceRegister/etapas/etapa8';
 import { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -132,6 +136,34 @@ export default function StackNavigation() {
       <Stack.Screen
         name="SpaceAvailabilityScreen"
         component={SpaceAvailabilityScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Etapa5"
+        component={Etapa5}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Etapa6"
+        component={Etapa6}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Etapa7"
+        component={Etapa7}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
+        name="Etapa8"
+        component={Etapa8}
         options={{
           headerShown: false
         }}

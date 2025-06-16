@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { View, SafeAreaView, Text, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
@@ -7,6 +7,8 @@ import { styles } from '../../../styles/spaceRegisterStyles/etapa2Styles';
 import RegisterSpaceInput from '../../../components/inputs/registerSpaceInput';
 import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
 import { colors } from '../../../styles/globalStyles/colors';
+import { ProgressBar } from '../../../components/ProgressBar';
+import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 
 const estados = [
   { value: 'AC', label: 'Acre' },
@@ -40,12 +42,14 @@ const estados = [
 
 const Etapa2 = () => {
   const navigation = useNavigation<NavigationProps>();
-  const [street, setStreet] = useState('');
-  const [number, setNumber] = useState('');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [zipCode, setZipCode] = useState('');
+  const { formData, updateFormData } = useSpaceRegister();
+  const [street, setStreet] = useState(formData.street);
+  const [number, setNumber] = useState(formData.number);
+  const [complement, setComplement] = useState(formData.complement);
+  const [neighborhood, setNeighborhood] = useState(formData.neighborhood);
+  const [city, setCity] = useState(formData.city);
+  const [state, setState] = useState(formData.state);
+  const [zipCode, setZipCode] = useState(formData.zipCode);
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleStateSelect = (selectedState: string) => {
@@ -53,11 +57,63 @@ const Etapa2 = () => {
     setModalVisible(false);
   };
 
-  const handleNext = () => {
-    if (!street || !number || !neighborhood || !city || !state || !zipCode) {
-      Alert.alert('Atenção', 'Preencha todos os campos do endereço.');
+  // Função para validar os campos da etapa
+  const validarEtapa = () => {
+    const erros = [];
+    
+    if (!street?.trim()) {
+      erros.push('A rua é obrigatória');
+    }
+
+    if (!number?.trim()) {
+      erros.push('O número é obrigatório');
+    }
+
+    if (!neighborhood?.trim()) {
+      erros.push('O bairro é obrigatório');
+    }
+
+    if (!city?.trim()) {
+      erros.push('A cidade é obrigatória');
+    }
+
+    if (!state) {
+      erros.push('O estado é obrigatório');
+    }
+
+    if (!zipCode?.trim()) {
+      erros.push('O CEP é obrigatório');
+    } else if (!/^\d{5}-?\d{3}$/.test(zipCode)) {
+      erros.push('O CEP deve estar no formato 00000-000');
+    }
+
+    return {
+      valido: erros.length === 0,
+      erros
+    };
+  };
+
+  const handleProsseguir = () => {
+    const validacao = validarEtapa();
+    
+    if (!validacao.valido) {
+      Alert.alert(
+        'Campos Obrigatórios',
+        validacao.erros.join('\n'),
+        [{ text: 'OK' }]
+      );
       return;
     }
+
+    updateFormData({
+      street,
+      number,
+      complement,
+      neighborhood,
+      city,
+      state,
+      zipCode,
+    });
     navigation.navigate('SpaceNextStepScreen' as never);
   };
 
@@ -65,21 +121,10 @@ const Etapa2 = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>Etapa 2 de 8</Text>
-          <View style={styles.progressBarContainer}>
-            <View style={[styles.progressBar, { width: '16%' }]} />
-            <View style={[styles.progressBar, { width: '16%' }]} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-          </View>
+          <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
         </View>
-
         <Text style={styles.title}>Endereço do Espaço</Text>
-        <Text style={styles.subtitle}>Preencha os dados do endereço onde o espaço está localizado</Text>
+        <Text style={styles.subtitle}>Preencha o endereço completo do seu espaço</Text>
 
         <ScrollView style={styles.scrollView}>
           <View style={styles.formContainer}>
@@ -91,7 +136,7 @@ const Etapa2 = () => {
             />
 
             <View style={styles.rowContainer}>
-              <View style={styles.halfInput}>
+              <View style={styles.halfContainer}>
                 <RegisterSpaceInput
                   label="Número"
                   placeholder="Número"
@@ -100,7 +145,8 @@ const Etapa2 = () => {
                   keyboardType="numeric"
                 />
               </View>
-              <View style={styles.halfInput}>
+
+              <View style={styles.halfContainer}>
                 <RegisterSpaceInput
                   label="CEP"
                   placeholder="00000-000"
@@ -112,7 +158,7 @@ const Etapa2 = () => {
             </View>
 
             <View style={styles.rowContainer}>
-              <View style={styles.halfInput}>
+              <View style={styles.halfContainer}>
                 <RegisterSpaceInput
                   label="Bairro"
                   placeholder="Bairro"
@@ -120,7 +166,8 @@ const Etapa2 = () => {
                   onChangeText={setNeighborhood}
                 />
               </View>
-              <View style={styles.halfInput}>
+
+              <View style={styles.halfContainer}>
                 <RegisterSpaceInput
                   label="Cidade"
                   placeholder="Cidade"
@@ -130,8 +177,7 @@ const Etapa2 = () => {
               </View>
             </View>
 
-            <Text style={pageTexts.labelInput}>Estado</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.typeButton}
               onPress={() => setModalVisible(true)}
             >
@@ -140,15 +186,12 @@ const Etapa2 = () => {
               </Text>
             </TouchableOpacity>
 
-            <View style={styles.instructionsContainer}>
-              <Text style={styles.instructionsTitle}>Instruções</Text>
-              <View style={styles.instructionsList}>
-                <Text style={styles.instructionItem}>• Digite o nome da rua para autopreenchimento do endereço</Text>
-                <Text style={styles.instructionItem}>• Verifique se todos os dados estão corretos</Text>
-                <Text style={styles.instructionItem}>• O endereço será usado para localização no mapa</Text>
-                <Text style={styles.instructionItem}>• Certifique-se de que o endereço está completo e correto</Text>
-              </View>
-            </View>
+            <RegisterSpaceInput
+              label="Complemento"
+              placeholder="Complemento (opcional)"
+              value={complement}
+              onChangeText={setComplement}
+            />
           </View>
         </ScrollView>
 
@@ -160,7 +203,7 @@ const Etapa2 = () => {
           />
           <RegisterSpaceButton
             title="Continuar"
-            onPress={handleNext}
+            onPress={handleProsseguir}
             variant="primary"
           />
         </View>

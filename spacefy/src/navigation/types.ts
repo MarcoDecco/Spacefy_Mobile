@@ -50,6 +50,11 @@ export type RootStackParamList = {
   SpaceNextStepScreen: undefined;
   SpaceAvailabilityScreen: undefined;
   SpaceImagesScreen: undefined;
+  Etapa4: undefined;
+  Etapa5: undefined;
+  Etapa6: undefined;
+  Etapa7: undefined;
+  Etapa8: undefined;
 };
 
 export type NavigationProps = NativeStackNavigationProp<RootStackParamList>; 

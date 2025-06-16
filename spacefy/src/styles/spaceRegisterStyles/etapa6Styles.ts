@@ -26,60 +26,51 @@ export const styles = StyleSheet.create({
         color: colors.dark_gray,
         marginBottom: 24,
     },
-    formContainer: {
+    categoriesContainer: {
         paddingBottom: 100,
     },
-    buttonContainer: {
-        marginTop: 24,
+    categorySection: {
+        marginBottom: 24,
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        padding: 16,
     },
-    imageContainer: {
-        marginTop: 24,
+    categoryTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: colors.black,
+        marginBottom: 16,
     },
-    imageGrid: {
+    itemsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        gap: 12,
     },
-    imageWrapper: {
+    itemContainer: {
         width: '48%',
-        aspectRatio: 1,
-        position: 'relative',
+        marginBottom: 12,
     },
-    image: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 8,
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    removeButton: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: colors.red,
+    checkbox: {
         width: 24,
         height: 24,
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    removeButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    addButton: {
-        width: '48%',
-        aspectRatio: 1,
-        backgroundColor: colors.light_gray,
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
+        borderRadius: 4,
         borderWidth: 2,
-        borderColor: colors.gray,
-        borderStyle: 'dashed',
+        borderColor: colors.blue,
+        marginRight: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    addButtonText: {
-        fontSize: 32,
-        color: colors.gray,
+    checkboxChecked: {
+        backgroundColor: colors.blue,
+    },
+    itemLabel: {
+        flex: 1,
+        fontSize: 16,
+        color: colors.black,
     },
     buttonRowFixed: {
         position: 'absolute',
@@ -91,15 +82,5 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         gap: 12,
-    },
-    modalContainer: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalImage: {
-        width: '100%',
-        height: '100%',
     },
 }); 

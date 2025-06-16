@@ -14,7 +14,8 @@ api.interceptors.request.use(async (config) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('Requisição sendo feita para:', config.url); // Log da URL da requisição
+    console.log('URL completa da requisição:', `${config.baseURL}${config.url}`); // Log da URL completa
+    console.log('Headers da requisição:', config.headers); // Log dos headers
     return config;
 });
 
@@ -26,6 +27,7 @@ api.interceptors.response.use(
     },
     (error) => {
         console.log('Erro na requisição:', error.response?.status, error.response?.data);
+        console.log('URL que falhou:', error.config?.baseURL + error.config?.url); // Log da URL que falhou
         return Promise.reject(error);
     }
 );

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { useState } from 'react';
+import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
 import { inputStyles } from '../../../styles/componentStyles/inputStyles';
@@ -7,6 +7,8 @@ import { pageTexts } from '../../../styles/globalStyles/pageTexts';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa1Styles';
 import RegisterSpaceInput from '../../../components/inputs/registerSpaceInput';
 import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
+import { ProgressBar } from '../../../components/ProgressBar';
+import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 
 const tiposEspaco = [
   { id: '1', label: 'Espaço para Eventos' },
@@ -57,125 +59,159 @@ const tiposEspaco = [
   { id: '46', label: 'Outro' }
 ];
 
-export default function SpaceInfoScreen() {
-  const navigation = useNavigation<NavigationProps>();
-  const [name, setName] = useState('');
-  const [capacity, setCapacity] = useState('');
-  const [type, setType] = useState('');
-  const [description, setDescription] = useState('');
+const Etapa1 = () => {
+  const navigation = useNavigation();
+  const { formData, updateFormData } = useSpaceRegister();
+  const [space_name, setSpaceName] = useState(formData.space_name);
+  const [space_description, setSpaceDescription] = useState(formData.space_description);
+  const [space_type, setSpaceType] = useState(formData.space_type);
+  const [max_people, setMaxPeople] = useState(formData.max_people);
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleTypeSelect = (selectedType: string) => {
-    setType(selectedType);
+    setSpaceType(selectedType);
     setModalVisible(false);
+  };
+
+  // Função para validar os campos da etapa
+  const validarEtapa = () => {
+    const erros = [];
+    
+    if (!space_name?.trim()) {
+      erros.push('O nome do espaço é obrigatório');
+    }
+
+    if (!space_type) {
+      erros.push('O tipo do espaço é obrigatório');
+    }
+
+    if (!max_people || parseInt(max_people) <= 0) {
+      erros.push('A capacidade máxima deve ser maior que zero');
+    }
+
+    return {
+      valido: erros.length === 0,
+      erros
+    };
+  };
+
+  const handleProsseguir = () => {
+    const validacao = validarEtapa();
+    
+    if (!validacao.valido) {
+      Alert.alert(
+        'Campos Obrigatórios',
+        validacao.erros.join('\n'),
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    updateFormData({
+      space_name,
+      space_description,
+      space_type,
+      max_people,
+    });
+    navigation.navigate('SpaceAddressScreen' as never);
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>Etapa 1 de 8</Text>
-          <View style={styles.progressBarContainer}>
-            <View style={[styles.progressBar, { width: '16%' }]} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
-            <View style={styles.progressBarInactive} />
+          <ProgressBar progress={0.125} currentStep={1} totalSteps={8} />
+        </View>
+
+        <Text style={styles.title}>Informações Básicas</Text>
+        <Text style={styles.subtitle}>
+          Preencha as informações básicas do seu espaço
+        </Text>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.formContainer}>
+            <RegisterSpaceInput
+              label="Nome do Espaço"
+              placeholder="Digite o nome do seu espaço"
+              value={space_name}
+              onChangeText={setSpaceName}
+            />
+
+            <RegisterSpaceInput
+              label="Descrição"
+              placeholder="Descreva seu espaço"
+              value={space_description}
+              onChangeText={setSpaceDescription}
+              multiline
+              numberOfLines={4}
+            />
+
+            <TouchableOpacity
+              style={styles.typeButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={styles.typeButtonText}>
+                {space_type || 'Selecione o tipo de espaço'}
+              </Text>
+            </TouchableOpacity>
+
+            <RegisterSpaceInput
+              label="Capacidade Máxima"
+              placeholder="Número de pessoas"
+              value={max_people}
+              onChangeText={setMaxPeople}
+              keyboardType="numeric"
+            />
+
+            <View style={styles.buttonContainer}>
+              <RegisterSpaceButton
+                title="Prosseguir"
+                onPress={handleProsseguir}
+              />
+            </View>
           </View>
-        </View>
-        <Text style={styles.title}>Informações do Espaço</Text>
-        <View style={{ paddingBottom: 80 }}>
-          <RegisterSpaceInput
-            label="Nome do espaço"
-            placeholder="Insira o nome do espaço"
-            value={name}
-            onChangeText={setName}
-          />
-
-          <Text style={pageTexts.labelInput}>Tipo de espaço</Text>
-          <TouchableOpacity 
-            style={styles.typeButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.typeButtonText}>
-              {type || 'Escolher tipo'}
-            </Text>
-          </TouchableOpacity>
-
-          <RegisterSpaceInput
-            label="Capacidade máxima de pessoas"
-            placeholder="Insira o número máximo de pessoas"
-            value={capacity}
-            onChangeText={setCapacity}
-            keyboardType="numeric"
-          />
-
-          <RegisterSpaceInput
-            label="Breve descrição do espaço"
-            placeholder="Descreva como é o seu espaço"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            maxLength={250}
-            hint="MAX 250 caracteres"
-          />
-        </View>
+        </ScrollView>
 
         <Modal
-          animationType="slide"
-          transparent={true}
           visible={modalVisible}
+          transparent
+          animationType="slide"
           onRequestClose={() => setModalVisible(false)}
         >
           <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
             <View style={modalStyles.centeredView}>
-              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+              <TouchableWithoutFeedback>
                 <View style={modalStyles.modalView}>
-                  <Text style={modalStyles.modalTitle}>Selecione o tipo de espaço</Text>
+                  <Text style={modalStyles.modalTitle}>Escolha o tipo do espaço</Text>
                   <FlatList
                     data={tiposEspaco}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                       <TouchableOpacity
-                        style={modalStyles.typeItem}
+                        style={modalStyles.modalOption}
                         onPress={() => handleTypeSelect(item.label)}
                       >
-                        <Text style={modalStyles.typeItemText}>{item.label}</Text>
+                        <Text style={modalStyles.modalOptionText}>{item.label}</Text>
                       </TouchableOpacity>
                     )}
-                    style={modalStyles.list}
                   />
                   <TouchableOpacity
-                    style={modalStyles.closeButton}
+                    style={modalStyles.modalCloseButton}
                     onPress={() => setModalVisible(false)}
                   >
-                    <Text style={modalStyles.closeButtonText}>Fechar</Text>
+                    <Text style={modalStyles.modalCloseButtonText}>Cancelar</Text>
                   </TouchableOpacity>
                 </View>
               </TouchableWithoutFeedback>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
-
-        <View style={styles.buttonRowFixed}>
-          <RegisterSpaceButton
-            title="Voltar"
-            onPress={() => navigation.goBack()}
-            variant="secondary"
-          />
-
-          <RegisterSpaceButton
-            title="Prosseguir"
-            onPress={() => navigation.navigate('SpaceAddressScreen')}
-          />
-        </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
 }
+
+export default Etapa1;
 
 const modalStyles = StyleSheet.create({
   centeredView: {
@@ -226,6 +262,27 @@ const modalStyles = StyleSheet.create({
     width: '100%',
   },
   closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalOption: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalOptionText: {
+    fontSize: 16,
+  },
+  modalCloseButton: {
+    marginTop: 15,
+    backgroundColor: '#2196F3',
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+    width: '100%',
+  },
+  modalCloseButtonText: {
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',

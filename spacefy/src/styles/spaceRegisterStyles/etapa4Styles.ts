@@ -15,30 +15,6 @@ export const styles = StyleSheet.create({
     progressContainer: {
         marginBottom: 16,
     },
-    progressText: {
-        fontSize: 13,
-        color: colors.dark_gray,
-        marginBottom: 4,
-    },
-    progressBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 6,
-        marginBottom: 16,
-        gap: 6,
-    },
-    progressBar: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.blue,
-        flex: 1,
-    },
-    progressBarInactive: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.gray,
-        flex: 1,
-    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
@@ -47,7 +23,7 @@ export const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 16,
-        color: colors.gray,
+        color: colors.dark_gray,
         marginBottom: 24,
     },
     sectionContainer: {
@@ -93,49 +69,10 @@ export const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 16,
     },
-    dayRow: {
+    checkboxGrid: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    dayLabel: {
-        flex: 1,
-        fontSize: 16,
-        color: colors.black,
-    },
-    timeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    timeInput: {
-        borderWidth: 1,
-        borderColor: colors.light_gray,
-        borderRadius: 6,
-        padding: 8,
-        width: 80,
-        textAlign: 'center',
-    },
-    timeSeparator: {
-        fontSize: 16,
-        color: colors.gray,
-    },
-    horarioContainer: {
-        flex: 1,
-    },
-    horarioLabel: {
-        fontSize: 14,
-        color: colors.gray,
-        marginBottom: 4,
-    },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: colors.light_gray,
-        borderRadius: 6,
-        backgroundColor: colors.white,
-    },
-    picker: {
-        height: 50,
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
     },
     checkboxContainer: {
         flexDirection: 'row',
@@ -182,6 +119,24 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
     },
+    horarioContainer: {
+        flex: 1,
+    },
+    horarioLabel: {
+        fontSize: 14,
+        color: colors.gray,
+        marginBottom: 4,
+    },
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: colors.light_gray,
+        borderRadius: 6,
+        backgroundColor: colors.white,
+    },
+    picker: {
+        height: 50,
+        paddingHorizontal: 12,
+    },
     removeButton: {
         padding: 8,
     },
@@ -220,5 +175,16 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         gap: 12,
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalImage: {
+        width: '90%',
+        height: '80%',
+        resizeMode: 'contain',
     },
 }); 
