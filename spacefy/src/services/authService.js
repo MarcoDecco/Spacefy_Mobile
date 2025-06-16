@@ -4,6 +4,7 @@ import { localAuthService } from "./database/localAuthService";
 import { databaseService } from "./database/databaseService";
 import { jwtDecode } from "jwt-decode";
 import NetInfo from '@react-native-community/netinfo';
+import * as SecureStore from 'expo-secure-store';
 
 // Inicializa o banco de dados quando o serviço é importado
 databaseService.init().catch(console.error);
@@ -11,34 +12,16 @@ databaseService.init().catch(console.error);
 export const authService = {
   login: async (email, password) => {
     try {
-      console.log('🚀 Iniciando processo de login...', { email });
-      
       // Verifica o status da conexão
       const netInfo = await NetInfo.fetch();
       const isOnline = netInfo.isConnected && netInfo.isInternetReachable;
-      console.log('🌐 Status da conexão:', { isOnline, netInfo });
 
       // Verifica o estado atual do usuário antes do login
       const currentUserBeforeLogin = await localAuthService.getCurrentUser(email);
-      console.log('👤 Estado do usuário antes do login:', currentUserBeforeLogin ? {
-        id: currentUserBeforeLogin.id,
-        email: currentUserBeforeLogin.email,
-        isLoggedIn: currentUserBeforeLogin.isLoggedIn,
-        lastLogin: currentUserBeforeLogin.lastLogin,
-        hasToken: !!currentUserBeforeLogin.token
-      } : 'Nenhum usuário encontrado');
 
       if (!isOnline) {
-        console.log('📱 Tentando login offline...');
         // Tenta fazer login offline
         const currentUser = await localAuthService.getCurrentUser(email);
-        console.log('👤 Resultado da busca offline:', currentUser ? {
-          id: currentUser.id,
-          email: currentUser.email,
-          isLoggedIn: currentUser.isLoggedIn,
-          lastLogin: currentUser.lastLogin,
-          hasToken: !!currentUser.token
-        } : 'Nenhum usuário encontrado');
 
         if (currentUser) {
           // Atualiza o status de login mesmo no modo offline
@@ -47,7 +30,6 @@ export const authService = {
             email: currentUser.email,
             token: currentUser.token
           });
-          console.log('✅ Login offline realizado com sucesso');
           return {
             user: {
               id: currentUser.id,
@@ -57,11 +39,9 @@ export const authService = {
           };
         }
 
-        console.log('❌ Nenhuma conta disponível para login offline');
         throw new Error('Nenhuma conta disponível para login offline. Faça login online primeiro para habilitar o acesso offline.');
       }
 
-      console.log('🌐 Realizando login online...');
       // Faz a requisição de login
       const response = await api.post("/auth/login", {
         email,
@@ -69,18 +49,9 @@ export const authService = {
       });
 
       const { token, user } = response.data;
-      console.log('✅ Login online bem-sucedido:', {
-        userId: user.id,
-        email: user.email,
-        tokenLength: token.length
-      });
 
       // Decodifica o token para obter o email
       const decodedToken = jwtDecode(token);
-      console.log('🔑 Token decodificado:', {
-        email: decodedToken.email,
-        exp: decodedToken.exp
-      });
 
       // Log dos dados antes de salvar
       const userData = {
@@ -89,42 +60,18 @@ export const authService = {
         token,
         refreshToken: response.data.refreshToken
       };
-      console.log('💾 Preparando dados para salvar:', {
-        id: userData.id,
-        email: userData.email,
-        tokenLength: userData.token.length,
-        hasRefreshToken: !!userData.refreshToken
-      });
 
       // Salva no AsyncStorage para compatibilidade com código existente
       await AsyncStorage.setItem("token", token);
       await AsyncStorage.setItem("userId", user.id);
-      console.log('💾 Dados salvos no AsyncStorage');
 
       // Salva no banco de dados local
       await localAuthService.saveUserSession(userData);
-      console.log('✅ Dados salvos no banco local');
-
-      // Verifica se os dados foram salvos corretamente
-      const savedUser = await localAuthService.getCurrentUser(email);
-      console.log('🔍 Verificação pós-salvamento:', savedUser ? {
-        id: savedUser.id,
-        email: savedUser.email,
-        isLoggedIn: savedUser.isLoggedIn,
-        lastLogin: savedUser.lastLogin,
-        hasToken: !!savedUser.token
-      } : 'Usuário não encontrado');
 
       // Verifica se o usuário está realmente logado
       const isLoggedIn = await localAuthService.isUserLoggedIn(user.id);
-      console.log('🔐 Verificação final de login:', {
-        userId: user.id,
-        isLoggedIn,
-        hasToken: !!token
-      });
 
       if (!isLoggedIn) {
-        console.log('⚠️ Usuário não está marcado como logado, tentando corrigir...');
         await localAuthService.saveUserSession({
           id: user.id,
           email: decodedToken.email,
@@ -132,33 +79,41 @@ export const authService = {
         });
       }
 
+      // Salva e-mail e senha no SecureStore para login biométrico
+      await SecureStore.setItemAsync('biometricEmail', email);
+      await SecureStore.setItemAsync('biometricPassword', password);
+
       return response.data;
     } catch (error) {
-      console.error('❌ Erro no login:', {
-        error,
-        message: error.message,
-        response: error.response?.data,
-        stack: error.stack
-      });
-
-      // Melhora a mensagem de erro para ser mais específica
-      if (error.message.includes('login offline')) {
-        throw error; // Mantém a mensagem de erro específica que já definimos
+      if (error.message && error.message.includes('login offline')) {
+        throw error;
       } else if (!error.response) {
         throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.');
       } else {
-        throw error; // Mantém outros erros como estão
+        throw error;
       }
     }
   },
-  
+
+  // Login biométrico usando dados salvos no SecureStore
+  biometricLogin: async () => {
+    try {
+      const email = await SecureStore.getItemAsync('biometricEmail');
+      const password = await SecureStore.getItemAsync('biometricPassword');
+      if (!email || !password) {
+        throw new Error('Dados para login biométrico não encontrados.');
+      }
+      return await authService.login(email, password);
+    } catch (error) {
+      throw error;
+    }
+  },
+
   register: async (userData) => {
     try {
-      // Faz a requisição de registro
       const response = await api.post("/users/createUser", userData);
       return response.data;
     } catch (error) {
-      console.error('Erro no registro:', error);
       throw error;
     }
   },
@@ -176,7 +131,6 @@ export const authService = {
         }
       );
 
-      // Atualiza os dados no banco local se necessário
       if (userData.email) {
         await localAuthService.updateUserSession(userId, {
           email: userData.email
@@ -185,39 +139,30 @@ export const authService = {
 
       return response.data;
     } catch (error) {
-      console.error('Erro na atualização:', error);
       throw error;
     }
   },
-  
+
   logout: async () => {
     try {
       const userId = await AsyncStorage.getItem("userId");
-      
-      // Remove do banco local
       if (userId) {
         await localAuthService.logout(userId);
       }
-
-      // Remove do AsyncStorage
       await AsyncStorage.multiRemove(['token', 'userId']);
-      
-      // Limpa o token do axios
+      await SecureStore.deleteItemAsync('biometricEmail');
+      await SecureStore.deleteItemAsync('biometricPassword');
       delete api.defaults.headers.common['Authorization'];
-      
       return true;
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
       throw error;
     }
   },
 
-  // Novos métodos para gerenciamento offline
   getCurrentUser: async () => {
     try {
       return await localAuthService.getCurrentUser();
     } catch (error) {
-      console.error('Erro ao buscar usuário atual:', error);
       return null;
     }
   },
@@ -226,10 +171,8 @@ export const authService = {
     try {
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) return false;
-      
       return await localAuthService.isUserLoggedIn(userId);
     } catch (error) {
-      console.error('Erro ao verificar autenticação:', error);
       return false;
     }
   },
@@ -255,7 +198,6 @@ export const authService = {
 
       return { token, refreshToken };
     } catch (error) {
-      console.error('Erro ao atualizar sessão:', error);
       throw error;
     }
   }

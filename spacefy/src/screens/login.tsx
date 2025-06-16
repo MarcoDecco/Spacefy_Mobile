@@ -7,13 +7,38 @@ import Button from '../components/buttons/button';
 import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { inputStyles } from '~/styles/componentStyles/inputStyles';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { authenticateBiometric, isBiometricAvailable, isEnrolled } from '../services/biometrics';
+import * as SecureStore from 'expo-secure-store';
 
 export default function Login({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+
+  useEffect(() => {
+    // Verifica se biometria está disponível, cadastrada e se há e-mail salvo
+    const checkBiometric = async () => {
+      const available = await isBiometricAvailable();
+      const enrolled = await isEnrolled();
+      const savedEmail = await SecureStore.getItemAsync('biometricEmail');
+      setBiometricEnabled(available && enrolled && !!savedEmail);
+    };
+    checkBiometric();
+  }, []);
+
+  useEffect(() => {
+    // Se biometria estiver habilitada, já tenta autenticar ao abrir a tela
+    const tryBiometricLogin = async () => {
+      if (biometricEnabled) {
+        await handleBiometricLogin();
+      }
+    };
+    tryBiometricLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [biometricEnabled]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -24,9 +49,10 @@ export default function Login({ navigation }: any) {
     try {
       setLoading(true);
       await authService.login(email, password);
+      // Salva o e-mail para login biométrico futuro
+      await SecureStore.setItemAsync('biometricEmail', email);
       navigation.navigate('MainApp');
     } catch (error: any) {
-      console.log('Erro detalhado:', error);
       Alert.alert(
         'Erro ao fazer login',
         `Detalhes do erro: ${error?.message || error?.response?.data?.message || 'Erro desconhecido'}`
@@ -36,20 +62,30 @@ export default function Login({ navigation }: any) {
     }
   };
 
+  // Login usando biometria
+  const handleBiometricLogin = async () => {
+  try {
+    const result = await authenticateBiometric('Autentique-se para entrar');
+    if (result.success) {
+      await authService.biometricLogin();
+      navigation.navigate('MainApp');
+    } else {
+      Alert.alert('Biometria', 'Autenticação biométrica não realizada.');
+    }
+  } catch (error) {
+    Alert.alert('Biometria', 'Erro ao autenticar com biometria.');
+  }
+};
+
   return (
-    <KeyboardAvoidingView 
-      behavior='height'
+    <KeyboardAvoidingView
+      behavior="height"
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}
-    >
-      <ScrollView 
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <LinearGradient
           colors={[colors.others[100], colors.others[200]]}
-          style={[styles.container]}
-        >
+          style={[styles.container]}>
           <View style={styles.cardContainer}>
             <View style={imageStyles.profileImageContainer}>
               <Image
@@ -77,11 +113,17 @@ export default function Login({ navigation }: any) {
               onChangeText={setPassword}
             />
 
-            <Button 
-              text={loading ? "Carregando..." : "Entrar"}
+            <Button
+              text={loading ? 'Carregando...' : 'Entrar'}
               onPress={handleLogin}
               color="blue"
             />
+
+            {biometricEnabled && (
+              <View style={{ marginTop: 12 }}>
+                <Button text="Entrar com biometria" onPress={handleBiometricLogin} color="blue" />
+              </View>
+            )}
 
             <View style={styles.dividerContainer}>
               <View style={styles.divider} />
@@ -99,4 +141,4 @@ export default function Login({ navigation }: any) {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-} 
+}

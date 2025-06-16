@@ -34,6 +34,7 @@
     "expo-local-authentication": "^16.0.4",
     "expo-location": "^18.1.5",
     "expo-navigation-bar": "~4.2.5",
+    "expo-secure-store": "^14.2.3",
     "expo-sqlite": "~15.2.12",
     "expo-status-bar": "~2.2.3",
     "firebase": "^9.23.0",
