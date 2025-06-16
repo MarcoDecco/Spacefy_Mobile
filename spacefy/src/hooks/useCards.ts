@@ -51,16 +51,60 @@ export const useCards = (type: CardType = 'all') => {
                 if (!user?.id) {
                   throw new Error('Usuário não autenticado');
                 }
+                console.log('Buscando espaços alugados para o usuário:', user.id);
                 const rentedSpaces = await rentalService.getSpacesByUserRentalID(user.id);
-                apiSpaces = rentedSpaces.map((rental: RentalSpace) => ({
-                  ...rental.space,
-                  rental_id: rental._id,
-                  rental_start_date: rental.start_date,
-                  rental_end_date: rental.end_date,
-                  rental_start_time: rental.startTime,
-                  rental_end_time: rental.endTime,
-                  rental_value: rental.value
-                }));
+                console.log('Dados brutos dos espaços alugados:', JSON.stringify(rentedSpaces, null, 2));
+
+                try {
+                  apiSpaces = rentedSpaces.map((rental: any) => {
+                    console.log('Processando aluguel:', JSON.stringify(rental, null, 2));
+
+                    // Verificando se temos os dados necessários
+                    if (!rental.space) {
+                      console.error('Aluguel sem dados do espaço:', rental);
+                      throw new Error('Dados do espaço não encontrados');
+                    }
+
+                    // Usando os dados do espaço diretamente do objeto rental.space
+                    const space = rental.space;
+
+                    // Garantindo que image_url seja sempre um array
+                    const image_url = Array.isArray(space.image_url)
+                      ? space.image_url
+                      : space.image_url
+                        ? [space.image_url]
+                        : [];
+
+                    return {
+                      _id: space._id,
+                      space_name: space.space_name,
+                      image_url,
+                      location: space.location,
+                      price_per_hour: space.price_per_hour,
+                      space_description: space.space_description || '',
+                      space_type: space.space_type || '',
+                      space_amenities: space.space_amenities || [],
+                      max_people: space.max_people || 0,
+                      week_days: space.week_days || [],
+                      opening_time: space.opening_time || '',
+                      closing_time: space.closing_time || '',
+                      space_rules: space.space_rules || [],
+                      owner_name: space.owner_name || '',
+                      owner_phone: space.owner_phone || '',
+                      owner_email: space.owner_email || '',
+                      rental_id: rental._id,
+                      rental_start_date: rental.start_date,
+                      rental_end_date: rental.end_date,
+                      rental_start_time: rental.startTime,
+                      rental_end_time: rental.endTime,
+                      rental_value: rental.value
+                    };
+                  });
+                  console.log('Espaços processados com sucesso:', apiSpaces.length);
+                } catch (mapError) {
+                  console.error('Erro ao processar espaços alugados:', mapError);
+                  throw new Error('Erro ao processar dados dos espaços alugados');
+                }
                 break;
               default:
                 apiSpaces = await spaceService.getSpaces();

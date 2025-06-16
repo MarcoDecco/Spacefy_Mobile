@@ -24,9 +24,14 @@ export const rentalService = {
 
     getSpacesByUserRentalID: async (userId) => {
         try {
-            const response = await api.get(`/users/rentals/${userId}`);
+            const response = await api.get(`/rentals/user/${userId}`);
+            if (!response.data || !Array.isArray(response.data)) {
+                throw new Error('Formato de resposta inválido');
+            }
+            console.log('Resposta da API de aluguéis:', JSON.stringify(response.data, null, 2));
             return response.data;
         } catch (error) {
+            console.error('Erro ao buscar espaços alugados:', error);
             throw new Error('Erro ao buscar espaços do aluguel');
         }
     }
