@@ -40,26 +40,15 @@ import { ImageCarousel } from '../components/ImageCarousel';
 import { SpaceHeader } from '../components/SpaceHeader';
 import { RatingRow } from '../components/RatingRow';
 import { SpaceDetailsRow } from '../components/SpaceDetailsRow';
+import { blockedDatesService } from '../services/blockedDates';
+import { Space, ReceivedSpace } from '../types/space';
+import { spaceService } from '../services/spaceService';
+import { useSpaceDetails } from '../hooks/useSpaceDetails';
 
 interface SpaceDetailsProps {
   route: {
     params: {
-      space: {
-        id: string;
-        images: any[];
-        title: string;
-        address: string;
-        price: string;
-        rating: number;
-        reviews: number;
-        description?: string;
-        amenities?: string[];
-        type?: string;
-        area?: string;
-        hasWifi?: boolean;
-        capacity?: string;
-        bathrooms?: string;
-      };
+      space: ReceivedSpace;
     };
   };
 }
@@ -80,8 +69,24 @@ interface ReviewResponse {
   comment: string;
 }
 
+interface RentedTime {
+  startTime: string;
+  endTime: string;
+}
+
+interface RentedDate {
+  date: string;
+  times: RentedTime[];
+}
+
+interface BlockedDatesResponse {
+  blocked_dates: string[];
+  rented_dates: RentedDate[];
+}
+
 export default function SpaceDetails({ route }: SpaceDetailsProps) {
-  const { space } = route.params;
+  const { space: receivedSpace } = route.params;
+  const { space, isLoading } = useSpaceDetails(receivedSpace.id);
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { theme, isDarkMode } = useTheme();
@@ -100,22 +105,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   const [pickerTarget, setPickerTarget] = useState<
     'checkInDate' | 'checkOutDate' | 'checkInTime' | 'checkOutTime'
   >('checkInDate');
-
-  // Estados para modal do calendário customizado
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [calendarVisible, setCalendarVisible] = useState(false);
-  const [calendarTarget, setCalendarTarget] = useState<'checkInDate' | 'checkOutDate'>(
-    'checkInDate'
-  );
-
+  const [calendarTarget, setCalendarTarget] = useState<'checkInDate' | 'checkOutDate'>('checkInDate');
   const [timeModalVisible, setTimeModalVisible] = useState(false);
-  const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>(
-    'checkInTime'
-  );
-
+  const [timeModalTarget, setTimeModalTarget] = useState<'checkInTime' | 'checkOutTime'>('checkInTime');
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-
-  // Estados para avaliações
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -139,16 +135,17 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const MAX_DESCRIPTION_LENGTH = 150;
   const shouldShowMoreButton =
-    space.description && space.description.length > MAX_DESCRIPTION_LENGTH;
+    space?.space_description && space?.space_description.length > MAX_DESCRIPTION_LENGTH;
   const displayDescription = showFullDescription
-    ? space.description
-    : space.description?.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
+    ? space?.space_description
+    : space?.space_description?.substring(0, MAX_DESCRIPTION_LENGTH) + '...';
 
   const MAX_REVIEW_LENGTH = 120;
   const toggleReview = (id: number) => {
     setReviews(reviews.map((r) => (r.id === id ? { ...r, expanded: !r.expanded } : r)));
   };
-  const renderReview = (review: any) => (
+
+  const renderReview = (review: Review) => (
     <View
       key={review.id}
       style={[styles.reviewCard, isDarkMode && { backgroundColor: theme.card }]}>
@@ -211,7 +208,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   };
 
   const scrollToIndex = (index: number) => {
-    const newIndex = Math.max(0, Math.min(index, space.images.length - 1));
+    if (!space?.image_url || !Array.isArray(space?.image_url)) return;
+    
+    const newIndex = Math.max(0, Math.min(index, space?.image_url.length - 1));
     scrollRef.current?.scrollTo({
       x: newIndex * windowWidth,
       animated: true,
@@ -230,12 +229,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
   };
 
   useEffect(() => {
-    if (space.images.length <= 1 || isAutoPlayPaused || !isFocused) return;
+    if (!space?.image_url || !Array.isArray(space?.image_url) || space?.image_url.length <= 1 || isAutoPlayPaused || !isFocused) return;
+    
     const timer = setInterval(() => {
-      scrollToIndex((activeIndex + 1) % space.images.length);
+      scrollToIndex((activeIndex + 1) % space?.image_url.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, [activeIndex, isAutoPlayPaused, space.images.length, isFocused]);
+  }, [activeIndex, isAutoPlayPaused, space?.image_url, isFocused]);
 
   const openPicker = (target: typeof pickerTarget, mode: typeof pickerMode) => {
     if (mode === 'date') {
@@ -256,7 +256,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     if (pickerTarget === 'checkOutTime') setCheckOutTime(date);
   };
 
-  // Função para tratar a seleção do calendário
   const handleCalendarSelect = (day: { dateString: string }) => {
     const selected = new Date(day.dateString + 'T00:00:00');
     if (calendarTarget === 'checkInDate') setCheckInDate(selected);
@@ -264,15 +263,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setCalendarVisible(false);
   };
 
-  // Estado para controle de loading
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Função para fazer a reserva do espaço
   const handleRent = async () => {
     try {
-      setIsLoading(true);
-
-      // Junta data e hora de check-in
       const checkIn = new Date(
         checkInDate.getFullYear(),
         checkInDate.getMonth(),
@@ -283,7 +275,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         0
       );
 
-      // Junta data e hora de check-out
       const checkOut = new Date(
         checkOutDate.getFullYear(),
         checkOutDate.getMonth(),
@@ -294,7 +285,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         0
       );
 
-      // Verifica se a data de check-out é posterior ao check-in
       if (checkOut <= checkIn) {
         Alert.alert('Data Inválida', 'A data de check-out deve ser posterior à data de check-in.', [
           { text: 'OK' },
@@ -303,7 +293,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       }
 
       const reservationData = {
-        spaceId: space.id,
+        spaceId: space?._id,
         checkIn: checkIn.toISOString(),
         checkOut: checkOut.toISOString(),
         totalValue: calcularTotal(),
@@ -319,12 +309,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       Alert.alert('Erro', 'Não foi possível realizar a reserva. Tente novamente mais tarde.', [
         { text: 'OK' },
       ]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  // Gerar lista de horários agrupados por período
   const generateTimeList = () => {
     const periods = {
       manha: { start: 6, end: 12 },
@@ -338,7 +325,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       noite: [] as string[],
     };
 
-    // Primeiro, geramos os horários normais
     for (let h = 0; h < 24; h++) {
       for (let m = 0; m < 60; m += 30) {
         const hour = h.toString().padStart(2, '0');
@@ -355,7 +341,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       }
     }
 
-    // Adiciona os horários de 00:00 até 05:00 no final do período noturno
     for (let h = 0; h <= 5; h++) {
       for (let m = 0; m < 60; m += 30) {
         const hour = h.toString().padStart(2, '0');
@@ -370,7 +355,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const timeGroups = generateTimeList();
 
-  // Função para selecionar horário
   const handleTimeSelect = (timeStr: string) => {
     const [hour, minute] = timeStr.split(':').map(Number);
     const selected = new Date();
@@ -380,9 +364,7 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     setTimeModalVisible(false);
   };
 
-  // Função para calcular o total
-  function calcularTotal() {
-    // Junta data e hora de check-in
+  const calcularTotal = () => {
     const checkIn = new Date(
       checkInDate.getFullYear(),
       checkInDate.getMonth(),
@@ -392,7 +374,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       0,
       0
     );
-    // Junta data e hora de check-out
     const checkOut = new Date(
       checkOutDate.getFullYear(),
       checkOutDate.getMonth(),
@@ -403,63 +384,35 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       0
     );
 
-    // Verifica se a data de check-out é posterior ao check-in
     if (checkOut <= checkIn) {
       return 'R$ 0,00';
     }
 
-    // Diferença em milissegundos
     const diffMs = checkOut.getTime() - checkIn.getTime();
-    // Diferença em minutos
     const diffMinutos = diffMs / (1000 * 60);
-    // Converte para horas com decimais (ex: 1.5 para 1 hora e 30 minutos)
     const diffHoras = diffMinutos / 60;
-
-    // Extrai o valor numérico do preço do espaço (remove R$, espaços e converte vírgula para ponto)
-    const precoPorHora = parseFloat(space.price.replace(/[R$\s.]/g, '').replace(',', '.'));
-
-    // Calcula o preço por minuto
+    const precoPorHora = space?.price_per_hour || 0;
     const precoPorMinuto = precoPorHora / 60;
-
-    // Calcula o total usando os minutos exatos
     const total = diffMinutos * precoPorMinuto;
 
-    // Formata para moeda brasileira
     return total.toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-  }
-
-  // Dados dinâmicos para facilitar integração futura com API
-  const aluguel = space.price || 'R$1250,00';
-  const tipo = space.type || 'Salão de Festas';
-  const metragem = space.area || '2500 m²';
-  const wifi = space.hasWifi !== undefined ? (space.hasWifi ? 'Sim' : 'Não') : 'Sim';
-  const capacidade = space.capacity || '250 Pessoas';
-  const banheiros = space.bathrooms || '6 Banheiros';
-
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-
-  // Adicionar verificação de dados do espaço
-  const spaceDetails = {
-    amenities: space.amenities || [
-      'Wi-Fi',
-      'Ar Condicionado',
-      'Cozinha',
-      'Estacionamento',
-      'Acessibilidade',
-    ],
-    type: space.type || 'Não especificado',
-    area: space.area || 'Não especificado',
-    capacity: space.capacity || 'Não especificado',
-    bathrooms: space.bathrooms || 'Não especificado',
-    hasWifi: space.hasWifi !== undefined ? space.hasWifi : true,
   };
 
-  // Função para adicionar nova avaliação
+  const aluguel = `R$ ${space?.price_per_hour?.toFixed(2) || '0.00'}`;
+  const tipo = space?.space_type || 'Não especificado';
+  const capacidade = `${space?.max_people || 0} Pessoas`;
+
+  const spaceDetails = {
+    amenities: space?.space_amenities || [],
+    type: space?.space_type || 'Não especificado',
+    capacity: `${space?.max_people || 0} Pessoas`,
+  };
+
   const handleAddReview = () => {
     if (newRating === 0) {
       Alert.alert(
@@ -489,7 +442,6 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     }, 1500);
   };
 
-  // Função para abrir o modal de horário
   const openTimeModal = (target: typeof timeModalTarget) => {
     setTimeModalTarget(target);
     setTimeModalVisible(true);
@@ -497,28 +449,28 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
 
   const handleFavoritePress = async () => {
     try {
-      if (!space.id) {
+      if (!space?._id) {
         Alert.alert('Erro', 'ID do espaço não encontrado');
         return;
       }
 
       const spaceData = {
-        _id: space.id,
-        space_name: space.title,
-        image_url: space.images.map((img) => (typeof img === 'string' ? img : img.uri)),
-        location: space.address,
-        price_per_hour: parseFloat(space.price.replace(/[^0-9.-]+/g, '')),
-        space_description: space.description || '',
-        space_amenities: space.amenities || [],
-        space_type: space.type || '',
-        max_people: parseInt(space.capacity?.replace(/[^0-9]/g, '') || '0'),
-        week_days: [],
-        opening_time: '',
-        closing_time: '',
-        space_rules: [],
-        owner_name: '',
-        owner_phone: '',
-        owner_email: '',
+        _id: space._id,
+        space_name: space.space_name,
+        image_url: space.image_url,
+        location: space.location.formatted_address,
+        price_per_hour: space.price_per_hour,
+        space_description: space.space_description,
+        space_amenities: space.space_amenities,
+        space_type: space.space_type,
+        max_people: space.max_people,
+        week_days: space.week_days,
+        opening_time: space.weekly_days?.[0]?.time_ranges?.[0]?.open || '',
+        closing_time: space.weekly_days?.[0]?.time_ranges?.[0]?.close || '',
+        space_rules: space.space_rules,
+        owner_name: space.owner_name,
+        owner_phone: space.owner_phone,
+        owner_email: space.owner_email,
       };
 
       await toggleFavorite(spaceData);
@@ -528,7 +480,26 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     }
   };
 
-  const isFavorite = favorites.some((fav) => fav.spaceId?._id === space.id);
+  const isFavorite = favorites.some((fav) => fav.spaceId?._id === space?._id);
+
+  // Formatar as imagens para o formato esperado pelo ImageCarousel
+  const formattedImages = React.useMemo(() => {
+    if (!space?.image_url) return [];
+    
+    const images = Array.isArray(space.image_url) 
+      ? space.image_url 
+      : [space.image_url];
+    
+    return images.map(url => ({ uri: url }));
+  }, [space?.image_url]);
+
+  if (isLoading || !space) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Carregando...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.safeArea, isDarkMode && { backgroundColor: theme.background }]}>
@@ -551,193 +522,197 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
             style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled">
-            {/* Carrossel de imagens */}
-            <ImageCarousel
-              images={space.images}
-              activeIndex={activeIndex}
-              onScroll={handleScroll}
-              onMomentumScrollEnd={handleMomentumScrollEnd}
-              scrollRef={scrollRef}
-              setIsAutoPlayPaused={setIsAutoPlayPaused}
-              styles={styles}
-            />
-
-            <View style={styles.content}>
-
-              {/* Nome, endereço e favorito */}
-              <SpaceHeader
-                title={space.title}
-                address={space.address}
-                isFavorite={isFavorite}
-                onFavoritePress={handleFavoritePress}
-                theme={theme}
-                isDarkMode={isDarkMode}
-                styles={styles}
-              />
-
-              {/* Avaliação */}
-              <RatingRow
-                rating={space.rating}
-                reviews={space.reviews}
-                theme={theme}
-                isDarkMode={isDarkMode}
-                styles={styles}
-              />
-
-              {/* Divisor horizontal */}
-              <View style={styles.horizontalDivider} />
-
-              {/* Seção de Aluguel, Tipo e Detalhes */}
-              <SpaceDetailsRow
-                aluguel={aluguel}
-                tipo={tipo}
-                wifi={wifi}
-                metragem={metragem}
-                banheiros={banheiros}
-                capacidade={capacidade}
-                isDarkMode={isDarkMode}
-                theme={theme}
-                styles={styles}
-                onSeeMore={() => setDetailsModalVisible(true)}
-              />
-
-              {/* Divisor horizontal */}
-              <View style={styles.horizontalDivider} />
-
-              {/* Seção de aluguel do espaço */}
-              <View style={styles.rentalSection}>
-                <View style={styles.rentalHeader}>
-                  <MaterialIcons
-                    name="event-available"
-                    size={28}
-                    color={isDarkMode ? theme.blue : colors.blue}
-                  />
-                  <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
-                    Reserve Este Espaço
-                  </Text>
-                </View>
-                <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
-                  Selecione o período desejado para sua reserva
-                </Text>
-
-                <View
-                  style={[
-                    styles.rentalCard,
-                    isDarkMode && {
-                      backgroundColor: theme.card,
-                      borderColor: theme.border,
-                      borderWidth: 1,
-                    },
-                  ]}>
-                  {/* Data e Hora de Check-in */}
-                  <CheckInDateTime
-                    checkInDate={checkInDate}
-                    checkInTime={checkInTime}
-                    isDarkMode={isDarkMode}
-                    theme={theme}
-                    styles={styles}
-                    openPicker={openPicker}
-                    openTimeModal={openTimeModal}
-                  />
-
-                  {/* Divisor */}
-                  <View
-                    style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
-                  />
-
-                  {/* Data e Hora de Check-out */}
-                  <CheckOutDateTime
-                    checkOutDate={checkOutDate}
-                    checkOutTime={checkOutTime}
-                    isDarkMode={isDarkMode}
-                    theme={theme}
-                    styles={styles}
-                    openPicker={openPicker}
-                    openTimeModal={openTimeModal}
-                  />
-
-                  {/* Divisor */}
-                  <View
-                    style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
-                  />
-
-                  {/* Total e Botão */}
-                  <RentalTotalBar
-                    isDarkMode={isDarkMode}
-                    theme={theme}
-                    styles={styles}
-                    calcularTotal={calcularTotal}
-                    handleRent={handleRent}
-                    isLoading={isLoading}
-                  />
-                </View>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <Text>Carregando...</Text>
               </View>
-
-              {/* Divisor horizontal */}
-              <View style={styles.horizontalDivider} />
-
-              {/* Descrição */}
-              <DescriptionSection
-                displayDescription={displayDescription || ''}
-                shouldShowMoreButton={!!shouldShowMoreButton}
-                showFullDescription={showFullDescription}
-                setShowFullDescription={setShowFullDescription}
-                isDarkMode={isDarkMode}
-                theme={theme}
-                styles={styles}
-              />
-
-              {/* Divisor horizontal */}
-              <View style={styles.horizontalDivider} />
-
-              {/* Avaliações */}
-              <View>
-                <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
-                  Avaliações do Espaço
-                </Text>
-                <FlatList
-                  data={reviews}
-                  keyExtractor={(item) => item.id.toString()}
-                  renderItem={({ item }) => renderReview(item)}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 16 }}
+            ) : (
+              <>
+                <ImageCarousel
+                  images={formattedImages}
+                  activeIndex={activeIndex}
+                  onScroll={handleScroll}
+                  onMomentumScrollEnd={handleMomentumScrollEnd}
+                  scrollRef={scrollRef}
+                  setIsAutoPlayPaused={setIsAutoPlayPaused}
+                  styles={styles}
                 />
-              </View>
 
-              {/* Bloco de avaliação do local */}
-              <ReviewBox
-                isDarkMode={isDarkMode}
-                theme={theme}
-                styles={styles}
-                newRating={newRating}
-                setNewRating={setNewRating}
-                newComment={newComment}
-                setNewComment={setNewComment}
-                handleAddReview={handleAddReview}
-                onClear={() => {
-                  setNewRating(0);
-                  setNewComment('');
-                }}
-              />
+                <View style={styles.content}>
 
-              {/* Divisor horizontal */}
-              <View style={styles.horizontalDivider} />
+                  {/* Nome, endereço e favorito */}
+                  <SpaceHeader
+                    title={space.space_name || 'Sem título'}
+                    address={space.location?.formatted_address || 'Endereço não disponível'}
+                    isFavorite={isFavorite}
+                    onFavoritePress={handleFavoritePress}
+                    theme={theme}
+                    isDarkMode={isDarkMode}
+                    styles={styles}
+                  />
 
-              {/* Bloco de apresentação do locador do espaço */}
-              <LandlordCard
-                name="Ricardo Penne"
-                reviews={10}
-                rating={4.8}
-                spaces={4}
-                isDarkMode={isDarkMode}
-                theme={theme}
-                styles={styles}
-                onPress={() => {
-                  // lógica para abrir detalhes do locador
-                }}
-              />
-            </View>
+                  {/* Avaliação */}
+                  <RatingRow
+                    rating={space?.rating || 0}
+                    reviews={space?.reviews || 0}
+                    theme={theme}
+                    isDarkMode={isDarkMode}
+                    styles={styles}
+                  />
+
+                  {/* Divisor horizontal */}
+                  <View style={styles.horizontalDivider} />
+
+                  {/* Seção de Aluguel, Tipo e Detalhes */}
+                  <SpaceDetailsRow
+                    aluguel={aluguel}
+                    tipo={tipo}
+                    capacidade={capacidade}
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                    onSeeMore={() => setDetailsModalVisible(true)}
+                  />
+
+                  {/* Divisor horizontal */}
+                  <View style={styles.horizontalDivider} />
+
+                  {/* Seção de aluguel do espaço */}
+                  <View style={styles.rentalSection}>
+                    <View style={styles.rentalHeader}>
+                      <MaterialIcons
+                        name="event-available"
+                        size={28}
+                        color={isDarkMode ? theme.blue : colors.blue}
+                      />
+                      <Text style={[styles.rentalTitle, isDarkMode && { color: theme.text }]}>
+                        Reserve Este Espaço
+                      </Text>
+                    </View>
+                    <Text style={[styles.rentalSubtitle, isDarkMode && { color: theme.text }]}>
+                      Selecione o período desejado para sua reserva
+                    </Text>
+
+                    <View
+                      style={[
+                        styles.rentalCard,
+                        isDarkMode && {
+                          backgroundColor: theme.card,
+                          borderColor: theme.border,
+                          borderWidth: 1,
+                        },
+                      ]}>
+                      {/* Data e Hora de Check-in */}
+                      <CheckInDateTime
+                        checkInDate={checkInDate}
+                        checkInTime={checkInTime}
+                        isDarkMode={isDarkMode}
+                        theme={theme}
+                        styles={styles}
+                        openPicker={openPicker}
+                        openTimeModal={openTimeModal}
+                      />
+
+                      {/* Divisor */}
+                      <View
+                        style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
+                      />
+
+                      {/* Data e Hora de Check-out */}
+                      <CheckOutDateTime
+                        checkOutDate={checkOutDate}
+                        checkOutTime={checkOutTime}
+                        isDarkMode={isDarkMode}
+                        theme={theme}
+                        styles={styles}
+                        openPicker={openPicker}
+                        openTimeModal={openTimeModal}
+                      />
+
+                      {/* Divisor */}
+                      <View
+                        style={[styles.rentalDivider, isDarkMode && { backgroundColor: theme.border }]}
+                      />
+
+                      {/* Total e Botão */}
+                      <RentalTotalBar
+                        isDarkMode={isDarkMode}
+                        theme={theme}
+                        styles={styles}
+                        calcularTotal={calcularTotal}
+                        handleRent={handleRent}
+                        isLoading={isLoading}
+                      />
+                    </View>
+                  </View>
+
+                  {/* Divisor horizontal */}
+                  <View style={styles.horizontalDivider} />
+
+                  {/* Descrição */}
+                  <DescriptionSection
+                    displayDescription={displayDescription || ''}
+                    shouldShowMoreButton={!!shouldShowMoreButton}
+                    showFullDescription={showFullDescription}
+                    setShowFullDescription={setShowFullDescription}
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                  />
+
+                  {/* Divisor horizontal */}
+                  <View style={styles.horizontalDivider} />
+
+                  {/* Avaliações */}
+                  <View>
+                    <Text style={[styles.sectionTitle, isDarkMode && { color: theme.text }]}>
+                      Avaliações do Espaço
+                    </Text>
+                    <FlatList
+                      data={reviews}
+                      keyExtractor={(item) => item.id.toString()}
+                      renderItem={({ item }) => renderReview(item)}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ gap: 16 }}
+                    />
+                  </View>
+
+                  {/* Bloco de avaliação do local */}
+                  <ReviewBox
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                    newRating={newRating}
+                    setNewRating={setNewRating}
+                    newComment={newComment}
+                    setNewComment={setNewComment}
+                    handleAddReview={handleAddReview}
+                    onClear={() => {
+                      setNewRating(0);
+                      setNewComment('');
+                    }}
+                  />
+
+                  {/* Divisor horizontal */}
+                  <View style={styles.horizontalDivider} />
+
+                  {/* Bloco de apresentação do locador do espaço */}
+                  <LandlordCard
+                    name="Ricardo Penne"
+                    reviews={10}
+                    rating={4.8}
+                    spaces={4}
+                    isDarkMode={isDarkMode}
+                    theme={theme}
+                    styles={styles}
+                    onPress={() => {
+                      // lógica para abrir detalhes do locador
+                    }}
+                  />
+                </View>
+              </>
+            )}
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -757,6 +732,8 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
         theme={theme}
         styles={styles}
         isDarkMode={isDarkMode}
+        spaceId={space?._id}
+        weekDays={space?.week_days || []}
       />
 
       {/* Modal de Horário */}
