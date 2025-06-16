@@ -1,17 +1,16 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, FlatList, ActivityIndicator, Text, StyleSheet } from 'react-native';
+import { View, FlatList, ActivityIndicator, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useFavorites } from '../hooks/useFavorites';
 import Card from '../components/card';
 import Search from '../components/searchBar';
 import { useTheme } from '../contexts/ThemeContext';
-import { homeStyles as styles } from '../styles/homeStyles';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import ScrollToTopButton from '../components/scrollToTopButton';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../styles/globalStyles/colors';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
+import { colors } from '../styles/globalStyles/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 type FavoritesScreenRouteProp = RouteProp<RootStackParamList, 'Favorites'>;
 
@@ -20,14 +19,7 @@ interface Space {
   space_name: string;
   image_url: string[];
   price_per_hour: number;
-  location: string | {
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-    formatted_address: string;
-    place_id: string;
-  };
+  location: string | { coordinates: { lat: number; lng: number; }; formatted_address: string; place_id: string; };
   space_description: string;
   space_amenities: string[];
   space_type: string;
@@ -42,7 +34,7 @@ interface Space {
 }
 
 interface Favorite {
-  _id: string; // Agora o campo _id existe
+  _id: string;
   spaceId: Space | null;
   userId: string;
   createdAt: Date;
@@ -50,8 +42,8 @@ interface Favorite {
 }
 
 export default function Favorites() {
-  const navigation = useNavigation();
   const route = useRoute<FavoritesScreenRouteProp>();
+  const navigation = useNavigation();
   const { favorites, loading, error } = useFavorites();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +56,6 @@ export default function Favorites() {
     sortBy: '',
   });
 
-  // Verifica se a tela foi acessada pelo perfil
   const isFromProfile = route.params?.from === 'profile';
 
   const handleSearch = useCallback((text: string) => {
@@ -101,13 +92,12 @@ export default function Favorites() {
 
     const matchesSearch =
       searchQuery === '' ||
-      (typeof space.space_name === 'string' &&
-        space.space_name.toLowerCase().includes(searchLower)) ||
+      (typeof space.space_name === 'string' && space.space_name.toLowerCase().includes(searchLower)) ||
       (typeof space.location === 'string' && space.location.toLowerCase().includes(searchLower));
 
     const matchesPrice = filterByPrice(space.price_per_hour, filters.priceRange);
     const matchesType = filterByType(space.space_type, filters.spaceType);
-    const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
+    const matchesRating = filterByRating(5, filters.rating);
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
   });
@@ -152,7 +142,7 @@ export default function Favorites() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[localStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={theme.blue} />
       </View>
     );
@@ -160,7 +150,7 @@ export default function Favorites() {
 
   if (error) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[localStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={{ color: theme.text }}>{error}</Text>
       </View>
     );
@@ -168,75 +158,63 @@ export default function Favorites() {
 
   if (favorites.length === 0) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[localStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={{ color: theme.text }}>Você ainda não tem espaços favoritos</Text>
       </View>
     );
   }
 
   const EmptySearchComponent = () => (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingTop: 50,
-        paddingHorizontal: 20,
-      }}>
-      <Text
-        style={[
-          pageTexts.title,
-          {
-            textAlign: 'center',
-            color: theme.text,
-            fontSize: 24,
-            marginBottom: 16,
-          },
-        ]}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 50, paddingHorizontal: 20 }}>
+      <Text style={[pageTexts.title, { textAlign: 'center', color: theme.text, fontSize: 24, marginBottom: 16 }]}>
         Nenhum espaço encontrado
       </Text>
-      <Text
-        style={[
-          pageTexts.title,
-          {
-            textAlign: 'center',
-            color: theme.text,
-            fontSize: 16,
-            opacity: 0.7,
-            lineHeight: 24,
-          },
-        ]}>
+      <Text style={[pageTexts.title, { textAlign: 'center', color: theme.text, fontSize: 16, opacity: 0.7, lineHeight: 24 }]}>
         Tente ajustar sua busca ou filtros para encontrar o que você procura.
       </Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[localStyles.container, isDarkMode && { backgroundColor: theme.background }]}>
+      {/* HEADER MANUAL */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, color: theme.text }}>Favoritos</Text>
+      </View>
+
       <Search
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
         showBackButton={isFromProfile}
       />
+
       <FlatList
         ref={flatListRef}
         data={filteredFavorites}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => renderCard(item)}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.contentContainer, localStyles.listContainer]}
+        contentContainerStyle={localStyles.listContainer}
         numColumns={1}
         ListEmptyComponent={EmptySearchComponent}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       />
+
       <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const localStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.light_gray,
+  },
   listContainer: {
     paddingHorizontal: 16,
     paddingBottom: 32,
