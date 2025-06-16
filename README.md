@@ -1,3 +1,5 @@
+![Spacefy Logo](spacefy/assets/logo/LogoSpacefy.png)
+
 # Spacefy Mobile - Aplicativo de Gerenciamento de Espaços
 
 ## 📱 Descrição
