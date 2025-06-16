@@ -11,6 +11,7 @@ import BaseInput from '../components/inputs/baseInput';
 import PasswordInput from '../components/inputs/passwordInput';
 import { useState } from 'react';
 import { authService } from '../services/authService';
+import { authenticateBiometric, isBiometricAvailable, isEnrolled } from '../services/biometrics';
 
 export default function Register() {
   const navigation = useNavigation<NavigationProps>();
@@ -40,14 +41,14 @@ export default function Register() {
     try {
       setLoading(true);
       await authService.register(formData);
-      
+
       Alert.alert(
         'Sucesso',
         'Cadastro realizado com sucesso!',
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Login')
+            onPress: () => perguntarBiometria()
           }
         ]
       );
@@ -58,6 +59,43 @@ export default function Register() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para perguntar se o usuário deseja cadastrar biometria
+  const perguntarBiometria = async () => {
+    const available = await isBiometricAvailable();
+    const enrolled = await isEnrolled();
+
+    if (available && enrolled) {
+      Alert.alert(
+        'Biometria',
+        'Deseja ativar o acesso biométrico para facilitar seu login?',
+        [
+          {
+            text: 'Sim',
+            onPress: async () => {
+              const result = await authenticateBiometric('Confirme sua biometria para ativar o acesso');
+              if (result.success) {
+                Alert.alert('Biometria', 'Acesso biométrico ativado com sucesso!', [
+                  { text: 'OK', onPress: () => navigation.navigate('Login') }
+                ]);
+              } else {
+                Alert.alert('Biometria', 'A biometria não foi ativada.', [
+                  { text: 'OK', onPress: () => navigation.navigate('Login') }
+                ]);
+              }
+            }
+          },
+          {
+            text: 'Agora não',
+            onPress: () => navigation.navigate('Login'),
+            style: 'cancel'
+          }
+        ]
+      );
+    } else {
+      navigation.navigate('Login');
     }
   };
 
@@ -162,4 +200,4 @@ export default function Register() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-} 
+}
