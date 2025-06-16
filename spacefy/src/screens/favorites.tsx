@@ -185,13 +185,6 @@ export default function Favorites() {
         <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, color: theme.text }}>Favoritos</Text>
       </View>
 
-      <Search
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        initialValue={searchQuery}
-        showBackButton={isFromProfile}
-      />
-
       <FlatList
         ref={flatListRef}
         data={filteredFavorites}
