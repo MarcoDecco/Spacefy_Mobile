@@ -1,51 +1,82 @@
-import { View, Text, TextInput, TextInputProps } from 'react-native';
-import { inputStyles } from '~/styles/componentStyles/inputStyles';
-import { pageTexts } from '~/styles/globalStyles/pageTexts';
+import React from 'react';
+import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native';
+import { colors } from '../../styles/globalStyles/colors';
 
 interface RegisterSpaceInputProps extends TextInputProps {
   label: string;
-  required?: boolean;
   error?: string;
-  hint?: string;
-  containerStyle?: object;
+  rightIcon?: React.ReactNode;
 }
 
-export default function RegisterSpaceInput({
+const RegisterSpaceInput: React.FC<RegisterSpaceInputProps> = ({
   label,
-  required = false,
   error,
-  hint,
-  containerStyle,
-  value,
-  onChangeText,
+  rightIcon,
+  style,
   ...props
-}: RegisterSpaceInputProps) {
+}) => {
   return (
-    <View style={[inputStyles.container, containerStyle]}>
-      <View style={inputStyles.labelContainer}>
-        <Text style={pageTexts.labelInput}>{label}</Text>
-        {required && <Text style={inputStyles.required}>*</Text>}
-        {hint && <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>{hint}</Text>}
-      </View>
-      <View style={inputStyles.inputContainerNoBorder}>
+    <View style={styles.container}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.inputContainer}>
         <TextInput
           style={[
-            inputStyles.input,
-            inputStyles.registerSpaceInput,
-            props.multiline && { minHeight: 60, textAlignVertical: 'top' },
-            props.style,
+            styles.input,
+            error && styles.inputError,
+            style,
           ]}
-          placeholderTextColor="#A0A0A0"
-          value={value}
-          onChangeText={onChangeText}
+          placeholderTextColor={colors.gray}
           {...props}
         />
+        {rightIcon && (
+          <View style={styles.rightIconContainer}>
+            {rightIcon}
+          </View>
+        )}
       </View>
-      {error && (
-        <View style={inputStyles.errorContainer}>
-          <Text style={inputStyles.errorText}>{error}</Text>
-        </View>
-      )}
+      {error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
-} 
+};
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 8,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: colors.black,
+    borderWidth: 1,
+    borderColor: colors.light_gray,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  rightIconContainer: {
+    position: 'absolute',
+    right: 16,
+    height: '100%',
+    justifyContent: 'center',
+  },
+});
+
+export default RegisterSpaceInput; 

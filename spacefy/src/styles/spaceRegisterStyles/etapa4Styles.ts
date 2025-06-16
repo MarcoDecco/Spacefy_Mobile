@@ -1,190 +1,138 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
+const { width } = Dimensions.get('window');
 const statusBarHeight = Constants.statusBarHeight;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: statusBarHeight,
         backgroundColor: colors.light_gray,
-        paddingHorizontal: 30,
-        paddingTop: 30,
+        marginTop: statusBarHeight,
     },
     progressContainer: {
+        backgroundColor: colors.white,
+        paddingTop: 20,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
         marginBottom: 16,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '700',
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 16,
+        paddingHorizontal: 24,
+        paddingTop: 24,
     },
     subtitle: {
         fontSize: 16,
         color: colors.dark_gray,
+        lineHeight: 24,
         marginBottom: 24,
+        paddingHorizontal: 24,
     },
-    sectionContainer: {
-        marginBottom: 24,
+    formContainer: {
+        flex: 1,
+        paddingHorizontal: 24,
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.black,
-        marginBottom: 16,
-    },
-    priceContainer: {
+    availabilityContainer: {
         backgroundColor: colors.white,
-        borderRadius: 8,
+        borderRadius: 16,
         padding: 16,
         marginBottom: 24,
     },
-    priceInput: {
-        borderWidth: 1,
-        borderColor: colors.light_gray,
-        borderRadius: 6,
-        padding: 12,
-        fontSize: 16,
-        color: colors.black,
-    },
-    priceLabel: {
-        fontSize: 14,
-        color: colors.gray,
-        marginBottom: 8,
-    },
-    precoLiquido: {
-        fontSize: 14,
-        color: colors.blue,
-        marginTop: 8,
-    },
-    precoInfo: {
-        fontSize: 14,
-        color: colors.gray,
-        marginTop: 8,
-    },
-    daysContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 16,
-    },
-    checkboxGrid: {
+    timeSlotContainer: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
     },
-    checkboxContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        width: '48%',
-    },
-    checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 4,
-        borderWidth: 2,
-        borderColor: colors.blue,
-        marginRight: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    checkboxChecked: {
-        backgroundColor: colors.blue,
-    },
-    checkboxLabel: {
+    timeSlotLabel: {
         fontSize: 16,
         color: colors.black,
+        fontWeight: '500',
     },
-    horariosDiaContainer: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
+    timeSlotValue: {
+        fontSize: 16,
+        color: colors.blue,
+        fontWeight: '600',
+    },
+    addTimeSlotButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: colors.light_blue,
         padding: 16,
-        marginBottom: 16,
+        borderRadius: 12,
+        marginTop: 16,
     },
-    horariosDiaTitle: {
+    addTimeSlotText: {
+        color: colors.blue,
         fontSize: 16,
         fontWeight: '600',
-        color: colors.black,
-        marginBottom: 12,
-    },
-    horarioRangeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    horarioFieldsContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        gap: 12,
-    },
-    horarioContainer: {
-        flex: 1,
-    },
-    horarioLabel: {
-        fontSize: 14,
-        color: colors.gray,
-        marginBottom: 4,
-    },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: colors.light_gray,
-        borderRadius: 6,
-        backgroundColor: colors.white,
-    },
-    picker: {
-        height: 50,
-        paddingHorizontal: 12,
-    },
-    removeButton: {
-        padding: 8,
-    },
-    addButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 12,
-        backgroundColor: colors.light_gray,
-        borderRadius: 6,
-    },
-    addButtonText: {
-        fontSize: 14,
-        color: colors.blue,
         marginLeft: 8,
     },
-    replicateButton: {
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 16,
+    timeSlotRow: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 24,
+        justifyContent: 'space-between',
+        backgroundColor: colors.light_gray,
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 8,
     },
-    replicateButtonText: {
+    timeSlotText: {
         fontSize: 14,
-        color: colors.blue,
-        fontWeight: '600',
+        color: colors.dark_gray,
     },
-    buttonRowFixed: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingHorizontal: 30,
-        marginBottom: '8%',
+    removeTimeSlotButton: {
+        padding: 4,
+    },
+    timeSlotList: {
+        marginTop: 16,
+    },
+    timeSlotHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: 12,
-    },
-    modalContainer: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: 8,
     },
-    modalImage: {
-        width: '90%',
-        height: '80%',
-        resizeMode: 'contain',
+    timeSlotTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.black,
+    },
+    timeSlotCount: {
+        fontSize: 14,
+        color: colors.dark_gray,
+    },
+    priceContainer: {
+        marginBottom: 24,
+        backgroundColor: colors.white,
+        padding: 16,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.light_gray,
+    },
+    priceLabel: {
+        fontSize: 16,
+        color: colors.black,
+        fontWeight: '500',
+        marginBottom: 8,
+    },
+    priceInput: {
+        fontSize: 18,
+        color: colors.black,
+        borderWidth: 1,
+        borderColor: colors.light_gray,
+        borderRadius: 6,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        backgroundColor: colors.white,
     },
 }); 

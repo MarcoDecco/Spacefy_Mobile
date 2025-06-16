@@ -1,14 +1,45 @@
-import React, { useState } from 'react';
-import { View, SafeAreaView, Text, TouchableOpacity, ScrollView, TouchableWithoutFeedback, Keyboard, Modal, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { 
+  View, 
+  SafeAreaView, 
+  Text, 
+  TouchableOpacity, 
+  TouchableWithoutFeedback, 
+  Keyboard, 
+  ScrollView, 
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Dimensions
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
-import { pageTexts } from '../../../styles/globalStyles/pageTexts';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa2Styles';
+import { colors } from '../../../styles/globalStyles/colors';
 import RegisterSpaceInput from '../../../components/inputs/registerSpaceInput';
 import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
-import { colors } from '../../../styles/globalStyles/colors';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
+import { MaterialIcons } from '@expo/vector-icons';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import * as Location from 'expo-location';
+import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+
+interface ViaCepResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
+}
+
+interface LocationData {
+  latitude: number;
+  longitude: number;
+}
 
 const estados = [
   { value: 'AC', label: 'Acre' },
@@ -43,69 +74,142 @@ const estados = [
 const Etapa2 = () => {
   const navigation = useNavigation<NavigationProps>();
   const { formData, updateFormData } = useSpaceRegister();
-  const [street, setStreet] = useState(formData.street);
-  const [number, setNumber] = useState(formData.number);
-  const [complement, setComplement] = useState(formData.complement);
-  const [neighborhood, setNeighborhood] = useState(formData.neighborhood);
-  const [city, setCity] = useState(formData.city);
-  const [state, setState] = useState(formData.state);
-  const [zipCode, setZipCode] = useState(formData.zipCode);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [street, setStreet] = useState(formData.street || '');
+  const [number, setNumber] = useState(formData.number || '');
+  const [complement, setComplement] = useState(formData.complement || '');
+  const [neighborhood, setNeighborhood] = useState(formData.neighborhood || '');
+  const [city, setCity] = useState(formData.city || '');
+  const [state, setState] = useState(formData.state || '');
+  const [zipCode, setZipCode] = useState(formData.zipCode || '');
+  const [loading, setLoading] = useState(false);
+  const [location, setLocation] = useState<LocationData | null>(null);
+  const [mapLoading, setMapLoading] = useState(true);
 
-  const handleStateSelect = (selectedState: string) => {
-    setState(selectedState);
-    setModalVisible(false);
+  const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+    try {
+      // Primeiro, vamos buscar o CEP usando a API do ViaCEP
+      const response = await fetch(
+        `https://viacep.com.br/ws/${zipCode}/json/`
+      );
+      const data: ViaCepResponse = await response.json();
+
+      if (data.erro) {
+        Alert.alert('Erro', 'Não foi possível obter o endereço');
+        return;
+      }
+
+      // Preencher os campos com os dados do endereço
+      setStreet(data.logradouro);
+      setNeighborhood(data.bairro);
+      setCity(data.localidade);
+      setState(data.uf);
+      
+      if (data.complemento) {
+        setComplement(data.complemento);
+      }
+    } catch (error) {
+      console.error('Erro ao obter endereço:', error);
+      Alert.alert('Erro', 'Não foi possível obter o endereço');
+    }
   };
 
-  // Função para validar os campos da etapa
-  const validarEtapa = () => {
-    const erros = [];
-    
-    if (!street?.trim()) {
-      erros.push('A rua é obrigatória');
-    }
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permissão negada',
+            'Precisamos da sua localização para mostrar o mapa',
+            [{ text: 'OK' }]
+          );
+          setMapLoading(false);
+          return;
+        }
 
-    if (!number?.trim()) {
-      erros.push('O número é obrigatório');
-    }
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
 
-    if (!neighborhood?.trim()) {
-      erros.push('O bairro é obrigatório');
-    }
+        const newLocation = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        };
 
-    if (!city?.trim()) {
-      erros.push('A cidade é obrigatória');
-    }
+        setLocation(newLocation);
 
-    if (!state) {
-      erros.push('O estado é obrigatório');
-    }
+        // Buscar o CEP mais próximo usando a API do ViaCEP
+        const cepResponse = await fetch(
+          `https://viacep.com.br/ws/${zipCode}/json/`
+        );
+        const cepData = await cepResponse.json();
 
-    if (!zipCode?.trim()) {
-      erros.push('O CEP é obrigatório');
-    } else if (!/^\d{5}-?\d{3}$/.test(zipCode)) {
-      erros.push('O CEP deve estar no formato 00000-000');
-    }
+        if (!cepData.erro) {
+          setZipCode(cepData.cep);
+          await getAddressFromCoordinates(newLocation.latitude, newLocation.longitude);
+        }
+      } catch (error) {
+        Alert.alert(
+          'Erro',
+          'Não foi possível obter sua localização',
+          [{ text: 'OK' }]
+        );
+      } finally {
+        setMapLoading(false);
+      }
+    })();
+  }, []);
 
-    return {
-      valido: erros.length === 0,
-      erros
-    };
+  const fetchAddressByCep = async (cep: string) => {
+    try {
+      setLoading(true);
+      const cleanCep = cep.replace(/\D/g, '');
+      
+      if (cleanCep.length !== 8) {
+        return;
+      }
+
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data: ViaCepResponse = await response.json();
+
+      if (data.erro) {
+        Alert.alert('Erro', 'CEP não encontrado');
+        return;
+      }
+
+      setStreet(data.logradouro);
+      setNeighborhood(data.bairro);
+      setCity(data.localidade);
+      setState(data.uf);
+      
+      if (data.complemento) {
+        setComplement(data.complemento);
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível buscar o endereço');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleZipCodeChange = (text: string) => {
+    const cleanText = text.replace(/\D/g, '');
+    const formattedText = cleanText.replace(/^(\d{5})(\d)/, '$1-$2');
+    setZipCode(formattedText);
+
+    if (cleanText.length === 8) {
+      fetchAddressByCep(cleanText);
+    }
   };
 
   const handleProsseguir = () => {
-    const validacao = validarEtapa();
-    
-    if (!validacao.valido) {
-      Alert.alert(
-        'Campos Obrigatórios',
-        validacao.erros.join('\n'),
-        [{ text: 'OK' }]
-      );
+    if (!street || !number || !neighborhood || !city || !state || !zipCode) {
+      Alert.alert('Erro', 'Por favor, preencha todos os campos obrigatórios');
       return;
     }
 
     updateFormData({
+      ...formData,
       street,
       number,
       complement,
@@ -113,136 +217,229 @@ const Etapa2 = () => {
       city,
       state,
       zipCode,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
     });
-    navigation.navigate('SpaceNextStepScreen' as never);
+
+    // @ts-ignore
+    navigation.navigate('Etapa3');
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.progressContainer}>
-          <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
-        </View>
-        <Text style={styles.title}>Endereço do Espaço</Text>
-        <Text style={styles.subtitle}>Preencha o endereço completo do seu espaço</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.progressContainer}>
+        <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
+      </View>
 
-        <ScrollView style={styles.scrollView}>
-          <View style={styles.formContainer}>
-            <RegisterSpaceInput
-              label="Rua"
-              placeholder="Digite o nome da rua"
-              value={street}
-              onChangeText={setStreet}
-            />
-
-            <View style={styles.rowContainer}>
-              <View style={styles.halfContainer}>
-                <RegisterSpaceInput
-                  label="Número"
-                  placeholder="Número"
-                  value={number}
-                  onChangeText={setNumber}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={styles.halfContainer}>
-                <RegisterSpaceInput
-                  label="CEP"
-                  placeholder="00000-000"
-                  value={zipCode}
-                  onChangeText={setZipCode}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-
-            <View style={styles.rowContainer}>
-              <View style={styles.halfContainer}>
-                <RegisterSpaceInput
-                  label="Bairro"
-                  placeholder="Bairro"
-                  value={neighborhood}
-                  onChangeText={setNeighborhood}
-                />
-              </View>
-
-              <View style={styles.halfContainer}>
-                <RegisterSpaceInput
-                  label="Cidade"
-                  placeholder="Cidade"
-                  value={city}
-                  onChangeText={setCity}
-                />
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.typeButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <Text style={styles.typeButtonText}>
-                {state || 'Selecione o estado'}
-              </Text>
-            </TouchableOpacity>
-
-            <RegisterSpaceInput
-              label="Complemento"
-              placeholder="Complemento (opcional)"
-              value={complement}
-              onChangeText={setComplement}
-            />
-          </View>
-        </ScrollView>
-
-        <View style={styles.buttonRowFixed}>
-          <RegisterSpaceButton
-            title="Voltar"
-            onPress={() => navigation.goBack()}
-            variant="secondary"
-          />
-          <RegisterSpaceButton
-            title="Continuar"
-            onPress={handleProsseguir}
-            variant="primary"
-          />
-        </View>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          style={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingBottom: 100 }}
         >
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={styles.modalContainer}>
-              <TouchableWithoutFeedback>
-                <View style={styles.modalView}>
-                  <Text style={styles.modalTitle}>Selecione o estado</Text>
-                  <ScrollView style={styles.modalList}>
-                    {estados.map((estado) => (
-                      <TouchableOpacity
-                        key={estado.value}
-                        style={styles.modalItem}
-                        onPress={() => handleStateSelect(estado.label)}
-                      >
-                        <Text style={styles.modalItemText}>{estado.label}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
-                  <TouchableOpacity
-                    style={styles.modalCloseButton}
-                    onPress={() => setModalVisible(false)}
-                  >
-                    <Text style={styles.modalCloseButtonText}>Fechar</Text>
-                  </TouchableOpacity>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View>
+              <View style={styles.header}>
+                <Text style={styles.title}>Localização</Text>
+                <Text style={styles.description}>
+                  Informe o endereço completo do seu espaço
+                </Text>
+              </View>
+
+              <View style={styles.formContainer}>
+                <View style={styles.addressContainer}>
+                  <View style={styles.addressRow}>
+                    <MaterialIcons name="location-on" size={24} color={colors.blue} style={styles.addressIcon} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.addressLabel}>Endereço</Text>
+                      <Text style={styles.addressText}>
+                        {street ? `${street}, ${number}` : 'Endereço não informado'}
+                      </Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={styles.useCurrentLocationButton}
+                      onPress={async () => {
+                        try {
+                          setLoading(true);
+                          const { status } = await Location.requestForegroundPermissionsAsync();
+                          if (status !== 'granted') {
+                            Alert.alert('Permissão negada', 'Precisamos da sua localização para preencher o endereço');
+                            return;
+                          }
+
+                          const location = await Location.getCurrentPositionAsync({
+                            accuracy: Location.Accuracy.High,
+                          });
+
+                          const newLocation = {
+                            latitude: location.coords.latitude,
+                            longitude: location.coords.longitude,
+                          };
+
+                          setLocation(newLocation);
+
+                          // Buscar o endereço usando a API de geocodificação reversa
+                          const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLocation.latitude}&lon=${newLocation.longitude}`
+                          );
+                          const data = await response.json();
+
+                          if (data.address) {
+                            setStreet(data.address.road || data.address.pedestrian || '');
+                            setNumber(data.address.house_number || '');
+                            setNeighborhood(data.address.suburb || data.address.neighbourhood || '');
+                            setCity(data.address.city || data.address.town || '');
+                            setState(data.address.state || '');
+                            setZipCode(data.address.postcode || '');
+                          }
+                        } catch (error) {
+                          Alert.alert('Erro', 'Não foi possível obter seu endereço atual');
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="my-location" size={24} color={colors.blue} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </TouchableWithoutFeedback>
+
+                <View style={styles.mapContainer}>
+                  {mapLoading ? (
+                    <View style={styles.mapLoadingContainer}>
+                      <ActivityIndicator size="large" color={colors.blue} />
+                    </View>
+                  ) : (
+                    <>
+                      <MapView
+                        provider={PROVIDER_GOOGLE}
+                        style={styles.map}
+                        initialRegion={location ? {
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                          latitudeDelta: 0.005,
+                          longitudeDelta: 0.005,
+                        } : undefined}
+                      >
+                        {location && (
+                          <Marker
+                            coordinate={{
+                              latitude: location.latitude,
+                              longitude: location.longitude,
+                            }}
+                          />
+                        )}
+                      </MapView>
+                      <TouchableOpacity 
+                        style={styles.currentLocationButton}
+                        onPress={async () => {
+                          try {
+                            setMapLoading(true);
+                            const location = await Location.getCurrentPositionAsync({
+                              accuracy: Location.Accuracy.High,
+                            });
+                            const newLocation = {
+                              latitude: location.coords.latitude,
+                              longitude: location.coords.longitude,
+                            };
+                            setLocation(newLocation);
+                            // Aqui você pode adicionar a lógica para buscar o CEP mais próximo
+                            // e preencher o endereço
+                          } catch (error) {
+                            Alert.alert('Erro', 'Não foi possível obter sua localização');
+                          } finally {
+                            setMapLoading(false);
+                          }
+                        }}
+                      >
+                        <MaterialIcons name="my-location" size={24} color={colors.white} />
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="CEP"
+                    placeholder="Digite o CEP"
+                    value={zipCode}
+                    onChangeText={handleZipCodeChange}
+                    keyboardType="numeric"
+                    maxLength={9}
+                    rightIcon={loading ? <ActivityIndicator color={colors.blue} /> : undefined}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Endereço"
+                    placeholder="Digite o endereço"
+                    value={street}
+                    onChangeText={setStreet}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Número"
+                    placeholder="Digite o número"
+                    value={number}
+                    onChangeText={setNumber}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Complemento"
+                    placeholder="Digite o complemento (opcional)"
+                    value={complement}
+                    onChangeText={setComplement}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Bairro"
+                    placeholder="Digite o bairro"
+                    value={neighborhood}
+                    onChangeText={setNeighborhood}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Cidade"
+                    placeholder="Digite a cidade"
+                    value={city}
+                    onChangeText={setCity}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <RegisterSpaceInput
+                    label="Estado"
+                    placeholder="Digite o estado"
+                    value={state}
+                    onChangeText={setState}
+                  />
+                </View>
+              </View>
             </View>
           </TouchableWithoutFeedback>
-        </Modal>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+        </ScrollView>
+
+        <NavigationButtons
+          onBack={() => navigation.goBack()}
+          onNext={handleProsseguir}
+          disabled={!street || !number || !neighborhood || !city || !state || !zipCode}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

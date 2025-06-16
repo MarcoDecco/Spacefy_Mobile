@@ -1,414 +1,344 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, TextInput, Alert, SafeAreaView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  SafeAreaView,
+  Platform,
+  Modal,
+  TextInput,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { NavigationProps } from '../../../navigation/types';
-import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
-import { Ionicons } from '@expo/vector-icons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/types';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa4Styles';
 import { colors } from '../../../styles/globalStyles/colors';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
+import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { Ionicons } from '@expo/vector-icons';
 
-// Função para formatar moeda
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value);
-};
-
-// Array com os dias da semana
-const DIAS_SEMANA = [
-    { id: 'domingo', label: 'Domingo', order: 0 },
-    { id: 'segunda', label: 'Segunda-feira', order: 1 },
-    { id: 'terca', label: 'Terça-feira', order: 2 },
-    { id: 'quarta', label: 'Quarta-feira', order: 3 },
-    { id: 'quinta', label: 'Quinta-feira', order: 4 },
-    { id: 'sexta', label: 'Sexta-feira', order: 5 },
-    { id: 'sabado', label: 'Sábado', order: 6 }
+const weekDays = [
+  { key: 'mon', label: 'Segunda' },
+  { key: 'tue', label: 'Terça' },
+  { key: 'wed', label: 'Quarta' },
+  { key: 'thu', label: 'Quinta' },
+  { key: 'fri', label: 'Sexta' },
+  { key: 'sat', label: 'Sábado' },
+  { key: 'sun', label: 'Domingo' },
 ];
 
-interface CampoHorarioProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
+type Etapa4ScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'SpaceAvailabilityScreen'>;
+
+interface DaySlot {
+  enabled: boolean;
+  slots: { start: string; end: string }[];
 }
 
-// Componente para campo de horário
-const CampoHorario: React.FC<CampoHorarioProps> = ({ label, value, onChange }) => {
-    const handleTimeChange = (text: string) => {
-        // Remove caracteres não numéricos
-        const numbers = text.replace(/[^\d]/g, '');
-        
-        // Formata o horário como HH:mm
-        let formatted = numbers;
-        if (numbers.length > 2) {
-            formatted = numbers.slice(0, 2) + ':' + numbers.slice(2, 4);
-        }
-        
-        // Valida o horário
-        if (formatted.length === 5) {
-            const [hours, minutes] = formatted.split(':').map(Number);
-            if (hours > 23 || minutes > 59) {
-                return;
-            }
-        }
-        
-        onChange(formatted);
-    };
-
-    return (
-        <View style={styles.horarioContainer}>
-            <Text style={styles.horarioLabel}>{label}</Text>
-            <View style={styles.pickerContainer}>
-                <TextInput
-                    style={styles.picker}
-                    value={value}
-                    onChangeText={handleTimeChange}
-                    placeholder="00:00"
-                    keyboardType="numeric"
-                    maxLength={5}
-                />
-            </View>
-        </View>
-    );
-};
-
-interface CampoPrecoProps {
-    value: string;
-    onChange: (value: string) => void;
+function pad(num: number) {
+  return num < 10 ? `0${num}` : `${num}`;
 }
 
-// Componente para campo de preço
-const CampoPreco: React.FC<CampoPrecoProps> = ({ value, onChange }) => {
-    const formatarPreco = (valor: number): string => {
-        if (!valor) return 'R$ 0,00';
-        return formatCurrency(valor);
-    };
+function splitTime(time: string) {
+  const [h, m] = time.split(':').map(Number);
+  return { hour: h, minute: m };
+}
 
-    const calcularValorLiquido = (valor: number): number => {
-        if (!valor) return 0;
-        return valor * 0.90; // 90% do valor total (100% - 10% de comissão)
-    };
+export default function Etapa4() {
+  const navigation = useNavigation<Etapa4ScreenNavigationProp>();
+  const { formData, updateFormData } = useSpaceRegister();
+  const [pricePerHour, setPricePerHour] = useState(formData.price_per_hour || '');
+  const [days, setDays] = useState<Record<string, DaySlot>>(() => {
+    const initial: Record<string, DaySlot> = {};
+    weekDays.forEach(day => {
+      initial[day.key] = { enabled: false, slots: [{ start: '08:00', end: '18:00' }] };
+    });
+    return initial;
+  });
 
-    const handlePrecoChange = (text: string) => {
-        const valor = text.replace(/[^\d]/g, '');
-        const valorNumerico = valor ? parseFloat(valor) / 100 : 0;
-        onChange(valorNumerico.toString());
-    };
+  // Modal customizado para editar horário
+  const [editModal, setEditModal] = useState<{
+    visible: boolean;
+    dayKey: string;
+    slotIdx: number;
+    field: 'start' | 'end';
+    hour: number;
+    minute: number;
+  }>({ visible: false, dayKey: '', slotIdx: 0, field: 'start', hour: 8, minute: 0 });
 
-    return (
+  // Checkbox para ativar/desativar o dia
+  const toggleDay = (key: string) => {
+    setDays(prev => ({
+      ...prev,
+      [key]: { ...prev[key], enabled: !prev[key].enabled },
+    }));
+  };
+
+  // Atualiza horário de um slot
+  const updateSlot = (dayKey: string, slotIdx: number, field: 'start' | 'end', value: string) => {
+    setDays(prev => {
+      const newSlots = prev[dayKey].slots.map((slot, idx) =>
+        idx === slotIdx ? { ...slot, [field]: value } : slot
+      );
+      return {
+        ...prev,
+        [dayKey]: { ...prev[dayKey], slots: newSlots },
+      };
+    });
+  };
+
+  // Adiciona novo slot ao dia
+  const addSlot = (dayKey: string) => {
+    setDays(prev => ({
+      ...prev,
+      [dayKey]: {
+        ...prev[dayKey],
+        slots: [...prev[dayKey].slots, { start: '08:00', end: '18:00' }],
+      },
+    }));
+  };
+
+  // Remove slot do dia
+  const removeSlot = (dayKey: string, slotIdx: number) => {
+    setDays(prev => {
+      const newSlots = prev[dayKey].slots.filter((_, idx) => idx !== slotIdx);
+      return {
+        ...prev,
+        [dayKey]: { ...prev[dayKey], slots: newSlots.length ? newSlots : [{ start: '08:00', end: '18:00' }] },
+      };
+    });
+  };
+
+  // Replicar horários do primeiro dia ativo para os outros
+  const replicateFirstDay = () => {
+    const firstActive = weekDays.find(day => days[day.key].enabled);
+    if (!firstActive) {
+      Alert.alert('Erro', 'Selecione pelo menos um dia da semana.');
+      return;
+    }
+
+    const slotsToReplicate = [...days[firstActive.key].slots];
+    
+    setDays(prev => {
+      const newDays = { ...prev };
+      weekDays.forEach(day => {
+        if (day.key !== firstActive.key && prev[day.key].enabled) {
+          newDays[day.key] = {
+            ...prev[day.key],
+            slots: slotsToReplicate.map(slot => ({
+              start: slot.start,
+              end: slot.end
+            }))
+          };
+        }
+      });
+      return newDays;
+    });
+
+    Alert.alert('Sucesso', 'Horários replicados com sucesso!');
+  };
+
+  // Abrir modal customizado
+  const openEditModal = (dayKey: string, slotIdx: number, field: 'start' | 'end', value: string) => {
+    const { hour, minute } = splitTime(value);
+    setEditModal({ visible: true, dayKey, slotIdx, field, hour, minute });
+  };
+
+  // Salvar horário do modal
+  const saveEditModal = () => {
+    const { dayKey, slotIdx, field, hour, minute } = editModal;
+    updateSlot(dayKey, slotIdx, field, `${pad(hour)}:${pad(minute)}`);
+    setEditModal({ ...editModal, visible: false });
+  };
+
+  const handleProsseguir = () => {
+    const selected = weekDays.filter(day => days[day.key].enabled);
+    if (selected.length === 0) {
+      Alert.alert('Erro', 'Selecione pelo menos um dia da semana.');
+      return;
+    }
+    if (!pricePerHour || isNaN(Number(pricePerHour)) || Number(pricePerHour) <= 0) {
+      Alert.alert('Erro', 'Digite um preço por hora válido.');
+      return;
+    }
+    for (const day of selected) {
+      for (const slot of days[day.key].slots) {
+        if (!slot.start || !slot.end) {
+          Alert.alert('Erro', 'Preencha todos os horários.');
+          return;
+        }
+      }
+    }
+
+    // Converter o formato dos dados
+    const weekly_days = selected.map(day => ({
+      day: day.key,
+      time_ranges: days[day.key].slots.map(slot => ({
+        open: slot.start,
+        close: slot.end
+      }))
+    }));
+
+    updateFormData({
+      ...formData,
+      weekly_days,
+      price_per_hour: pricePerHour,
+    });
+    navigation.navigate('Etapa5');
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.progressContainer}>
+        <ProgressBar progress={0.5} currentStep={4} totalSteps={8} />
+      </View>
+      <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Disponibilidade do espaço</Text>
+        <Text style={styles.subtitle}>
+          Selecione os dias e horários em que seu espaço estará disponível para reserva.
+        </Text>
+
+        {/* Campo de preço por hora */}
         <View style={styles.priceContainer}>
-            <Text style={styles.priceLabel}>Valor por Hora</Text>
-            <TextInput
-                style={styles.priceInput}
-                value={formatarPreco(Number(value))}
-                onChangeText={handlePrecoChange}
-                placeholder="Digite o valor por hora"
-                keyboardType="numeric"
-            />
-            <Text style={styles.precoInfo}>
-                Após a comissão do site (10%), você receberá: {' '}
-                <Text style={styles.precoLiquido}>
-                    {formatarPreco(calcularValorLiquido(Number(value)))}
-                </Text> por hora
-            </Text>
+          <Text style={styles.priceLabel}>Preço por hora (R$)</Text>
+          <TextInput
+            style={styles.priceInput}
+            value={pricePerHour}
+            onChangeText={setPricePerHour}
+            keyboardType="numeric"
+            placeholder="0,00"
+            placeholderTextColor={colors.gray}
+          />
         </View>
-    );
-};
 
-interface CheckboxDiaProps {
-    dia: {
-        id: string;
-        label: string;
-        order: number;
-    };
-    checked: boolean;
-    onChange: (id: string, checked: boolean) => void;
-}
-
-// Componente para checkbox de dia da semana
-const CheckboxDia: React.FC<CheckboxDiaProps> = ({ dia, checked, onChange }) => (
-    <TouchableOpacity
-        style={styles.checkboxContainer}
-        onPress={() => onChange(dia.id, !checked)}
-    >
-        <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-            {checked && <Ionicons name="checkmark" size={16} color="#fff" />}
-        </View>
-        <Text style={styles.checkboxLabel}>{dia.label}</Text>
-    </TouchableOpacity>
-);
-
-interface HorariosDiaProps {
-    dia: {
-        id: string;
-        label: string;
-        order: number;
-    };
-    timeRanges: Array<{
-        open: string;
-        close: string;
-    }>;
-    onAddTimeRange: (dayId: string) => void;
-    onRemoveTimeRange: (dayId: string, index: number) => void;
-    onUpdateTimeRange: (dayId: string, index: number, field: string, value: string) => void;
-}
-
-// Componente para horários de um dia específico
-const HorariosDia: React.FC<HorariosDiaProps> = ({ dia, timeRanges, onAddTimeRange, onRemoveTimeRange, onUpdateTimeRange }) => {
-    const handleTimeUpdate = (index: number, field: string, value: string) => {
-        const currentRange = timeRanges[index];
-        const newRange = { ...currentRange, [field]: value };
-
-        if (newRange.open && newRange.close) {
-            const openTime = new Date(`2000-01-01T${newRange.open}`);
-            const closeTime = new Date(`2000-01-01T${newRange.close}`);
-            
-            if (closeTime <= openTime) {
-                Alert.alert('Erro', 'O horário de fechamento deve ser posterior ao de abertura');
-                return;
-            }
-        }
-
-        onUpdateTimeRange(dia.id, index, field, value);
-    };
-
-    return (
-        <View style={styles.horariosDiaContainer}>
-            <Text style={styles.horariosDiaTitle}>{dia.label}</Text>
-            {timeRanges.map((range, index) => (
-                <View key={index} style={styles.horarioRangeContainer}>
-                    <View style={styles.horarioFieldsContainer}>
-                        <CampoHorario
-                            label="Abertura"
-                            value={range.open}
-                            onChange={(value) => handleTimeUpdate(index, 'open', value)}
-                        />
-                        <CampoHorario
-                            label="Fechamento"
-                            value={range.close}
-                            onChange={(value) => handleTimeUpdate(index, 'close', value)}
-                        />
-                    </View>
+        <View style={styles.availabilityContainer}>
+          {weekDays.map(day => (
+            <View key={day.key} style={{ marginBottom: 16 }}>
+              <TouchableOpacity
+                style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}
+                onPress={() => toggleDay(day.key)}
+              >
+                <View style={{
+                  width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: days[day.key].enabled ? colors.blue : colors.gray, backgroundColor: days[day.key].enabled ? colors.blue : 'transparent', marginRight: 12, justifyContent: 'center', alignItems: 'center',
+                }}>
+                  {days[day.key].enabled && <Ionicons name="checkmark" size={18} color={colors.white} />}
+                </View>
+                <Text style={{ fontSize: 16, color: colors.black, fontWeight: '500' }}>{day.label}</Text>
+              </TouchableOpacity>
+              {days[day.key].enabled && days[day.key].slots.map((slot, idx) => (
+                <View key={idx} style={styles.timeSlotRow}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <Text style={{ fontSize: 14, color: colors.dark_gray, marginRight: 8 }}>Início:</Text>
                     <TouchableOpacity
-                        style={styles.removeButton}
-                        onPress={() => onRemoveTimeRange(dia.id, index)}
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.light_gray,
+                        borderRadius: 6,
+                        paddingHorizontal: 12,
+                        paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+                        marginRight: 8,
+                        backgroundColor: colors.white,
+                      }}
+                      onPress={() => openEditModal(day.key, idx, 'start', slot.start)}
                     >
-                        <Ionicons name="trash-outline" size={24} color={colors.error} />
+                      <Text style={{ fontSize: 16, color: colors.black }}>{slot.start}</Text>
                     </TouchableOpacity>
+                    <Text style={{ fontSize: 14, color: colors.dark_gray, marginRight: 8 }}>Fim:</Text>
+                    <TouchableOpacity
+                      style={{
+                        borderWidth: 1,
+                        borderColor: colors.light_gray,
+                        borderRadius: 6,
+                        paddingHorizontal: 12,
+                        paddingVertical: Platform.OS === 'ios' ? 8 : 4,
+                        backgroundColor: colors.white,
+                      }}
+                      onPress={() => openEditModal(day.key, idx, 'end', slot.end)}
+                    >
+                      <Text style={{ fontSize: 16, color: colors.black }}>{slot.end}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.removeTimeSlotButton}
+                    onPress={() => removeSlot(day.key, idx)}
+                  >
+                    <Ionicons name="close-circle" size={22} color={colors.error} />
+                  </TouchableOpacity>
                 </View>
-            ))}
-            <TouchableOpacity
-                style={styles.addButton}
-                onPress={() => onAddTimeRange(dia.id)}
-            >
-                <Ionicons name="add-circle-outline" size={20} color={colors.blue} />
-                <Text style={styles.addButtonText}>Adicionar Horário</Text>
-            </TouchableOpacity>
+              ))}
+              {days[day.key].enabled && (
+                <TouchableOpacity style={styles.addTimeSlotButton} onPress={() => addSlot(day.key)}>
+                  <Ionicons name="add-circle" size={20} color={colors.blue} />
+                  <Text style={styles.addTimeSlotText}>Adicionar horário</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          ))}
+          <TouchableOpacity style={[styles.addTimeSlotButton, { marginTop: 8 }]} onPress={replicateFirstDay}>
+            <Ionicons name="copy" size={20} color={colors.blue} />
+            <Text style={styles.addTimeSlotText}>Replicar horários do primeiro dia</Text>
+          </TouchableOpacity>
         </View>
-    );
-};
-
-const Etapa4 = () => {
-    const navigation = useNavigation<NavigationProps>();
-    const { formData, updateFormData } = useSpaceRegister();
-    const [weekly_days, setWeeklyDays] = useState<string[]>(formData.weekly_days?.map(day => day.day) || []);
-    const [price_per_hour, setPricePerHour] = useState<string>(formData.price_per_hour || '');
-    const [timeRanges, setTimeRanges] = useState<Record<string, Array<{ open: string; close: string }>>>({});
-
-    const handleDayToggle = (day: string) => {
-        setWeeklyDays(prev => {
-            if (prev.includes(day)) {
-                const newSelectedDays = prev.filter(d => d !== day);
-                // Remover os horários do dia que foi desmarcado
-                setTimeRanges(prev => {
-                    const newRanges = { ...prev };
-                    delete newRanges[day];
-                    return newRanges;
-                });
-                return newSelectedDays;
-            } else {
-                return [...prev, day];
-            }
-        });
-    };
-
-    const handleAddTimeRange = (dayId: string) => {
-        setTimeRanges(prev => ({
-            ...prev,
-            [dayId]: [...(prev[dayId] || []), { open: '', close: '' }]
-        }));
-    };
-
-    const handleRemoveTimeRange = (dayId: string, index: number) => {
-        setTimeRanges(prev => ({
-            ...prev,
-            [dayId]: prev[dayId].filter((_, i) => i !== index)
-        }));
-    };
-
-    const handleUpdateTimeRange = (dayId: string, index: number, field: string, value: string) => {
-        setTimeRanges(prev => ({
-            ...prev,
-            [dayId]: prev[dayId].map((range, i) => 
-                i === index ? { ...range, [field]: value } : range
-            )
-        }));
-    };
-
-    const handleReplicateTimeRanges = () => {
-        if (weekly_days.length < 2) return;
-
-        // Pegar os horários do primeiro dia selecionado
-        const firstDay = weekly_days[0];
-        const firstDayRanges = timeRanges[firstDay] || [];
-
-        // Replicar para todos os outros dias
-        const newTimeRanges = { ...timeRanges };
-        weekly_days.slice(1).forEach(dayId => {
-            newTimeRanges[dayId] = [...firstDayRanges];
-        });
-
-        setTimeRanges(newTimeRanges);
-    };
-
-    // Função para validar os campos da etapa
-    const validarEtapa = () => {
-        const erros = [];
-        
-        if (Number(price_per_hour) <= 0) {
-            erros.push('O valor por hora deve ser maior que zero');
-        }
-
-        if (weekly_days.length === 0) {
-            erros.push('Selecione pelo menos um dia da semana');
-        }
-
-        // Validar horários para cada dia selecionado
-        weekly_days.forEach((dayId) => {
-            const dayRanges = timeRanges[dayId] || [];
-            if (dayRanges.length === 0) {
-                erros.push(`Adicione pelo menos um horário para ${DIAS_SEMANA.find(d => d.id === dayId)?.label}`);
-            } else {
-                dayRanges.forEach((range: { open: string; close: string }, index) => {
-                    if (!range.open || !range.close) {
-                        erros.push(`Preencha os horários de abertura e fechamento para ${DIAS_SEMANA.find(d => d.id === dayId)?.label} (horário ${index + 1})`);
-                    }
-                });
-            }
-        });
-
-        return {
-            valido: erros.length === 0,
-            erros
-        };
-    };
-
-    const handleProsseguir = () => {
-        const validacao = validarEtapa();
-        
-        if (!validacao.valido) {
-            Alert.alert(
-                'Campos Obrigatórios',
-                validacao.erros.join('\n'),
-                [{ text: 'OK' }]
-            );
-            return;
-        }
-
-        // Formatar os dados para o formato esperado pela API
-        const formattedWeeklyDays = weekly_days.map(dayId => ({
-            day: dayId,
-            time_ranges: timeRanges[dayId] || []
-        }));
-
-        updateFormData({
-            weekly_days: formattedWeeklyDays,
-            price_per_hour,
-        });
-        navigation.navigate('Etapa5' as never);
-    };
-
-    return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.progressContainer}>
-                    <ProgressBar progress={0.5} currentStep={4} totalSteps={8} />
+      </ScrollView>
+      <NavigationButtons
+        onBack={() => navigation.goBack()}
+        onNext={handleProsseguir}
+        disabled={weekDays.every(day => !days[day.key].enabled)}
+      />
+      <Modal
+        visible={editModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditModal({ ...editModal, visible: false })}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ backgroundColor: colors.white, borderRadius: 16, padding: 24, width: 280, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>Editar horário</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
+              <View style={{ alignItems: 'center', marginRight: 16 }}>
+                <Text style={{ fontSize: 14, color: colors.dark_gray }}>Hora</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, hour: Math.max(0, m.hour - 1) }))}>
+                    <Ionicons name="remove-circle-outline" size={28} color={colors.blue} />
+                  </TouchableOpacity>
+                  <Text style={{ fontSize: 24, marginHorizontal: 8, minWidth: 32, textAlign: 'center' }}>{pad(editModal.hour)}</Text>
+                  <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, hour: Math.min(23, m.hour + 1) }))}>
+                    <Ionicons name="add-circle-outline" size={28} color={colors.blue} />
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.title}>Disponibilidade e Preços</Text>
-                <Text style={styles.subtitle}>
-                    Defina os horários de funcionamento e o valor por hora do seu espaço
-                </Text>
-
-                <ScrollView showsVerticalScrollIndicator={false}>
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Valor por Hora</Text>
-                        <CampoPreco value={price_per_hour} onChange={setPricePerHour} />
-                    </View>
-
-                    <View style={styles.sectionContainer}>
-                        <Text style={styles.sectionTitle}>Dias de Funcionamento</Text>
-                        <View style={styles.daysContainer}>
-                            <View style={styles.checkboxGrid}>
-                                {DIAS_SEMANA.map(dia => (
-                                    <CheckboxDia
-                                        key={dia.id}
-                                        dia={dia}
-                                        checked={weekly_days.includes(dia.id)}
-                                        onChange={handleDayToggle}
-                                    />
-                                ))}
-                            </View>
-                        </View>
-                    </View>
-
-                    {weekly_days.length > 0 && (
-                        <View style={styles.sectionContainer}>
-                            <Text style={styles.sectionTitle}>Horários de Funcionamento</Text>
-                            {weekly_days.map(dayId => {
-                                const dia = DIAS_SEMANA.find(d => d.id === dayId);
-                                if (!dia) return null;
-                                return (
-                                    <HorariosDia
-                                        key={dayId}
-                                        dia={dia}
-                                        timeRanges={timeRanges[dayId] || []}
-                                        onAddTimeRange={handleAddTimeRange}
-                                        onRemoveTimeRange={handleRemoveTimeRange}
-                                        onUpdateTimeRange={handleUpdateTimeRange}
-                                    />
-                                );
-                            })}
-                            {weekly_days.length > 1 && (
-                                <TouchableOpacity
-                                    style={styles.replicateButton}
-                                    onPress={handleReplicateTimeRanges}
-                                >
-                                    <Text style={styles.replicateButtonText}>
-                                        Replicar horários para todos os dias selecionados
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    )}
-                </ScrollView>
-
-                <View style={styles.buttonRowFixed}>
-                    <RegisterSpaceButton
-                        title="Voltar"
-                        onPress={() => navigation.goBack()}
-                        variant="secondary"
-                    />
-                    <RegisterSpaceButton
-                        title="Continuar"
-                        onPress={handleProsseguir}
-                        variant="primary"
-                    />
+              </View>
+              <View style={{ alignItems: 'center' }}>
+                <Text style={{ fontSize: 14, color: colors.dark_gray }}>Minuto</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, minute: Math.max(0, m.minute - 5) }))}>
+                    <Ionicons name="remove-circle-outline" size={28} color={colors.blue} />
+                  </TouchableOpacity>
+                  <Text style={{ fontSize: 24, marginHorizontal: 8, minWidth: 32, textAlign: 'center' }}>{pad(editModal.minute)}</Text>
+                  <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, minute: Math.min(55, m.minute + 5) }))}>
+                    <Ionicons name="add-circle-outline" size={28} color={colors.blue} />
+                  </TouchableOpacity>
                 </View>
-            </SafeAreaView>
-        </TouchableWithoutFeedback>
-    );
-};
-
-export default Etapa4; 
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: colors.light_gray, padding: 12, borderRadius: 8, alignItems: 'center', marginRight: 8 }}
+                onPress={() => setEditModal({ ...editModal, visible: false })}
+              >
+                <Text style={{ color: colors.dark_gray, fontWeight: '600' }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, backgroundColor: colors.blue, padding: 12, borderRadius: 8, alignItems: 'center' }}
+                onPress={saveEditModal}
+              >
+                <Text style={{ color: colors.white, fontWeight: '600' }}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+} 

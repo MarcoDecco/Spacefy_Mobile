@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, TouchableWithoutFeedback, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TouchableWithoutFeedback, SafeAreaView, Alert, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa8Styles';
 import { ProgressBar } from '../../../components/ProgressBar';
@@ -8,6 +8,29 @@ import { Ionicons } from '@expo/vector-icons';
 import api from '../../../services/api';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
+import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { Keyboard } from 'react-native';
+
+const MAPEAMENTO_REGRAS = {
+  'nao_fumar': 'Não é permitido fumar',
+  'nao_animais': 'Não é permitido animais',
+  'nao_festas': 'Não é permitido festas',
+  'nao_barulho': 'Não é permitido barulho após 22h',
+  'reserva_antecipada': 'É necessário reserva antecipada',
+  'deposito': 'É necessário depósito de segurança',
+  'contrato': 'É necessário contrato',
+  'seguro': 'É necessário seguro',
+};
+
+const MAPEAMENTO_DIAS = {
+  'mon': 'Segunda-feira',
+  'tue': 'Terça-feira',
+  'wed': 'Quarta-feira',
+  'thu': 'Quinta-feira',
+  'fri': 'Sexta-feira',
+  'sat': 'Sábado',
+  'sun': 'Domingo',
+};
 
 // Componente para seções de revisão
 const RevisaoSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -65,8 +88,7 @@ const Etapa8 = () => {
       { campo: 'owner_name', label: 'Nome do Proprietário' },
       { campo: 'owner_email', label: 'Email do Proprietário' },
       { campo: 'owner_phone', label: 'Telefone do Proprietário' },
-      { campo: 'document_photo', label: 'Documento do Proprietário' },
-      { campo: 'space_document_photo', label: 'Documento do Espaço' }
+      { campo: 'document_number', label: 'CPF/CNPJ do Proprietário' }
     ];
 
     camposObrigatorios.forEach(({ campo, label }) => {
@@ -104,142 +126,143 @@ const Etapa8 = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
-        <ProgressBar progress={1} currentStep={8} totalSteps={8} />
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.progressContainer}>
+          <ProgressBar progress={1} currentStep={8} totalSteps={8} />
+        </View>
 
-      <Text style={styles.title}>Revisar e Confirmar</Text>
-      <Text style={styles.subtitle}>
-        Revise todas as informações antes de finalizar o cadastro do seu espaço
-      </Text>
+        <ScrollView 
+          style={styles.formContainer} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 120 }}
+        >
+          <Text style={styles.title}>Revisar e Confirmar</Text>
+          <Text style={styles.subtitle}>
+            Revise todas as informações antes de finalizar o cadastro do seu espaço
+          </Text>
 
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
-        contentContainerStyle={{ paddingBottom: 120 }}
-        style={{ flex: 1 }}
-      >
-        <RevisaoSection title="Informações Básicas">
-          <ItemRevisao label="Nome do Espaço" value={formData.space_name} />
-          <ItemRevisao label="Tipo do Espaço" value={formData.space_type} />
-          <ItemRevisao label="Capacidade" value={formData.max_people} />
-          <ItemRevisaoLargo label="Descrição" value={formData.space_description} />
-        </RevisaoSection>
+          <RevisaoSection title="Informações Básicas">
+            <ItemRevisao label="Nome do Espaço" value={formData.space_name} />
+            <ItemRevisao label="Tipo do Espaço" value={formData.space_type} />
+            <ItemRevisao label="Capacidade" value={formData.max_people} />
+            <ItemRevisaoLargo label="Descrição" value={formData.space_description} />
+          </RevisaoSection>
 
-        <RevisaoSection title="Endereço">
-          <ItemRevisao label="Rua" value={formData.street} />
-          <ItemRevisao label="Número" value={formData.number} />
-          {formData.complement && (
-            <ItemRevisao label="Complemento" value={formData.complement} />
-          )}
-          <ItemRevisao label="Bairro" value={formData.neighborhood} />
-          <ItemRevisao label="Cidade" value={formData.city} />
-          <ItemRevisao label="Estado" value={formData.state} />
-          <ItemRevisao label="CEP" value={formData.zipCode} />
-        </RevisaoSection>
+          <RevisaoSection title="Endereço">
+            <ItemRevisao label="Rua" value={formData.street} />
+            <ItemRevisao label="Número" value={formData.number} />
+            {formData.complement && (
+              <ItemRevisao label="Complemento" value={formData.complement} />
+            )}
+            <ItemRevisao label="Bairro" value={formData.neighborhood} />
+            <ItemRevisao label="Cidade" value={formData.city} />
+            <ItemRevisao label="Estado" value={formData.state} />
+            <ItemRevisao label="CEP" value={formData.zipCode} />
+          </RevisaoSection>
 
-        <RevisaoSection title="Disponibilidade">
-          {formData.weekly_days.map((day, index) => (
-            <View key={index} style={styles.itemContainer}>
-              <Text style={styles.itemLabel}>{day.day}</Text>
-              {day.time_ranges.map((range, rangeIndex) => (
-                <Text key={rangeIndex} style={styles.itemValue}>
-                  {range.open} - {range.close}
-                </Text>
-              ))}
-            </View>
-          ))}
-        </RevisaoSection>
-
-        <RevisaoSection title="Preços">
-          <ItemRevisao label="Preço por Hora" value={formData.price_per_hour} />
-        </RevisaoSection>
-
-        <RevisaoSection title="Regras">
-          {formData.space_rules.length > 0 ? (
-            formData.space_rules.map((regra, index) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.itemValue}>• {regra}</Text>
-              </View>
-            ))
-          ) : (
-            <Text style={styles.noAmenitiesText}>Nenhuma regra informada</Text>
-          )}
-        </RevisaoSection>
-
-        <RevisaoSection title="Comodidades">
-          <View style={styles.amenitiesContainer}>
-            {formData.space_amenities.length > 0 ? (
-              formData.space_amenities.map((comodidade, index) => (
-                <View key={index} style={styles.amenityItem}>
-                  <Ionicons name="checkmark-circle" size={16} color={colors.blue} />
-                  <Text style={styles.amenityText}>{comodidade}</Text>
+          <RevisaoSection title="Disponibilidade">
+            {formData.weekly_days && formData.weekly_days.length > 0 ? (
+              formData.weekly_days.map((day, index) => (
+                <View key={index} style={styles.itemContainer}>
+                  <Text style={styles.itemLabel}>{MAPEAMENTO_DIAS[day.day as keyof typeof MAPEAMENTO_DIAS]}</Text>
+                  <View style={{ flex: 1 }}>
+                    {day.time_ranges.map((range, rangeIndex) => (
+                      <Text key={rangeIndex} style={styles.itemValue}>
+                        {range.open} - {range.close}
+                      </Text>
+                    ))}
+                  </View>
                 </View>
               ))
             ) : (
-              <Text style={styles.noAmenitiesText}>Nenhuma comodidade informada</Text>
+              <Text style={styles.noAmenitiesText}>Nenhum horário informado</Text>
             )}
-          </View>
-        </RevisaoSection>
+          </RevisaoSection>
 
-        <RevisaoSection title="Informações do Proprietário">
-          <ItemRevisao label="Nome" value={formData.owner_name} />
-          <ItemRevisao label="Email" value={formData.owner_email} />
-          <ItemRevisao label="Telefone" value={formData.owner_phone} />
-          <ItemRevisao label="CPF/CNPJ" value={formData.document_number} />
-        </RevisaoSection>
+          <RevisaoSection title="Preços">
+            <ItemRevisao 
+              label="Preço por Hora" 
+              value={`R$ ${Number(formData.price_per_hour).toFixed(2).replace('.', ',')}`} 
+            />
+          </RevisaoSection>
 
-        <RevisaoSection title="Documentos">
-          <ItemRevisao 
-            label="Documento do Proprietário" 
-            value={formData.document_photo ? 'Documento anexado' : 'Não anexado'} 
-          />
-          <ItemRevisao 
-            label="Documento do Espaço" 
-            value={formData.space_document_photo ? 'Documento anexado' : 'Não anexado'} 
-          />
-        </RevisaoSection>
+          <RevisaoSection title="Regras">
+            {formData.space_rules.length > 0 ? (
+              formData.space_rules.map((regra, index) => (
+                <View key={index} style={styles.itemContainer}>
+                  <Text style={styles.itemValue}>• {MAPEAMENTO_REGRAS[regra as keyof typeof MAPEAMENTO_REGRAS] || regra}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.noAmenitiesText}>Nenhuma regra informada</Text>
+            )}
+          </RevisaoSection>
 
-        <RevisaoSection title="Termo de Uso">
+          <RevisaoSection title="Comodidades">
+            <View style={styles.amenitiesContainer}>
+              {formData.space_amenities.length > 0 ? (
+                formData.space_amenities.map((comodidade, index) => (
+                  <View key={index} style={styles.amenityItem}>
+                    <Ionicons name="checkmark-circle" size={16} color={colors.blue} />
+                    <Text style={styles.amenityText}>{comodidade}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noAmenitiesText}>Nenhuma comodidade informada</Text>
+              )}
+            </View>
+          </RevisaoSection>
+
+          <RevisaoSection title="Informações do Proprietário">
+            <ItemRevisao label="Nome" value={formData.owner_name} />
+            <ItemRevisao label="Email" value={formData.owner_email} />
+            <ItemRevisao label="Telefone" value={formData.owner_phone} />
+            <ItemRevisao label="CPF/CNPJ" value={formData.document_number} />
+          </RevisaoSection>
+
           <View style={styles.termoContainer}>
             <TouchableOpacity
-              style={styles.checkboxContainer}
+              style={[styles.checkbox, termoAceito && styles.checkboxChecked]}
               onPress={() => setTermoAceito(!termoAceito)}
             >
-              <View style={[styles.checkbox, termoAceito && styles.checkboxChecked]}>
-                {termoAceito && <Ionicons name="checkmark" size={16} color={colors.white} />}
-              </View>
-              <View>
-                <Text style={styles.checkboxLabel}>Aceito os termos de uso</Text>
-                <Text style={styles.checkboxDescription}>
-                  Ao marcar esta opção, você concorda com os termos de uso e política de privacidade do Spacefy.
-                </Text>
-              </View>
+              {termoAceito && <Ionicons name="checkmark" size={16} color={colors.white} />}
             </TouchableOpacity>
+            <Text style={styles.termoText}>
+              Li e aceito os{' '}
+              <Text style={styles.termoLink} onPress={() => {}}>
+                termos de uso
+              </Text>
+              {' '}e{' '}
+              <Text style={styles.termoLink} onPress={() => {}}>
+                política de privacidade
+              </Text>
+            </Text>
           </View>
-        </RevisaoSection>
-      </ScrollView>
+        </ScrollView>
 
-      <View style={styles.buttonRowFixed}>
-        <TouchableOpacity
-          style={[styles.button, styles.buttonSecondary]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.buttonTextSecondary}>Voltar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.buttonPrimary, loading && styles.buttonDisabled]}
-          onPress={handleFinalizar}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.buttonTextPrimary}>Finalizar Cadastro</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        <View style={styles.navigationContainer}>
+          <NavigationButtons
+            onBack={() => navigation.goBack()}
+            onNext={handleFinalizar}
+            disabled={!termoAceito || loading}
+            nextText="Finalizar"
+          />
+        </View>
+
+        {loading && (
+          <View style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(255,255,255,0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10,
+          }}>
+            <ActivityIndicator size="large" color={colors.blue} />
+          </View>
+        )}
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

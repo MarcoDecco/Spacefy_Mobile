@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-interface SpaceRegisterData {
+export interface SpaceRegisterData {
   // Etapa 1
   space_name: string;
   space_type: string;
@@ -15,10 +15,8 @@ interface SpaceRegisterData {
   city: string;
   state: string;
   zipCode: string;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };
+  latitude?: number;
+  longitude?: number;
   
   // Etapa 3
   image_url: string[];
@@ -47,6 +45,8 @@ interface SpaceRegisterData {
   document_photo: string;
   space_document_photo: string;
   termos_aceitos: boolean;
+  time_slots?: any;
+  availability?: any;
 }
 
 interface SpaceRegisterContextData {

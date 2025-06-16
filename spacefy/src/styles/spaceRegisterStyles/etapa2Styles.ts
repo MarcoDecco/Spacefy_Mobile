@@ -1,223 +1,145 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
 const statusBarHeight = Constants.statusBarHeight;
+const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: statusBarHeight,
         backgroundColor: colors.light_gray,
-        paddingHorizontal: 30,
-        paddingTop: 30,
     },
     progressContainer: {
-        marginBottom: 16,
+        backgroundColor: colors.white,
+        paddingTop: 20,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
     },
-    progressText: {
-        fontSize: 13,
-        color: colors.dark_gray,
-        marginBottom: 4,
-    },
-    progressBarContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        height: 6,
-        marginBottom: 16,
-        gap: 6,
-    },
-    progressBar: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.blue,
+    contentContainer: {
         flex: 1,
+        paddingHorizontal: 24,
+        paddingTop: 24,
     },
-    progressBarInactive: {
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: colors.gray,
-        flex: 1,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: colors.dark_gray,
-        marginBottom: 15,
+    header: {
+        marginBottom: 24,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '700',
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 16,
+        lineHeight: 36,
     },
-    subtitle: {
+    description: {
         fontSize: 16,
-        color: colors.gray,
-        marginBottom: 24,
-    },
-    scrollView: {
-        flex: 1,
+        color: colors.dark_gray,
+        lineHeight: 24,
+        marginBottom: 16,
     },
     formContainer: {
-        paddingBottom: 120,
-    },
-    rowContainer: {
-        flexDirection: 'row',
-        gap: 16,
-    },
-    halfInput: {
         flex: 1,
     },
-    typeButton: {
-        backgroundColor: colors.blue,
-        borderRadius: 6,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        alignSelf: 'flex-start',
-        marginBottom: 8,
-        marginTop: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+    inputContainer: {
+        marginBottom: 16,
     },
-    typeButtonText: {
-        color: colors.white,
-        fontWeight: '600',
-        fontSize: 15,
-    },
-    instructionsContainer: {
-        marginTop: 24,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 16,
-    },
-    instructionsTitle: {
+    inputLabel: {
         fontSize: 16,
         fontWeight: '600',
         color: colors.black,
         marginBottom: 8,
     },
-    instructionsList: {
-        gap: 8,
+    input: {
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 16,
+        fontSize: 16,
+        color: colors.black,
+        borderWidth: 1,
+        borderColor: colors.light_gray,
     },
-    instructionItem: {
+    inputError: {
+        borderColor: colors.error,
+    },
+    errorText: {
+        color: colors.error,
         fontSize: 14,
-        color: colors.gray,
-        lineHeight: 20,
+        marginTop: 4,
+    },
+    buttonContainer: {
+        padding: 24,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.light_gray,
     },
     buttonRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 24,
         gap: 12,
     },
-    backButton: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: colors.blue,
+    addressContainer: {
         backgroundColor: colors.white,
-        borderRadius: 6,
-        alignItems: 'center',
-        paddingVertical: 10,
-        marginRight: 8,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
     },
-    backButtonText: {
-        color: colors.blue,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    proceedButton: {
-        flex: 1,
-        backgroundColor: colors.blue,
-        borderRadius: 6,
-        alignItems: 'center',
-        paddingVertical: 10,
-    },
-    proceedButtonText: {
-        color: colors.white,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    buttonRowFixed: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingHorizontal: 30,
-        marginBottom: '8%',
+    addressRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 12,
+        alignItems: 'center',
     },
-    modalContainer: {
+    addressIcon: {
+        marginRight: 12,
+    },
+    addressText: {
+        flex: 1,
+        fontSize: 16,
+        color: colors.black,
+    },
+    addressLabel: {
+        fontSize: 14,
+        color: colors.dark_gray,
+        marginBottom: 4,
+    },
+    mapContainer: {
+        height: 200,
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 16,
+        backgroundColor: colors.light_gray,
+    },
+    map: {
+        width: '100%',
+        height: '100%',
+    },
+    mapLoadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    modalView: {
-        width: '90%',
-        maxHeight: '70%',
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        padding: 20,
+    currentLocationButton: {
+        position: 'absolute',
+        bottom: 16,
+        right: 16,
+        backgroundColor: colors.blue,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
+        elevation: 4,
+        shadowColor: colors.black,
         shadowOffset: {
             width: 0,
             height: 2,
         },
         shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
+        shadowRadius: 3.84,
     },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        textAlign: 'center',
-    },
-    modalList: {
-        width: '100%',
-    },
-    modalItem: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.light_gray,
-        width: '100%',
-    },
-    modalItemText: {
-        fontSize: 16,
-        color: colors.black,
-    },
-    modalCloseButton: {
-        marginTop: 15,
-        backgroundColor: colors.blue,
+    useCurrentLocationButton: {
+        padding: 8,
         borderRadius: 20,
-        padding: 10,
-        elevation: 2,
-        width: '100%',
-    },
-    modalCloseButtonText: {
-        color: colors.white,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    mapsHint: {
-        fontSize: 12,
-        color: colors.gray,
-        fontWeight: '400',
-    },
-    descHint: {
-        fontSize: 12,
-        color: colors.gray,
-        fontWeight: '400',
-    },
-    textArea: {
-        minHeight: 60,
-        textAlignVertical: 'top',
+        backgroundColor: colors.light_blue,
+        marginLeft: 12,
     },
 }); 

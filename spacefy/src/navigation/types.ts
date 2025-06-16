@@ -50,6 +50,7 @@ export type RootStackParamList = {
   SpaceNextStepScreen: undefined;
   SpaceAvailabilityScreen: undefined;
   SpaceImagesScreen: undefined;
+  Etapa3: undefined;
   Etapa4: undefined;
   Etapa5: undefined;
   Etapa6: undefined;

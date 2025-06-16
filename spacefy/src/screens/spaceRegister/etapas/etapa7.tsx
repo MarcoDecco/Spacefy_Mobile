@@ -14,6 +14,7 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -28,6 +29,7 @@ import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton
 import api from '../../../services/api';
 import { CampoTexto } from '../../../components/CampoTexto';
 import { CampoDocumento } from '../../../components/CampoDocumento';
+import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
 
 interface CampoTextoProps {
   titulo: string;
@@ -124,14 +126,6 @@ const Etapa7: React.FC = () => {
       Alert.alert('Erro', 'Por favor, preencha o CPF ou CNPJ do proprietário.');
       return false;
     }
-    if (!formData.document_photo) {
-      Alert.alert('Erro', 'Por favor, anexe o documento do proprietário.');
-      return false;
-    }
-    if (!formData.space_document_photo) {
-      Alert.alert('Erro', 'Por favor, anexe o documento do espaço.');
-      return false;
-    }
     return true;
   };
 
@@ -147,6 +141,14 @@ const Etapa7: React.FC = () => {
     }
   };
 
+  const isNextDisabled =
+    loading ||
+    !formData.owner_name?.trim() ||
+    !formData.owner_email?.trim() ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.owner_email) ||
+    !formData.owner_phone?.trim() ||
+    !formData.document_number?.trim();
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
@@ -154,12 +156,12 @@ const Etapa7: React.FC = () => {
           <ProgressBar progress={0.875} currentStep={7} totalSteps={8} />
         </View>
 
-        <Text style={styles.title}>Informações do Proprietário e Documentos</Text>
-        <Text style={styles.subtitle}>
-          Preencha os dados do proprietário e anexe os documentos necessários para o cadastro do seu espaço.
-        </Text>
+        <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
+          <Text style={styles.title}>Informações do Proprietário e Documentos</Text>
+          <Text style={styles.subtitle}>
+            Preencha os dados do proprietário e anexe os documentos necessários para o cadastro do seu espaço.
+          </Text>
 
-        <ScrollView style={styles.formContainer}>
           <CampoTexto
             titulo="Nome do Proprietário"
             value={formData.owner_name || ''}
@@ -198,16 +200,22 @@ const Etapa7: React.FC = () => {
           />
         </ScrollView>
 
-        <View style={styles.buttonContainer}>
-          <RegisterSpaceButton
-            title="Voltar"
-            onPress={() => navigation.goBack()}
-          />
-          <RegisterSpaceButton
-            title="Próximo"
-            onPress={handleNext}
-          />
-        </View>
+        <NavigationButtons
+          onBack={() => navigation.goBack()}
+          onNext={handleNext}
+          disabled={isNextDisabled}
+        />
+        {loading && (
+          <View style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(255,255,255,0.7)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 10,
+          }}>
+            <ActivityIndicator size="large" color={colors.blue} />
+          </View>
+        )}
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );

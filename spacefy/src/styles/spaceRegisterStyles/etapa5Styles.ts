@@ -1,69 +1,100 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
+const { width } = Dimensions.get('window');
 const statusBarHeight = Constants.statusBarHeight;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: statusBarHeight,
         backgroundColor: colors.light_gray,
-        paddingHorizontal: 30,
-        paddingTop: 30,
+        marginTop: statusBarHeight,
     },
     progressContainer: {
+        backgroundColor: colors.white,
+        paddingTop: 20,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
         marginBottom: 16,
     },
+    formContainer: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '700',
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 16,
+        paddingTop: 24,
     },
     subtitle: {
         fontSize: 16,
         color: colors.dark_gray,
+        lineHeight: 24,
         marginBottom: 24,
     },
     rulesContainer: {
-        gap: 16,
-        paddingBottom: 100,
+        marginBottom: 24,
     },
     ruleItem: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        padding: 16,
+        alignItems: 'center',
         backgroundColor: colors.white,
-        borderRadius: 8,
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
         borderWidth: 1,
         borderColor: colors.light_gray,
     },
-    checkboxContainer: {
-        width: 24,
-        height: 24,
-        borderRadius: 4,
-        borderWidth: 2,
+    ruleItemSelected: {
         borderColor: colors.blue,
-        marginRight: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: colors.light_blue,
     },
-    checkboxChecked: {
-        backgroundColor: colors.blue,
+    ruleIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.light_gray,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
     },
     ruleContent: {
         flex: 1,
     },
     ruleLabel: {
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: '600',
         color: colors.black,
         marginBottom: 4,
     },
+    ruleLabelSelected: {
+        color: colors.blue,
+    },
     ruleDescription: {
         fontSize: 14,
-        color: colors.gray,
+        color: colors.dark_gray,
+        lineHeight: 20,
+    },
+    ruleDescriptionSelected: {
+        color: colors.blue,
+    },
+    checkboxContainer: {
+        width: 24,
+        height: 24,
+        borderRadius: 6,
+        borderWidth: 2,
+        borderColor: colors.gray,
+        marginLeft: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxChecked: {
+        backgroundColor: colors.blue,
+        borderColor: colors.blue,
     },
     buttonRowFixed: {
         position: 'absolute',

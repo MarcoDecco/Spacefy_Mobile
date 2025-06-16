@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '~/styles/globalStyles/colors';
+import { colors } from '../globalStyles/colors';
 
 export const buttons = StyleSheet.create({
     blueButton: {
@@ -8,7 +8,11 @@ export const buttons = StyleSheet.create({
         borderRadius: 10,
         paddingVertical: 12,
         marginBottom: 10,
-        boxShadow: '0px 5px 8px rgba(0, 0, 0, 0.2)',
+        elevation: 5,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
 
     textBlueButton: {
@@ -16,9 +20,6 @@ export const buttons = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 18,
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-        textShadowOffset: { width: -0.5, height: 0.5 },
-        textShadowRadius: 2,
     },
 
     whiteButton: {
@@ -28,7 +29,11 @@ export const buttons = StyleSheet.create({
         borderColor: colors.blue,
         borderRadius: 10,
         paddingVertical: 12,
-        boxShadow: '0px 5px 8px rgba(0, 0, 0, 0.2)',
+        elevation: 5,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
 
     textWhiteButton: {
@@ -36,11 +41,8 @@ export const buttons = StyleSheet.create({
         textAlign: 'center',
         fontWeight: 'bold',
         fontSize: 18,
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-        textShadowOffset: { width: -0.5, height: 0.5 },
-        textShadowRadius: 1,
     },
-})
+});
 
 export const registerSpaceButtonStyles = StyleSheet.create({
   button: {
@@ -49,6 +51,11 @@ export const registerSpaceButtonStyles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
     marginHorizontal: 4,
+    elevation: 2,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   primary: {
     backgroundColor: colors.blue,

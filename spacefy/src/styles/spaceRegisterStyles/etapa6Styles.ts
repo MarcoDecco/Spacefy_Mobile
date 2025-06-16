@@ -1,76 +1,122 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
+const { width } = Dimensions.get('window');
 const statusBarHeight = Constants.statusBarHeight;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: statusBarHeight,
         backgroundColor: colors.light_gray,
-        paddingHorizontal: 30,
-        paddingTop: 30,
+        marginTop: statusBarHeight,
     },
     progressContainer: {
+        backgroundColor: colors.white,
+        paddingTop: 20,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
         marginBottom: 16,
     },
+    formContainer: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '700',
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 16,
+        paddingTop: 24,
     },
     subtitle: {
         fontSize: 16,
         color: colors.dark_gray,
+        lineHeight: 24,
         marginBottom: 24,
-    },
-    categoriesContainer: {
-        paddingBottom: 100,
     },
     categorySection: {
         marginBottom: 24,
-        backgroundColor: colors.white,
-        borderRadius: 8,
-        padding: 16,
+    },
+    categoryHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    categoryIconContainer: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: colors.light_blue,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
     },
     categoryTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: '600',
         color: colors.black,
-        marginBottom: 16,
     },
     itemsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 12,
+        marginHorizontal: -8,
     },
     itemContainer: {
-        width: '48%',
-        marginBottom: 12,
-    },
-    checkboxContainer: {
+        width: (width - 64) / 2,
+        backgroundColor: colors.white,
+        borderRadius: 12,
+        padding: 16,
+        margin: 8,
+        borderWidth: 1,
+        borderColor: colors.light_gray,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    itemContainerSelected: {
+        borderColor: colors.blue,
+        backgroundColor: colors.light_blue,
+    },
+    itemContent: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    itemIconContainer: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: colors.light_gray,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    itemIconContainerSelected: {
+        backgroundColor: colors.white,
+    },
+    itemLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.black,
+        flex: 1,
+    },
+    itemLabelSelected: {
+        color: colors.blue,
     },
     checkbox: {
         width: 24,
         height: 24,
-        borderRadius: 4,
+        borderRadius: 6,
         borderWidth: 2,
-        borderColor: colors.blue,
-        marginRight: 12,
-        alignItems: 'center',
+        borderColor: colors.gray,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     checkboxChecked: {
         backgroundColor: colors.blue,
-    },
-    itemLabel: {
-        flex: 1,
-        fontSize: 16,
-        color: colors.black,
+        borderColor: colors.blue,
     },
     buttonRowFixed: {
         position: 'absolute',

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView, Alert } from 'react-native';
+import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
 import { inputStyles } from '../../../styles/componentStyles/inputStyles';
 import { pageTexts } from '../../../styles/globalStyles/pageTexts';
 import { styles } from '../../../styles/spaceRegisterStyles/etapa1Styles';
+import { colors } from '../../../styles/globalStyles/colors';
 import RegisterSpaceInput from '../../../components/inputs/registerSpaceInput';
 import RegisterSpaceButton from '../../../components/buttons/registerSpaceButton';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
+import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
 
 const tiposEspaco = [
   { id: '1', label: 'Espaço para Eventos' },
@@ -117,101 +119,119 @@ const Etapa1 = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.progressContainer}>
-          <ProgressBar progress={0.125} currentStep={1} totalSteps={8} />
-        </View>
-
-        <Text style={styles.title}>Informações Básicas</Text>
-        <Text style={styles.subtitle}>
-          Preencha as informações básicas do seu espaço
-        </Text>
-
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.formContainer}>
-            <RegisterSpaceInput
-              label="Nome do Espaço"
-              placeholder="Digite o nome do seu espaço"
-              value={space_name}
-              onChangeText={setSpaceName}
-            />
-
-            <RegisterSpaceInput
-              label="Descrição"
-              placeholder="Descreva seu espaço"
-              value={space_description}
-              onChangeText={setSpaceDescription}
-              multiline
-              numberOfLines={4}
-            />
-
-            <TouchableOpacity
-              style={styles.typeButton}
-              onPress={() => setModalVisible(true)}
-            >
-              <Text style={styles.typeButtonText}>
-                {space_type || 'Selecione o tipo de espaço'}
-              </Text>
-            </TouchableOpacity>
-
-            <RegisterSpaceInput
-              label="Capacidade Máxima"
-              placeholder="Número de pessoas"
-              value={max_people}
-              onChangeText={setMaxPeople}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.buttonContainer}>
-              <RegisterSpaceButton
-                title="Prosseguir"
-                onPress={handleProsseguir}
-              />
-            </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.progressContainer}>
+            <ProgressBar progress={0.125} currentStep={1} totalSteps={8} />
           </View>
-        </ScrollView>
 
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-            <View style={modalStyles.centeredView}>
-              <TouchableWithoutFeedback>
-                <View style={modalStyles.modalView}>
-                  <Text style={modalStyles.modalTitle}>Escolha o tipo do espaço</Text>
-                  <FlatList
-                    data={tiposEspaco}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        style={modalStyles.modalOption}
-                        onPress={() => handleTypeSelect(item.label)}
-                      >
-                        <Text style={modalStyles.modalOptionText}>{item.label}</Text>
-                      </TouchableOpacity>
-                    )}
-                  />
-                  <TouchableOpacity
-                    style={modalStyles.modalCloseButton}
-                    onPress={() => setModalVisible(false)}
-                  >
-                    <Text style={modalStyles.modalCloseButtonText}>Cancelar</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
+          <ScrollView 
+            style={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            <View style={styles.header}>
+              <Text style={styles.title}>Informações Básicas</Text>
+              <Text style={styles.description}>
+                Preencha as informações básicas do seu espaço
+              </Text>
             </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+
+            <View style={styles.formContainer}>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Nome do Espaço"
+                  placeholder="Digite o nome do seu espaço"
+                  value={space_name}
+                  onChangeText={setSpaceName}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Descrição"
+                  placeholder="Descreva seu espaço"
+                  value={space_description}
+                  onChangeText={setSpaceDescription}
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Tipo do Espaço</Text>
+                <TouchableOpacity
+                  style={[styles.input, !space_type && styles.inputError]}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Text style={{ color: space_type ? colors.black : colors.gray }}>
+                    {space_type || 'Selecione o tipo de espaço'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Capacidade Máxima"
+                  placeholder="Número de pessoas"
+                  value={max_people}
+                  onChangeText={setMaxPeople}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </ScrollView>
+
+          <NavigationButtons
+            onBack={() => navigation.goBack()}
+            onNext={handleProsseguir}
+            disabled={!space_name || !space_description || !space_type || !max_people}
+          />
+
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+              <View style={modalStyles.centeredView}>
+                <TouchableWithoutFeedback>
+                  <View style={modalStyles.modalView}>
+                    <Text style={modalStyles.modalTitle}>Escolha o tipo do espaço</Text>
+                    <FlatList
+                      data={tiposEspaco}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={modalStyles.modalOption}
+                          onPress={() => handleTypeSelect(item.label)}
+                        >
+                          <Text style={modalStyles.modalOptionText}>{item.label}</Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                    <TouchableOpacity
+                      style={modalStyles.modalCloseButton}
+                      onPress={() => setModalVisible(false)}
+                    >
+                      <Text style={modalStyles.modalCloseButtonText}>Fechar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
-
-export default Etapa1;
 
 const modalStyles = StyleSheet.create({
   centeredView: {
@@ -226,7 +246,6 @@ const modalStyles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 20,
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -238,53 +257,32 @@ const modalStyles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  list: {
-    width: '100%',
-  },
-  typeItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  typeItemText: {
-    fontSize: 16,
-  },
-  closeButton: {
-    marginTop: 15,
-    backgroundColor: '#2196F3',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    width: '100%',
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '600',
+    marginBottom: 16,
     textAlign: 'center',
   },
   modalOption: {
-    padding: 15,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.light_gray,
   },
   modalOptionText: {
     fontSize: 16,
+    color: colors.black,
   },
   modalCloseButton: {
-    marginTop: 15,
-    backgroundColor: '#2196F3',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-    width: '100%',
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: colors.blue,
+    borderRadius: 8,
+    alignItems: 'center',
   },
   modalCloseButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
+
+export default Etapa1;

@@ -127,6 +127,13 @@ export default function StackNavigation() {
         }}
       />
       <Stack.Screen
+        name="Etapa3"
+        component={SpaceNextStepScreen}
+        options={{
+          headerShown: false
+        }}
+      />
+      <Stack.Screen
         name="SpaceNextStepScreen"
         component={SpaceNextStepScreen}
         options={{

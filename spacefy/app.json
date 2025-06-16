@@ -1,22 +1,28 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "spacefy",
+    "slug": "spacefy",
     "version": "1.0.0",
     "web": {
-      "favicon": "./assets/icone-da-logo.png"
+      "favicon": "./assets/favicon.png"
     },
     "experiments": {
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Precisamos da sua localização para mostrar o mapa e encontrar espaços próximos a você."
+        }
+      ]
     ],
     "orientation": "portrait",
-    "icon": "./assets/icone-da-logo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/icone-da-logo.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -24,12 +30,30 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.spacefy.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Precisamos da sua localização para mostrar o mapa e encontrar espaços próximos a você.",
+        "NSLocationAlwaysUsageDescription": "Precisamos da sua localização para mostrar o mapa e encontrar espaços próximos a você."
+      },
+      "config": {
+        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icone-da-logo.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.spacefy.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+        }
       }
     }
   }

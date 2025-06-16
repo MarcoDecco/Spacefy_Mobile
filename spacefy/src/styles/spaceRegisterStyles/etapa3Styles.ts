@@ -1,60 +1,72 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
+const { width } = Dimensions.get('window');
+const imageSize = (width - 48 - 16) / 3; // 3 imagens por linha com espaçamento
 const statusBarHeight = Constants.statusBarHeight;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginTop: statusBarHeight,
         backgroundColor: colors.light_gray,
-        paddingHorizontal: 30,
-        paddingTop: 30,
+        marginTop: statusBarHeight,
     },
     progressContainer: {
+        backgroundColor: colors.white,
+        paddingTop: 20,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.light_gray,
         marginBottom: 16,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 28,
+        fontWeight: '700',
         color: colors.black,
-        marginBottom: 24,
+        marginBottom: 16,
+        paddingHorizontal: 24,
+        paddingTop: 24,
     },
     subtitle: {
         fontSize: 16,
         color: colors.dark_gray,
+        lineHeight: 24,
         marginBottom: 24,
+        paddingHorizontal: 24,
     },
     formContainer: {
-        paddingBottom: 100,
-    },
-    buttonContainer: {
-        marginTop: 24,
+        flex: 1,
+        paddingHorizontal: 24,
     },
     imageContainer: {
-        marginTop: 24,
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 24,
     },
     imageGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        gap: 8,
     },
     imageWrapper: {
-        width: '48%',
-        aspectRatio: 1,
+        width: imageSize,
+        height: imageSize,
+        borderRadius: 12,
+        overflow: 'hidden',
         position: 'relative',
     },
     image: {
         width: '100%',
         height: '100%',
-        borderRadius: 8,
+        resizeMode: 'cover',
     },
     removeButton: {
         position: 'absolute',
         top: 8,
         right: 8,
-        backgroundColor: colors.red,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         width: 24,
         height: 24,
         borderRadius: 12,
@@ -63,33 +75,32 @@ export const styles = StyleSheet.create({
     },
     removeButtonText: {
         color: colors.white,
-        fontSize: 16,
-        fontWeight: 'bold',
+        fontSize: 14,
+        fontWeight: '600',
     },
     addButton: {
-        width: '48%',
-        aspectRatio: 1,
-        backgroundColor: colors.light_gray,
-        borderRadius: 8,
+        width: imageSize,
+        height: imageSize,
+        borderRadius: 12,
+        backgroundColor: colors.light_blue,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: colors.gray,
+        borderColor: colors.blue,
         borderStyle: 'dashed',
     },
     addButtonText: {
         fontSize: 32,
-        color: colors.gray,
+        color: colors.blue,
+        fontWeight: '300',
     },
     buttonRowFixed: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        paddingHorizontal: 30,
-        marginBottom: '8%',
         flexDirection: 'row',
         justifyContent: 'space-between',
+        padding: 24,
+        backgroundColor: colors.white,
+        borderTopWidth: 1,
+        borderTopColor: colors.light_gray,
         gap: 12,
     },
     modalContainer: {
@@ -99,7 +110,28 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalImage: {
-        width: '100%',
-        height: '100%',
+        width: width - 48,
+        height: width - 48,
+        resizeMode: 'contain',
+    },
+    imageCounter: {
+        position: 'absolute',
+        bottom: 8,
+        left: 8,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    imageCounterText: {
+        color: colors.white,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    imageTip: {
+        fontSize: 14,
+        color: colors.dark_gray,
+        marginTop: 16,
+        textAlign: 'center',
     },
 }); 

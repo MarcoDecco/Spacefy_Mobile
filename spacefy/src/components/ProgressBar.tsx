@@ -29,11 +29,14 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ progress, currentStep,
 const styles = StyleSheet.create({
   progressContainer: {
     marginBottom: 16,
+    alignItems: 'center',
   },
   progressText: {
-    fontSize: 13,
+    fontSize: 15,
     color: colors.dark_gray,
     marginBottom: 4,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   progressBarContainer: {
     flexDirection: 'row',
@@ -41,6 +44,7 @@ const styles = StyleSheet.create({
     height: 6,
     marginBottom: 16,
     gap: 6,
+    width: '100%',
   },
   progressBar: {
     height: 6,
