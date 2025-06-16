@@ -58,44 +58,19 @@ export default function StackNavigation() {
       <Stack.Screen
         name="Favorites"
         component={Favorites}
-        options={{headerShown: true,
-          title: 'Favoritos',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            },
-        }}
+        options={{headerShown: false }}
       />
       <Stack.Screen
         name="Rented"
         component={Rented}
-        options={{headerShown: true,
-          title: 'Alugados',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            },
+        options={{headerShown: false
         }}
       />
       <Stack.Screen
         name="MyReviews"
         component={MyReviews}
         options={{
-          headerShown: true,
-          title: 'Minhas Avaliações',
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTintColor: '#333',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
+          headerShown: false
         }}
       />
       <Stack.Screen
