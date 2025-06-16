@@ -63,15 +63,30 @@ export const TimeSelectModal: React.FC<TimeSelectModalProps> = ({
 }) => {
   const [blockedDatesData, setBlockedDatesData] = useState<BlockedDatesResponse | null>(null);
 
+  const roundToNextHalfHour = (): string => {
+    const now = new Date();
+    const minutes = now.getMinutes();
+    const hours = now.getHours();
+    
+    let roundedMinutes = Math.ceil(minutes / 30) * 30;
+    let roundedHours = hours;
+    
+    if (roundedMinutes === 60) {
+      roundedMinutes = 0;
+      roundedHours = (hours + 1) % 24;
+    }
+    
+    return `${roundedHours.toString().padStart(2, '0')}:${roundedMinutes.toString().padStart(2, '0')}`;
+  };
+
   useEffect(() => {
     async function fetchBlockedDates() {
       try {
         if (!spaceId) return;
         const data = await blockedDatesService.getBlockedDatesBySpaceId(spaceId);
-        console.log('Datas bloqueadas:', data);
         setBlockedDatesData(data);
       } catch (error) {
-        console.log('Erro ao buscar datas bloqueadas:', error);
+        console.error('Erro ao buscar datas bloqueadas:', error);
       }
     }
     fetchBlockedDates();
@@ -80,18 +95,13 @@ export const TimeSelectModal: React.FC<TimeSelectModalProps> = ({
   const generateTimeSlots = (): string[] => {
     const times: string[] = [];
     
-    console.log('weekly_days:', weekly_days);
-    
     if (!weekly_days || weekly_days.length === 0) {
-      console.log('weekly_days está vazio ou indefinido');
       return times;
     }
 
     const allTimeRanges = weekly_days.flatMap(day => day.time_ranges);
-    console.log('allTimeRanges:', allTimeRanges);
     
     if (!allTimeRanges || allTimeRanges.length === 0) {
-      console.log('time_ranges está vazio ou indefinido');
       return times;
     }
     
@@ -111,24 +121,28 @@ export const TimeSelectModal: React.FC<TimeSelectModalProps> = ({
         close: closeMinutes
       };
     });
-    
-    console.log('timeRangesInMinutes:', timeRangesInMinutes);
 
-    // Obter horários bloqueados para a data selecionada
     const blockedTimes = selectedDate && blockedDatesData?.rented_dates
       ? blockedDatesData.rented_dates
           .find(date => date.date === selectedDate)?.times || []
       : [];
 
-    // Converter horários bloqueados para minutos
     const blockedTimeRanges = blockedTimes.map(time => ({
       start: convertTimeToMinutes(time.startTime),
       end: convertTimeToMinutes(time.endTime)
     }));
 
+    const isToday = selectedDate === new Date().toISOString().split('T')[0];
+    const startTime = isToday ? convertTimeToMinutes(roundToNextHalfHour()) : 0;
+
     for (let hour = 0; hour < 24; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         const timeInMinutes = hour * 60 + minute;
+        
+        if (isToday && timeInMinutes < startTime) {
+          continue;
+        }
+
         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         
         const adjustedTimeInMinutes = timeInMinutes < timeRangesInMinutes[0].open 
@@ -139,17 +153,14 @@ export const TimeSelectModal: React.FC<TimeSelectModalProps> = ({
           adjustedTimeInMinutes >= range.open && adjustedTimeInMinutes <= range.close
         );
 
-        // Verificar se o horário está bloqueado
         const isBlocked = blockedTimeRanges.some(blocked => {
-          const adjustedBlockedStart = blocked.start < timeRangesInMinutes[0].open 
-            ? blocked.start + 24 * 60 
-            : blocked.start;
-          const adjustedBlockedEnd = blocked.end < timeRangesInMinutes[0].open 
-            ? blocked.end + 24 * 60 
-            : blocked.end;
+          const adjustedBlockedStart = blocked.start;
+          const adjustedBlockedEnd = blocked.end;
           
-          return adjustedTimeInMinutes >= adjustedBlockedStart && 
-                 adjustedTimeInMinutes < adjustedBlockedEnd;
+          return (
+            (adjustedTimeInMinutes >= adjustedBlockedStart && adjustedTimeInMinutes < adjustedBlockedEnd) ||
+            (adjustedTimeInMinutes + 24 * 60 >= adjustedBlockedStart && adjustedTimeInMinutes + 24 * 60 < adjustedBlockedEnd)
+          );
         });
 
         if (isWithinRange && !isBlocked) {
@@ -158,19 +169,15 @@ export const TimeSelectModal: React.FC<TimeSelectModalProps> = ({
       }
     }
 
-    console.log('Horários gerados:', times);
     return times;
   };
 
   const convertTimeToMinutes = (time: string): number => {
     const [hours, minutes] = time.split(':').map(Number);
-    const totalMinutes = hours * 60 + minutes;
-    console.log(`Convertendo ${time} para ${totalMinutes} minutos`);
-    return totalMinutes;
+    return hours * 60 + minutes;
   };
 
   const timeSlots = generateTimeSlots();
-  console.log('timeSlots final:', timeSlots);
 
   return (
     <Modal
