@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors } from '../../styles/globalStyles/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface NavigationButtonsProps {
   onBack: () => void;
@@ -17,18 +18,31 @@ export function NavigationButtons({
   backText = 'Voltar',
   disabled = false,
 }: NavigationButtonsProps) {
+  const { isDarkMode, theme } = useTheme();
+
   return (
-    <View style={styles.buttonRowFixed}>
+    <View style={[styles.buttonRowFixed, isDarkMode && { backgroundColor: theme.card, borderTopColor: theme.border }]}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={[
+          styles.backButton, 
+          isDarkMode && { 
+            backgroundColor: theme.card,
+            borderWidth: 1,
+            borderColor: theme.border
+          }
+        ]}
         onPress={onBack}
       >
-        <Text style={styles.backButtonText}>
+        <Text style={[styles.backButtonText, isDarkMode && { color: theme.text }]}>
           {backText}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.nextButton, disabled && styles.disabledButton]}
+        style={[
+          styles.nextButton, 
+          disabled && styles.disabledButton,
+          isDarkMode && { backgroundColor: theme.blue }
+        ]}
         onPress={onNext}
         disabled={disabled}
       >

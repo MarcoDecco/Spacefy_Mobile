@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TextInputProps, StyleSheet } from 'react-native';
 import { colors } from '../../styles/globalStyles/colors';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface RegisterSpaceInputProps extends TextInputProps {
   label: string;
@@ -15,17 +16,24 @@ const RegisterSpaceInput: React.FC<RegisterSpaceInputProps> = ({
   style,
   ...props
 }) => {
+  const { isDarkMode, theme } = useTheme();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, isDarkMode && { color: theme.text }]}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
           style={[
             styles.input,
             error && styles.inputError,
+            isDarkMode && {
+              backgroundColor: theme.card,
+              borderColor: theme.border,
+              color: theme.text
+            },
             style,
           ]}
-          placeholderTextColor={colors.gray}
+          placeholderTextColor={isDarkMode ? theme.gray : colors.gray}
           {...props}
         />
         {rightIcon && (
