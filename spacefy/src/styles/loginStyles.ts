@@ -6,17 +6,17 @@ export const loginStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 70,
+    paddingVertical: 20,
   },
 
   cardContainer: {
     width: '85%',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 15,
+    backgroundColor: colors.white,
+    borderRadius: 20,
     alignItems: 'center',
-    padding: 24,
+    padding: 20,
     marginVertical: 20,
-    boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.25)',
+    boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',
   },
 
   profileImageContainer: {
@@ -41,26 +41,20 @@ export const loginStyles = StyleSheet.create({
   },
 
   registerText: {
-    color: colors.dark_gray,
-    textAlign: 'center',
-    marginTop: 6,
+    color: colors.gray,
+    marginBottom: 5,
   },
 
   registerLink: {
     color: colors.blue,
-    textAlign: 'center',
     fontWeight: 'bold',
-    fontSize: 16,
-    textDecorationLine: 'underline',
   },
 
   dividerContainer: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
+    marginVertical: 20,
     width: '100%',
-    marginVertical: 8,
-    paddingHorizontal: 32,
   },
 
   divider: {
@@ -70,7 +64,27 @@ export const loginStyles = StyleSheet.create({
   },
 
   dividerText: {
-    marginHorizontal: 8,
-    color: colors.dark_gray,
+    marginHorizontal: 10,
+    color: colors.gray,
+  },
+
+  biometricButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.blue,
+  },
+
+  biometricButtonText: {
+    color: colors.blue,
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: '500',
   },
 }); 
