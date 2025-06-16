@@ -53,5 +53,20 @@ export const rentalService = {
             }
             throw error;
         }
+    },
+
+    getSpacesByUserRentalID: async (userId) => {
+        try {
+            console.log('Buscando espaços alugados para o usuário:', userId);
+            const response = await api.get(`/rentals/user/${userId}/spaces`);
+            console.log('Resposta da API:', response.data);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar espaços alugados:', error);
+            if (error.response?.data?.error) {
+                throw new Error(error.response.data.error);
+            }
+            throw new Error('Erro ao buscar espaços alugados');
+        }
     }
 }; 

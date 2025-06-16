@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, SafeAreaView } from "react-native";
 import Card from "../components/card";
 import { useCards } from "../hooks/useCards";
 import { BaseCard } from "../types/card";
@@ -171,13 +171,14 @@ export default function Rented() {
   };
 
   return (
-    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
       <Search 
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
         showBackButton={isFromProfile}
       />
+      <View style={localStyles.contentContainer}>
       <FlatList
         ref={flatListRef}
         data={user ? filteredCards : []}
@@ -189,13 +190,22 @@ export default function Rented() {
         ListEmptyComponent={loading ? null : EmptyComponent}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+          style={localStyles.list}
       />
       <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
     </View>
+    </SafeAreaView>
   );
 }
 
 const localStyles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+    marginTop: 100, // Aumentado para dar mais espaço entre a SearchBar e os cards
+  },
+  list: {
+    flex: 1,
+  },
   listContainer: {
     paddingHorizontal: 16,
     paddingBottom: 32,

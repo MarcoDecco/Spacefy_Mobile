@@ -52,7 +52,7 @@ export const useCards = (type: CardType = 'all') => {
                   throw new Error('Usuário não autenticado');
                 }
                 console.log('Buscando espaços alugados para o usuário:', user.id);
-                const rentedSpaces = await rentalService.getSpacesByUserRentalID(user.id);
+                const rentedSpaces = await rentalService.getRentalsByUserID(user.id);
                 console.log('Dados brutos dos espaços alugados:', JSON.stringify(rentedSpaces, null, 2));
 
                 try {
@@ -75,11 +75,16 @@ export const useCards = (type: CardType = 'all') => {
                         ? [space.image_url]
                         : [];
 
+                    // Garantindo que location seja um objeto
+                    const location = typeof space.location === 'string'
+                      ? JSON.parse(space.location)
+                      : space.location;
+
                     return {
                       _id: space._id,
                       space_name: space.space_name,
                       image_url,
-                      location: space.location,
+                      location,
                       price_per_hour: space.price_per_hour,
                       space_description: space.space_description || '',
                       space_type: space.space_type || '',

@@ -177,21 +177,13 @@ export default function Favorites() {
 
   return (
     <SafeAreaView style={[localStyles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      {/* HEADER MANUAL */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 }}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
-        </TouchableOpacity>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, color: theme.text }}>Favoritos</Text>
-      </View>
-
       <Search
         onSearch={handleSearch}
         onFilterChange={handleFilterChange}
         initialValue={searchQuery}
         showBackButton={isFromProfile}
       />
-
+      <View style={localStyles.contentContainer}>
       <FlatList
         ref={flatListRef}
         data={filteredFavorites}
@@ -203,9 +195,10 @@ export default function Favorites() {
         ListEmptyComponent={EmptySearchComponent}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+          style={localStyles.list}
       />
-
       <ScrollToTopButton onPress={scrollToTop} visible={showScrollTop} />
+      </View>
     </SafeAreaView>
   );
 }
@@ -214,6 +207,13 @@ const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.light_gray,
+  },
+  contentContainer: {
+    flex: 1,
+    marginTop: 100, // Aumentado para dar mais espaço entre a SearchBar e os cards
+  },
+  list: {
+    flex: 1,
   },
   listContainer: {
     paddingHorizontal: 16,

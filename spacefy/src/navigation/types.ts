@@ -39,7 +39,7 @@ export type RootStackParamList = {
   Settings: undefined;
   MyReservations: undefined;
   Favorites: { from?: string };
-  Rented: undefined;
+  Rented: { from?: string };
   MyReviews: undefined;
   EditProfile: undefined;
   Messages: { conversation: Conversation };
