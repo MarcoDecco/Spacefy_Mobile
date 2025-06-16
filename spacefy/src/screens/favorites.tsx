@@ -7,10 +7,10 @@ import { useTheme } from '../contexts/ThemeContext';
 import { FilterOptions } from '../components/filter';
 import { pageTexts } from '../styles/globalStyles/pageTexts';
 import ScrollToTopButton from '../components/scrollToTopButton';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../styles/globalStyles/colors';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
+import { colors } from '../styles/globalStyles/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 type FavoritesScreenRouteProp = RouteProp<RootStackParamList, 'Favorites'>;
 
@@ -19,11 +19,7 @@ interface Space {
   space_name: string;
   image_url: string[];
   price_per_hour: number;
-  location: string | {
-    coordinates: { lat: number; lng: number; };
-    formatted_address: string;
-    place_id: string;
-  };
+  location: string | { coordinates: { lat: number; lng: number; }; formatted_address: string; place_id: string; };
   space_description: string;
   space_amenities: string[];
   space_type: string;
@@ -46,8 +42,8 @@ interface Favorite {
 }
 
 export default function Favorites() {
-  const navigation = useNavigation();
   const route = useRoute<FavoritesScreenRouteProp>();
+  const navigation = useNavigation();
   const { favorites, loading, error } = useFavorites();
   const { theme, isDarkMode } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,13 +92,12 @@ export default function Favorites() {
 
     const matchesSearch =
       searchQuery === '' ||
-      (typeof space.space_name === 'string' &&
-        space.space_name.toLowerCase().includes(searchLower)) ||
+      (typeof space.space_name === 'string' && space.space_name.toLowerCase().includes(searchLower)) ||
       (typeof space.location === 'string' && space.location.toLowerCase().includes(searchLower));
 
     const matchesPrice = filterByPrice(space.price_per_hour, filters.priceRange);
     const matchesType = filterByType(space.space_type, filters.spaceType);
-    const matchesRating = filterByRating(5, filters.rating); // Rating fixo por enquanto
+    const matchesRating = filterByRating(5, filters.rating);
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
   });
@@ -182,19 +177,12 @@ export default function Favorites() {
 
   return (
     <SafeAreaView style={[localStyles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      
-      {/* Header */}
-      <View style={[localStyles.header, isDarkMode && { backgroundColor: theme.background }]}>
-        <TouchableOpacity
-          style={localStyles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color={isDarkMode ? theme.text : colors.black} />
+      {/* HEADER MANUAL */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <Text style={[localStyles.headerTitle, isDarkMode && { color: theme.text }]}>
-          Meus Favoritos
-        </Text>
-        <View style={localStyles.rightPlaceholder} />
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, color: theme.text }}>Favoritos</Text>
       </View>
 
       <Search
@@ -226,25 +214,6 @@ const localStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.light_gray,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.light_gray,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.black,
-  },
-  rightPlaceholder: {
-    width: 32,
   },
   listContainer: {
     paddingHorizontal: 16,

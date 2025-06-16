@@ -114,7 +114,7 @@ export default function Rented() {
       flex: 1, 
       justifyContent: 'center', 
       alignItems: 'center', 
-      paddingTop: 50,
+      paddingTop: 30,
       paddingHorizontal: 20
     }}>
       {!user ? (
