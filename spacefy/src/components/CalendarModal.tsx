@@ -1,24 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Modal, View, TouchableWithoutFeedback } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { blockedDatesService } from '../services/blockedDates';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors } from '../styles/globalStyles/colors';
-
-interface RentedTime {
-  startTime: string;
-  endTime: string;
-}
-
-interface RentedDate {
-  date: string;
-  times: RentedTime[];
-}
-
-interface BlockedDatesResponse {
-  blocked_dates: string[];
-  rented_dates: RentedDate[];
-}
 
 interface CalendarModalProps {
   visible: boolean;
@@ -43,22 +27,7 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
   spaceId,
   weekDays = [],
 }) => {
-  const [blockedDatesData, setBlockedDatesData] = useState<BlockedDatesResponse | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  useEffect(() => {
-    async function fetchBlockedDates() {
-      try {
-        if (!spaceId) return;
-        const data = await blockedDatesService.getBlockedDatesBySpaceId(spaceId) as BlockedDatesResponse;
-        console.log('Datas bloqueadas (completo):', JSON.stringify(data, null, 2));
-        setBlockedDatesData(data);
-      } catch (error) {
-        console.log('Erro ao buscar datas bloqueadas:', error);
-      }
-    }
-    fetchBlockedDates();
-  }, [spaceId]);
 
   // Mapeia os dias da semana para índices
   const diasSemanaMap: Record<string, number> = {
@@ -86,23 +55,6 @@ export const CalendarModal: React.FC<CalendarModalProps> = ({
   // Combina as datas marcadas com as datas bloqueadas
   const combinedMarkedDates = {
     ...markedDates,
-    ...(blockedDatesData?.blocked_dates?.reduce((acc, date) => {
-      acc[date] = {
-        disabled: true,
-        disabledTouchEvent: true,
-        dotColor: 'red',
-      };
-      return acc;
-    }, {} as any) || {}),
-    ...(blockedDatesData?.rented_dates?.reduce((acc, item) => {
-      acc[item.date] = {
-        ...acc[item.date],
-        disabled: true,
-        disabledTouchEvent: true,
-        dotColor: 'red',
-      };
-      return acc;
-    }, {} as any) || {}),
   };
 
   // Gera as datas marcadas para o mês atual

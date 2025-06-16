@@ -781,11 +781,13 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
       <TimeSelectModal
         visible={timeModalVisible}
         onClose={() => setTimeModalVisible(false)}
-        timeGroups={timeGroups}
         onSelect={handleTimeSelect}
         styles={styles}
         isDarkMode={isDarkMode}
         theme={theme}
+        weekly_days={space?.weekly_days || []}
+        selectedDate={timeModalTarget === 'checkInTime' ? checkInDate.toISOString().split('T')[0] : checkOutDate.toISOString().split('T')[0]}
+        spaceId={space?._id}
       />
 
       {/* Modal de Confirmação */}
