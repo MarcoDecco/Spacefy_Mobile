@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import { authenticateBiometric, isBiometricAvailable, isEnrolled } from '../services/biometrics';
 import * as SecureStore from 'expo-secure-store';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 export default function Login({ navigation }: any) {
   const [email, setEmail] = useState('');
@@ -29,17 +30,6 @@ export default function Login({ navigation }: any) {
     checkBiometric();
   }, []);
 
-  useEffect(() => {
-    // Se biometria estiver habilitada, já tenta autenticar ao abrir a tela
-    const tryBiometricLogin = async () => {
-      if (biometricEnabled) {
-        await handleBiometricLogin();
-      }
-    };
-    tryBiometricLogin();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [biometricEnabled]);
-
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Erro', 'Por favor, preencha todos os campos');
@@ -49,8 +39,8 @@ export default function Login({ navigation }: any) {
     try {
       setLoading(true);
       await authService.login(email, password);
-      // Salva o e-mail para login biométrico futuro
       await SecureStore.setItemAsync('biometricEmail', email);
+      await SecureStore.setItemAsync('biometricPassword', password);
       navigation.navigate('MainApp');
     } catch (error: any) {
       Alert.alert(
@@ -62,30 +52,46 @@ export default function Login({ navigation }: any) {
     }
   };
 
-  // Login usando biometria
+  // Login usando biometria com permissão e mensagem personalizada
   const handleBiometricLogin = async () => {
-  try {
-    const result = await authenticateBiometric('Autentique-se para entrar');
-    if (result.success) {
-      await authService.biometricLogin();
-      navigation.navigate('MainApp');
-    } else {
-      Alert.alert('Biometria', 'Autenticação biométrica não realizada.');
+    try {
+      // Verifica o tipo de biometria disponível
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      let tipoBiometria = 'biometria';
+      if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+        tipoBiometria = 'impressão digital';
+      } else if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+        tipoBiometria = 'Face ID';
+      }
+
+      const result = await authenticateBiometric(
+        `Autentique-se usando ${tipoBiometria} para entrar`
+      );
+      if (result.success) {
+        await authService.biometricLogin();
+        navigation.navigate('MainApp');
+      } else {
+        Alert.alert('Biometria', 'Autenticação biométrica não realizada.');
+      }
+    } catch (error) {
+      Alert.alert('Biometria', 'Erro ao autenticar com biometria.');
     }
-  } catch (error) {
-    Alert.alert('Biometria', 'Erro ao autenticar com biometria.');
-  }
-};
+  };
 
   return (
-    <KeyboardAvoidingView
-      behavior="height"
+    <KeyboardAvoidingView 
+      behavior='height'
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -100}
+    >
+      <ScrollView 
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <LinearGradient
           colors={[colors.others[100], colors.others[200]]}
-          style={[styles.container]}>
+          style={[styles.container]}
+        >
           <View style={styles.cardContainer}>
             <View style={imageStyles.profileImageContainer}>
               <Image
@@ -113,15 +119,19 @@ export default function Login({ navigation }: any) {
               onChangeText={setPassword}
             />
 
-            <Button
-              text={loading ? 'Carregando...' : 'Entrar'}
+            <Button 
+              text={loading ? "Carregando..." : "Entrar"}
               onPress={handleLogin}
               color="blue"
             />
 
             {biometricEnabled && (
               <View style={{ marginTop: 12 }}>
-                <Button text="Entrar com biometria" onPress={handleBiometricLogin} color="blue" />
+                <Button
+                  text="Entrar com biometria"
+                  onPress={handleBiometricLogin}
+                  color="blue"
+                />
               </View>
             )}
 
