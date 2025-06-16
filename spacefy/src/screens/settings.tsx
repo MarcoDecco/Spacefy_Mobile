@@ -141,14 +141,6 @@ export default function Settings() {
         toggleTheme();
         setDisplayPreferences(prev => ({ ...prev, darkMode: !prev.darkMode }));
       }
-    },
-    {
-      id: 'large_text',
-      title: 'Texto Grande',
-      icon: 'text-outline',
-      type: 'toggle',
-      value: displayPreferences.largeText,
-      onPress: () => setDisplayPreferences(prev => ({ ...prev, largeText: !prev.largeText }))
     }
   ];
 
@@ -189,7 +181,7 @@ export default function Settings() {
       title: 'Versão do Aplicativo',
       icon: 'information-circle-outline',
       type: 'navigate',
-      onPress: () => console.log('Mostrar versão')
+      onPress: () => Alert.alert('Versão', 'BETA')
     },
     {
       id: 'licenses',
@@ -214,7 +206,6 @@ export default function Settings() {
 
       <ScrollView>
         <SettingsSection title="Notificações" items={notificationSettings} />
-        <SettingsSection title="Privacidade e Segurança" items={privacySettings} />
         <SettingsSection title="Pagamento" items={paymentSettings} />
         <SettingsSection title="Exibição" items={displaySettings} />
         <SettingsSection title="Suporte e Ajuda" items={supportSettings} />

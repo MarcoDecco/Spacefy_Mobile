@@ -264,7 +264,7 @@ export default function Profile() {
 
         <TouchableOpacity 
           style={[styles.menuItem, isDarkMode && { backgroundColor: theme.card }]} 
-          onPress={() => navigation.navigate('Rented')}
+          onPress={() => navigation.navigate('Rented', { from: 'profile' })}
         >
           <Ionicons name="home-outline" size={24} color={isDarkMode ? theme.text : colors.black} />
           <Text style={[styles.menuItemText, isDarkMode && { color: theme.text }]}>Alugados</Text>
@@ -392,118 +392,118 @@ export default function Profile() {
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
-        >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-                <View style={[styles.editProfileModal, isDarkMode && { backgroundColor: theme.card }]}>
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+              <View style={[styles.editProfileModal, isDarkMode && { backgroundColor: theme.card }]}>
                   <ScrollView 
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 20 }}
                   >
-                    <View style={styles.modalHeader}>
-                      <Text style={[styles.modalTitle, isDarkMode && { color: theme.text }]}>Registre-se como Locador(a)</Text>
-                      
-                      <TouchableOpacity onPress={() => setIsSpaceOwnerModalVisible(false)} >
-                        <Ionicons name="close" size={24} color={isDarkMode ? theme.text : colors.black} />
-                      </TouchableOpacity>
-                    </View>
-                    
-                    <Text style={[styles.modalSubTittle, isDarkMode && { color: theme.text }]}>
-                      Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.
-                    </Text>
-
-                    <View>
-                      <View style={styles.documentTypeContainer}>
-                        <TouchableOpacity
-                          style={[
-                            styles.documentTypeButton,
-                            documentType === 'CPF' && styles.documentTypeButtonActive,
-                            isDarkMode && documentType !== 'CPF' && { 
-                              backgroundColor: theme.background,
-                              borderColor: theme.border
-                            }
-                          ]}
-                          onPress={() => setDocumentType('CPF')}
-                        >
-                          <Text style={[
-                            styles.documentTypeButtonText,
-                            documentType === 'CPF' && styles.documentTypeButtonTextActive,
-                            isDarkMode && documentType !== 'CPF' && { color: colors.white }
-                          ]}>CPF</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[
-                            styles.documentTypeButton,
-                            documentType === 'CNPJ' && styles.documentTypeButtonActive,
-                            isDarkMode && documentType !== 'CNPJ' && { 
-                              backgroundColor: theme.background,
-                              borderColor: theme.border
-                            }
-                          ]}
-                          onPress={() => setDocumentType('CNPJ')}
-                        >
-                          <Text style={[
-                            styles.documentTypeButtonText,
-                            documentType === 'CNPJ' && styles.documentTypeButtonTextActive,
-                            isDarkMode && documentType !== 'CNPJ' && { color: colors.white }
-                          ]}>CNPJ</Text>
-                        </TouchableOpacity>
-                      </View>
-
-                      <View style={styles.inputContainer}>
-                        <Text style={[styles.inputLabel, isDarkMode && { color: theme.text }]}>{documentType}</Text>
-                        <TextInput
-                          style={[styles.input, isDarkMode && { 
-                            backgroundColor: theme.background,
-                            color: theme.text,
-                            borderColor: theme.border,
-                            borderWidth: 1
-                          }]}
-                          value={documentNumber}
-                          onChangeText={handleDocumentChange}
-                          placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
-                          placeholderTextColor={isDarkMode ? theme.gray : colors.gray}
-                          keyboardType="numeric"
-                        />
-                      </View>
-
-                      <View style={styles.termsContainer}>
-                        <TouchableOpacity onPress={() => setAcceptedTerms(!acceptedTerms)} >
-                          <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
-                            {acceptedTerms && <Ionicons name="checkmark" size={16} color={colors.white} />}
-                          </View>
-                        </TouchableOpacity>
-
-                        <Text style={[styles.termsText, isDarkMode && { color: theme.text }]}>
-                          Eu li e concordo com os{' '}
-                          <Text 
-                            style={styles.termsLink}
-                            onPress={() => navigation.navigate('PaymentTerms')}
-                          >
-                            termos de distribuição de pagamento
-                          </Text>
-                        </Text>
-                      </View>
-
-                      <TouchableOpacity
-                        style={[
-                          styles.saveButton, 
-                          (!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)) && styles.saveButtonDisabled
-                        ]}
-                        onPress={handleConfirmUserTypeChange}
-                        disabled={!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)}
-                      >
-                        <Text style={styles.saveButtonText}>
-                          {loading ? 'Processando...' : 'Confirmar'}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </ScrollView>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, isDarkMode && { color: theme.text }]}>Registre-se como Locador(a)</Text>
+                  
+                  <TouchableOpacity onPress={() => setIsSpaceOwnerModalVisible(false)} >
+                    <Ionicons name="close" size={24} color={isDarkMode ? theme.text : colors.black} />
+                  </TouchableOpacity>
                 </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
+                
+                <Text style={[styles.modalSubTittle, isDarkMode && { color: theme.text }]}>
+                  Para anunciar seus espaços, informe seu CPF ou CNPJ para verificarmos sua identidade e garantir transações seguras.
+                </Text>
+
+                <View>
+                  <View style={styles.documentTypeContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.documentTypeButton,
+                        documentType === 'CPF' && styles.documentTypeButtonActive,
+                        isDarkMode && documentType !== 'CPF' && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }
+                      ]}
+                      onPress={() => setDocumentType('CPF')}
+                    >
+                      <Text style={[
+                        styles.documentTypeButtonText,
+                        documentType === 'CPF' && styles.documentTypeButtonTextActive,
+                        isDarkMode && documentType !== 'CPF' && { color: colors.white }
+                      ]}>CPF</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.documentTypeButton,
+                        documentType === 'CNPJ' && styles.documentTypeButtonActive,
+                        isDarkMode && documentType !== 'CNPJ' && { 
+                          backgroundColor: theme.background,
+                          borderColor: theme.border
+                        }
+                      ]}
+                      onPress={() => setDocumentType('CNPJ')}
+                    >
+                      <Text style={[
+                        styles.documentTypeButtonText,
+                        documentType === 'CNPJ' && styles.documentTypeButtonTextActive,
+                        isDarkMode && documentType !== 'CNPJ' && { color: colors.white }
+                      ]}>CNPJ</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <Text style={[styles.inputLabel, isDarkMode && { color: theme.text }]}>{documentType}</Text>
+                    <TextInput
+                      style={[styles.input, isDarkMode && { 
+                        backgroundColor: theme.background,
+                        color: theme.text,
+                        borderColor: theme.border,
+                        borderWidth: 1
+                      }]}
+                      value={documentNumber}
+                      onChangeText={handleDocumentChange}
+                      placeholder={documentType === 'CPF' ? '000.000.000-00' : '00.000.000/0000-00'}
+                      placeholderTextColor={isDarkMode ? theme.gray : colors.gray}
+                      keyboardType="numeric"
+                    />
+                  </View>
+
+                  <View style={styles.termsContainer}>
+                    <TouchableOpacity onPress={() => setAcceptedTerms(!acceptedTerms)} >
+                      <View style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}>
+                        {acceptedTerms && <Ionicons name="checkmark" size={16} color={colors.white} />}
+                      </View>
+                    </TouchableOpacity>
+
+                    <Text style={[styles.termsText, isDarkMode && { color: theme.text }]}>
+                      Eu li e concordo com os{' '}
+                      <Text 
+                        style={styles.termsLink}
+                        onPress={() => navigation.navigate('PaymentTerms')}
+                      >
+                        termos de distribuição de pagamento
+                      </Text>
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.saveButton, 
+                      (!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)) && styles.saveButtonDisabled
+                    ]}
+                    onPress={handleConfirmUserTypeChange}
+                    disabled={!acceptedTerms || loading || !isValidDocument(documentNumber, documentType)}
+                  >
+                    <Text style={styles.saveButtonText}>
+                      {loading ? 'Processando...' : 'Confirmar'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                  </ScrollView>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </Modal>
     </View>
