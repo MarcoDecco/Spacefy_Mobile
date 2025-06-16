@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import Card from "../components/card";
 import { useCards } from "../hooks/useCards";
 import { BaseCard } from "../types/card";
@@ -10,8 +10,9 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { FilterOptions } from '../components/filter';
 import ScrollToTopButton from '../components/scrollToTopButton';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
+import { Ionicons } from '@expo/vector-icons';
 
 type RentedScreenRouteProp = RouteProp<RootStackParamList, 'Rented'>;
 
@@ -20,6 +21,7 @@ export default function Rented() {
   const { theme, isDarkMode } = useTheme();
   const { user } = useAuth();
   const route = useRoute<RentedScreenRouteProp>();
+  const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const flatListRef = useRef<FlatList>(null);
@@ -30,7 +32,6 @@ export default function Rented() {
     sortBy: '',
   });
 
-  // Verifica se a tela foi acessada pelo perfil
   const isFromProfile = route.params?.from === 'profile';
 
   const handleSearch = useCallback((text: string) => {
@@ -81,7 +82,7 @@ export default function Rented() {
 
     const matchesPrice = filterByPrice(card.price_per_hour, filters.priceRange);
     const matchesType = filterByType(card.space_type, filters.spaceType);
-    const matchesRating = filterByRating(5, filters.rating); // Usando rating fixo de 5 por enquanto
+    const matchesRating = filterByRating(5, filters.rating);
 
     return matchesSearch && matchesPrice && matchesType && matchesRating;
   }));
@@ -110,25 +111,25 @@ export default function Rented() {
   );
 
   const EmptyComponent = () => (
-    <View style={{ 
-      flex: 1, 
-      justifyContent: 'center', 
-      alignItems: 'center', 
+    <View style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       paddingTop: 30,
       paddingHorizontal: 20
     }}>
       {!user ? (
         <>
-          <Text style={[pageTexts.title, { 
-            textAlign: 'center', 
+          <Text style={[pageTexts.title, {
+            textAlign: 'center',
             color: theme.text,
             fontSize: 24,
             marginBottom: 16
           }]}>
             Faça login para ver seus aluguéis
           </Text>
-          <Text style={[pageTexts.title, { 
-            textAlign: 'center', 
+          <Text style={[pageTexts.title, {
+            textAlign: 'center',
             color: theme.text,
             fontSize: 16,
             opacity: 0.7,
@@ -139,16 +140,16 @@ export default function Rented() {
         </>
       ) : (
         <>
-          <Text style={[pageTexts.title, { 
-            textAlign: 'center', 
+          <Text style={[pageTexts.title, {
+            textAlign: 'center',
             color: theme.text,
             fontSize: 24,
             marginBottom: 16
           }]}>
             Nenhum espaço alugado ainda
           </Text>
-          <Text style={[pageTexts.title, { 
-            textAlign: 'center', 
+          <Text style={[pageTexts.title, {
+            textAlign: 'center',
             color: theme.text,
             fontSize: 16,
             opacity: 0.7,
@@ -172,12 +173,15 @@ export default function Rented() {
 
   return (
     <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      <Search 
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        initialValue={searchQuery}
-        showBackButton={isFromProfile}
-      />
+      
+      {/* HEADER MANUAL */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginLeft: 16, color: theme.text }}>Alugados</Text>
+      </View>
+
       <FlatList
         ref={flatListRef}
         data={user ? filteredCards : []}
