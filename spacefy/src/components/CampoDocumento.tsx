@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
+import Constants from 'expo-constants';
 import { styles } from '../styles/spaceRegisterStyles/etapa7Styles';
 import { colors } from '../styles/globalStyles/colors';
 import { VisualizadorDocumento } from './VisualizadorDocumento';
@@ -19,41 +20,76 @@ export const CampoDocumento: React.FC<CampoDocumentoProps> = ({ titulo, value, o
 
   const uploadToCloudinary = async (fileUri: string) => {
     try {
+      const { cloudinaryApiUrl, cloudinaryCloudName } = Constants.expoConfig?.extra || {};
+      const uploadPreset = "spacefy_mobile"; // Novo preset específico para o app
+
+      // Debug das variáveis de ambiente
+      console.log('Debug das variáveis de ambiente:');
+      console.log('API_URL:', cloudinaryApiUrl);
+      console.log('CLOUD_NAME:', cloudinaryCloudName);
+      console.log('UPLOAD_PRESET:', uploadPreset);
+
       const formData = new FormData();
-      const timestamp = Math.floor(Date.now() / 1000);
+
+      // Prepara o arquivo para upload
+      const fileInfo = await FileSystem.getInfoAsync(fileUri);
+      console.log('Informações do arquivo:', fileInfo);
       
-      // Parâmetros para o upload
-      const params = {
-        folder: 'spacefy_documents',
-        timestamp: timestamp,
-        upload_preset: process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-      };
+      const fileType = fileInfo.uri.split('.').pop()?.toLowerCase();
+      let mimeType;
+      
+      // Determina o tipo MIME correto baseado na extensão
+      switch (fileType) {
+        case 'pdf':
+          mimeType = 'application/pdf';
+          break;
+        case 'png':
+          mimeType = 'image/png';
+          break;
+        case 'jpg':
+        case 'jpeg':
+          mimeType = 'image/jpeg';
+          break;
+        default:
+          mimeType = 'application/octet-stream';
+      }
 
-      formData.append('file', {
+      const fileToUpload = {
         uri: fileUri,
-        type: 'application/octet-stream',
-        name: 'document'
-      } as any);
-      formData.append('upload_preset', params.upload_preset);
-      formData.append('resource_type', 'auto');
-      formData.append('timestamp', params.timestamp.toString());
-      formData.append('api_key', process.env.EXPO_PUBLIC_CLOUDINARY_API_KEY);
-      formData.append('folder', params.folder);
+        type: mimeType,
+        name: `document.${fileType}`
+      };
+      console.log('Arquivo preparado para upload:', fileToUpload);
 
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_CLOUDINARY_API_URL}/${process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-        {
-          method: 'POST',
-          body: formData
-        }
-      );
+      formData.append('file', fileToUpload as any);
+      formData.append('upload_preset', uploadPreset);
+      formData.append('resource_type', 'auto');
+      formData.append('folder', 'spacefy_documents');
+
+      const uploadUrl = `${cloudinaryApiUrl}/${cloudinaryCloudName}/upload`;
+      console.log('URL completa de upload:', uploadUrl);
+      console.log('FormData completo:', formData);
+
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Status da resposta:', response.status);
+      console.log('Headers da resposta:', response.headers);
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Erro detalhado:', errorData);
         throw new Error(errorData.error?.message || 'Erro ao fazer upload do documento');
       }
 
       const data = await response.json();
+      console.log('Upload concluído:', data.secure_url);
       return data.secure_url;
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
@@ -85,6 +121,7 @@ export const CampoDocumento: React.FC<CampoDocumentoProps> = ({ titulo, value, o
           const url = await uploadToCloudinary(uri);
           onChange({ target: { name, value: url } });
         } catch (error) {
+          console.error('Erro detalhado:', error);
           setError('Erro ao fazer upload do documento. Tente novamente.');
         } finally {
           setIsUploading(false);
