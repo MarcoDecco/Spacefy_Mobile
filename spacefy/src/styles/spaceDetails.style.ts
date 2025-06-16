@@ -136,12 +136,11 @@ export const spaceDetailsStyles = StyleSheet.create({
   amenityItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 8,
   },
   amenityText: {
     fontSize: 16,
     color: colors.gray,
-    marginLeft: 8,
   },
   bookingCard: {
     backgroundColor: colors.white,
@@ -374,9 +373,19 @@ export const spaceDetailsStyles = StyleSheet.create({
     marginRight: 8,
   },
   detailsMoreButton: {
-    textAlign: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  detailsMoreButtonText: {
     color: colors.blue,
-    fontSize: 14,
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginRight: 4,
   },
   detailsInnerDivider: {
     height: 1,
@@ -462,11 +471,10 @@ export const spaceDetailsStyles = StyleSheet.create({
     textAlign: 'center',
   },
   detailsModalAmenities: {
-    marginTop: 16,
-    paddingTop: 16,
+    marginTop: 24,
+    paddingTop: 24,
     borderTopWidth: 1,
     borderTopColor: colors.light_gray,
-    marginBottom: 24,
   },
   detailsModalSectionTitle: {
     fontSize: 18,
@@ -476,8 +484,7 @@ export const spaceDetailsStyles = StyleSheet.create({
   },
   detailsModalAmenitiesList: {
     flexDirection: 'column',
-    gap: 8,
-    marginBottom: 16,
+    gap: 12,
   },
   detailsModalAmenityText: {
     fontSize: 16,

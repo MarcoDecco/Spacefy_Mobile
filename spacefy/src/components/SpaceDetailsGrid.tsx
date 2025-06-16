@@ -5,8 +5,6 @@ import { colors } from '~/styles/globalStyles/colors';
 
 interface SpaceDetailsGridProps {
   wifi: string;
-  metragem: string;
-  banheiros: string;
   capacidade: string;
   isDarkMode: boolean;
   theme: any;
@@ -16,8 +14,6 @@ interface SpaceDetailsGridProps {
 
 export const SpaceDetailsGrid: React.FC<SpaceDetailsGridProps> = ({
   wifi,
-  metragem,
-  banheiros,
   capacidade,
   isDarkMode,
   theme,
@@ -55,7 +51,7 @@ export const SpaceDetailsGrid: React.FC<SpaceDetailsGridProps> = ({
 
         <View style={[styles.detailsGridItem, { flex: 1 }]}>
           <MaterialIcons
-            name="crop-square"
+            name="groups"
             size={20}
             color={isDarkMode ? theme.text : colors.gray}
             style={{ marginRight: 8 }}
@@ -65,49 +61,23 @@ export const SpaceDetailsGrid: React.FC<SpaceDetailsGridProps> = ({
               styles.detailsInfoTextNoMargin,
               isDarkMode && { color: theme.text },
             ]}>
-            {metragem}
+            {capacidade}
           </Text>
         </View>
-
-        <View style={[styles.detailsGridItem, { flex: 1 }]}>
-          <MaterialIcons
-            name="wc"
-            size={20}
-            color={isDarkMode ? theme.text : colors.gray}
-            style={{ marginRight: 8 }}
-          />
-          <Text
-            style={[
-              styles.detailsInfoTextNoMargin,
-              isDarkMode && { color: theme.text },
-            ]}>
-            {banheiros}
-          </Text>
-        </View>
-      </View>
-
-      {/* Bottom row */}
-      <View style={styles.detailsGridItem}>
-        <MaterialIcons
-          name="groups"
-          size={20}
-          color={isDarkMode ? theme.text : colors.gray}
-          style={{ marginRight: 8 }}
-        />
-        <Text
-          style={[
-            styles.detailsInfoTextNoMargin,
-            isDarkMode && { color: theme.text },
-          ]}>
-          {capacidade}
-        </Text>
       </View>
     </View>
 
-    <TouchableOpacity onPress={onSeeMore}>
-      <Text style={[styles.detailsMoreButton, isDarkMode && { color: theme.blue }]}>
+    <TouchableOpacity
+      onPress={onSeeMore}
+      style={[styles.detailsMoreButton, isDarkMode && { backgroundColor: theme.card }]}>
+      <Text style={[styles.detailsMoreButtonText, isDarkMode && { color: theme.blue }]}>
         Ver mais
       </Text>
+      <Feather
+        name="chevron-right"
+        size={16}
+        color={isDarkMode ? theme.blue : colors.blue}
+      />
     </TouchableOpacity>
   </View>
 );

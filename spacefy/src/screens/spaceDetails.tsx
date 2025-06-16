@@ -411,6 +411,9 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
     amenities: space?.space_amenities || [],
     type: space?.space_type || 'Não especificado',
     capacity: `${space?.max_people || 0} Pessoas`,
+    hasWifi: space?.space_amenities?.some(amenity => 
+      amenity.toLowerCase().includes('wifi')
+    ) || false
   };
 
   const handleAddReview = () => {
@@ -567,6 +570,10 @@ export default function SpaceDetails({ route }: SpaceDetailsProps) {
                   <SpaceDetailsRow
                     aluguel={aluguel}
                     tipo={tipo}
+                    wifi={space?.space_amenities?.some(amenity => 
+                      amenity.toLowerCase().includes('wifi') || 
+                      amenity.toLowerCase().includes('wi-fi')
+                    ) ? 'Sim' : 'Não'}
                     capacidade={capacidade}
                     isDarkMode={isDarkMode}
                     theme={theme}

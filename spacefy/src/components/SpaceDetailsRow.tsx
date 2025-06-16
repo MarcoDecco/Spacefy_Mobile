@@ -6,8 +6,6 @@ interface SpaceDetailsRowProps {
   aluguel: string | number;
   tipo: string;
   wifi: string;
-  metragem: string;
-  banheiros: string;
   capacidade: string;
   isDarkMode: boolean;
   theme: any;
@@ -19,8 +17,6 @@ export const SpaceDetailsRow: React.FC<SpaceDetailsRowProps> = ({
   aluguel,
   tipo,
   wifi,
-  metragem,
-  banheiros,
   capacidade,
   isDarkMode,
   theme,
@@ -59,8 +55,6 @@ export const SpaceDetailsRow: React.FC<SpaceDetailsRowProps> = ({
     {/* Coluna Detalhes */}
     <SpaceDetailsGrid
       wifi={wifi}
-      metragem={metragem}
-      banheiros={banheiros}
       capacidade={capacidade}
       isDarkMode={isDarkMode}
       theme={theme}
