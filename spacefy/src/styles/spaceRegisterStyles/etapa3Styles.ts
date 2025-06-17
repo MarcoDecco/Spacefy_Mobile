@@ -1,16 +1,16 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
 const imageSize = (width - 48 - 16) / 3; // 3 imagens por linha com espaçamento
-const statusBarHeight = Constants.statusBarHeight;
+const statusBarHeight = Platform.OS === 'ios' ? Constants.statusBarHeight : StatusBar.currentHeight || 0;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.light_gray,
-        marginTop: statusBarHeight,
+        paddingTop: statusBarHeight,
     },
     progressContainer: {
         backgroundColor: colors.white,
@@ -26,7 +26,6 @@ export const styles = StyleSheet.create({
         color: colors.black,
         marginBottom: 16,
         paddingHorizontal: 24,
-        paddingTop: 24,
     },
     subtitle: {
         fontSize: 16,

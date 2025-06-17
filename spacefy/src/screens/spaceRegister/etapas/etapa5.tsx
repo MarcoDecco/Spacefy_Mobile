@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, Alert, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { colors } from '../../../styles/globalStyles/colors';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 // Array com as regras disponíveis para o espaço
 const REGRAS = [
@@ -73,36 +74,45 @@ interface CheckboxRegraProps {
 }
 
 // Componente para checkbox de regra
-const CheckboxRegra: React.FC<CheckboxRegraProps> = ({ regra, checked, onChange }) => (
-    <TouchableOpacity
-        style={[styles.ruleItem, checked && styles.ruleItemSelected]}
-        onPress={() => onChange(regra.id, !checked)}
-    >
-        <View style={styles.ruleIconContainer}>
-            <Ionicons
-                name={regra.icon as any}
-                size={24}
-                color={checked ? colors.blue : colors.dark_gray}
-            />
-        </View>
-        <View style={styles.ruleContent}>
-            <Text style={[styles.ruleLabel, checked && styles.ruleLabelSelected]}>
-                {regra.label}
-            </Text>
-            <Text style={[styles.ruleDescription, checked && styles.ruleDescriptionSelected]}>
-                {regra.descricao}
-            </Text>
-        </View>
-        <View style={[styles.checkboxContainer, checked && styles.checkboxChecked]}>
-            {checked && <Ionicons name="checkmark" size={16} color={colors.white} />}
-        </View>
-    </TouchableOpacity>
-);
+const CheckboxRegra: React.FC<CheckboxRegraProps> = ({ regra, checked, onChange }) => {
+    const { theme } = useTheme();
+    
+    return (
+        <TouchableOpacity
+            style={[
+                styles.ruleItem,
+                { backgroundColor: theme.card, borderColor: theme.border },
+                checked && styles.ruleItemSelected
+            ]}
+            onPress={() => onChange(regra.id, !checked)}
+        >
+            <View style={[styles.ruleIconContainer, { backgroundColor: theme.background }]}>
+                <Ionicons
+                    name={regra.icon as any}
+                    size={24}
+                    color={checked ? colors.blue : theme.text}
+                />
+            </View>
+            <View style={styles.ruleContent}>
+                <Text style={[styles.ruleLabel, { color: theme.text }, checked && styles.ruleLabelSelected]}>
+                    {regra.label}
+                </Text>
+                <Text style={[styles.ruleDescription, { color: theme.text }, checked && styles.ruleDescriptionSelected]}>
+                    {regra.descricao}
+                </Text>
+            </View>
+            <View style={[styles.checkboxContainer, { borderColor: theme.border }, checked && styles.checkboxChecked]}>
+                {checked && <Ionicons name="checkmark" size={16} color={colors.white} />}
+            </View>
+        </TouchableOpacity>
+    );
+};
 
 const Etapa5 = () => {
     const navigation = useNavigation<NavigationProps>();
     const { formData, updateFormData } = useSpaceRegister();
     const [selectedRules, setSelectedRules] = useState<string[]>(formData.space_rules || []);
+    const { theme, isDarkMode } = useTheme();
 
     const handleRuleChange = (ruleId: string, checked: boolean) => {
         if (checked) {
@@ -127,14 +137,18 @@ const Etapa5 = () => {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SafeAreaView style={styles.container}>
-                <View style={styles.progressContainer}>
+            <View style={[styles.container, { backgroundColor: theme.background }]}>
+                <StatusBar 
+                    barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+                />
+                
+                <View style={[styles.progressContainer, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                     <ProgressBar progress={0.625} currentStep={5} totalSteps={8} />
                 </View>
 
                 <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-                    <Text style={styles.title}>Regras do Espaço</Text>
-                    <Text style={styles.subtitle}>
+                    <Text style={[styles.title, { color: theme.text }]}>Regras do Espaço</Text>
+                    <Text style={[styles.subtitle, { color: theme.text }]}>
                         Selecione as regras que se aplicam ao seu espaço
                     </Text>
 
@@ -155,7 +169,7 @@ const Etapa5 = () => {
                     onNext={handleProsseguir}
                     disabled={selectedRules.length === 0}
                 />
-            </SafeAreaView>
+            </View>
         </TouchableWithoutFeedback>
     );
 };

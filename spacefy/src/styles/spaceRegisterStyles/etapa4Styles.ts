@@ -1,15 +1,15 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
-const statusBarHeight = Constants.statusBarHeight;
+const statusBarHeight = Platform.OS === 'ios' ? Constants.statusBarHeight : StatusBar.currentHeight || 0;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.light_gray,
-        marginTop: statusBarHeight,
+        paddingTop: statusBarHeight,
     },
     progressContainer: {
         backgroundColor: colors.white,
@@ -24,7 +24,6 @@ export const styles = StyleSheet.create({
         fontWeight: '700',
         color: colors.black,
         marginBottom: 16,
-        paddingHorizontal: 24,
         paddingTop: 24,
     },
     subtitle: {
@@ -32,7 +31,6 @@ export const styles = StyleSheet.create({
         color: colors.dark_gray,
         lineHeight: 24,
         marginBottom: 24,
-        paddingHorizontal: 24,
     },
     formContainer: {
         flex: 1,
@@ -134,5 +132,42 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 8,
         backgroundColor: colors.white,
+    },
+    modalContent: {
+        backgroundColor: colors.white,
+        borderRadius: 16,
+        padding: 24,
+        width: 280,
+        alignItems: 'center',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 16,
+        color: colors.black,
+    },
+    modalTimeText: {
+        fontSize: 24,
+        marginHorizontal: 8,
+        minWidth: 32,
+        textAlign: 'center',
+        color: colors.black,
+    },
+    modalButton: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    modalButtonCancel: {
+        backgroundColor: colors.light_gray,
+        marginRight: 8,
+    },
+    modalButtonSave: {
+        backgroundColor: colors.blue,
+    },
+    modalButtonText: {
+        color: colors.white,
+        fontWeight: '600',
     },
 }); 

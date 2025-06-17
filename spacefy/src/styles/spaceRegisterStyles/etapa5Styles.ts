@@ -1,15 +1,15 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
-const statusBarHeight = Constants.statusBarHeight;
+const statusBarHeight = Platform.OS === 'ios' ? Constants.statusBarHeight : StatusBar.currentHeight || 0;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.light_gray,
-        marginTop: statusBarHeight,
+        paddingTop: statusBarHeight,
     },
     progressContainer: {
         backgroundColor: colors.white,
@@ -37,17 +37,17 @@ export const styles = StyleSheet.create({
         marginBottom: 24,
     },
     rulesContainer: {
-        marginBottom: 24,
+        flex: 1,
     },
     ruleItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
         backgroundColor: colors.white,
-        padding: 16,
         borderRadius: 12,
+        padding: 16,
         marginBottom: 12,
         borderWidth: 1,
         borderColor: colors.light_gray,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     ruleItemSelected: {
         borderColor: colors.blue,
@@ -87,8 +87,7 @@ export const styles = StyleSheet.create({
         height: 24,
         borderRadius: 6,
         borderWidth: 2,
-        borderColor: colors.gray,
-        marginLeft: 12,
+        borderColor: colors.light_gray,
         justifyContent: 'center',
         alignItems: 'center',
     },

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../styles/globalStyles/colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ProgressBarProps {
   progress: number;
@@ -9,9 +10,13 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ progress, currentStep, totalSteps }) => {
+  const { theme } = useTheme();
+
   return (
     <View style={styles.progressContainer}>
-      <Text style={styles.progressText}>Etapa {currentStep} de {totalSteps}</Text>
+      <Text style={[styles.progressText, { color: theme.text }]}>
+        Etapa {currentStep} de {totalSteps}
+      </Text>
       <View style={styles.progressBarContainer}>
         {Array.from({ length: totalSteps }).map((_, index) => (
           <View
@@ -33,7 +38,6 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 15,
-    color: colors.dark_gray,
     marginBottom: 4,
     fontWeight: '500',
     textAlign: 'center',

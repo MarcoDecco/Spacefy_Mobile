@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, SafeAreaView, Text, TouchableOpacity, Modal, FlatList, StyleSheet, TouchableWithoutFeedback, Keyboard, ScrollView, Alert, KeyboardAvoidingView, Platform, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
 import { inputStyles } from '../../../styles/componentStyles/inputStyles';
@@ -126,7 +126,12 @@ const Etapa1 = () => {
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+        <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+          <StatusBar 
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={isDarkMode ? theme.background : colors.white}
+          />
+          
           <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
             <ProgressBar progress={0.125} currentStep={1} totalSteps={8} />
           </View>
@@ -236,7 +241,7 @@ const Etapa1 = () => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
-        </SafeAreaView>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

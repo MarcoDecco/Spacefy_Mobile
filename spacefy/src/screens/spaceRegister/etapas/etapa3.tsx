@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
   Platform,
-  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -20,12 +20,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 type Etapa3ScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Etapa3'>;
 
 export default function Etapa3() {
   const navigation = useNavigation<Etapa3ScreenNavigationProp>();
   const { formData, updateFormData } = useSpaceRegister();
+  const { isDarkMode, theme } = useTheme();
   const [images, setImages] = useState<string[]>(formData.image_url || []);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -90,19 +92,24 @@ export default function Etapa3() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
+    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+      <StatusBar 
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={isDarkMode ? theme.background : colors.white}
+      />
+      
+      <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card }]}>
         <ProgressBar progress={0.375} currentStep={3} totalSteps={8} />
       </View>
 
       <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Fotos do seu espaço</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Fotos do seu espaço</Text>
+        <Text style={[styles.subtitle, isDarkMode && { color: theme.text }]}>
           Adicione fotos do seu espaço para que os usuários possam conhecê-lo melhor.
           Você pode adicionar até 6 fotos.
         </Text>
 
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, isDarkMode && { backgroundColor: theme.card }]}>
           <View style={styles.imageGrid}>
             {images.map((uri, index) => (
               <View key={index} style={styles.imageWrapper}>
@@ -122,11 +129,11 @@ export default function Etapa3() {
             ))}
             {images.length < 6 && (
               <TouchableOpacity style={styles.addButton} onPress={pickImage}>
-                <Ionicons name="add" size={32} color={colors.blue} />
+                <Ionicons name="add" size={32} color={isDarkMode ? theme.blue : colors.blue} />
               </TouchableOpacity>
             )}
           </View>
-          <Text style={styles.imageTip}>
+          <Text style={[styles.imageTip, isDarkMode && { color: theme.text }]}>
             Dica: Adicione fotos em boa qualidade e bem iluminadas do seu espaço
           </Text>
         </View>
@@ -153,6 +160,6 @@ export default function Etapa3() {
           )}
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 } 

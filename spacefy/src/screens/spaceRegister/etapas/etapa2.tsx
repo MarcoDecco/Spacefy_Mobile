@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
-  SafeAreaView, 
   Text, 
   TouchableOpacity, 
   TouchableWithoutFeedback, 
@@ -229,225 +228,222 @@ const Etapa2 = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor="transparent"
-        translucent
-      />
-      <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
-        <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
-      </View>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+          <StatusBar 
+            barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+            backgroundColor={isDarkMode ? theme.background : colors.white}
+          />
+          
+          <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+            <ProgressBar progress={0.25} currentStep={2} totalSteps={8} />
+          </View>
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView 
-          style={styles.contentContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 100 }}
-        >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View>
-              <View style={styles.header}>
-                <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Localização</Text>
-                <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
-                  Informe o endereço completo do seu espaço
-                </Text>
+          <ScrollView 
+            style={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.header}>
+              <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Endereço do Espaço</Text>
+              <Text style={[styles.description, isDarkMode && { color: theme.text }]}>
+                Informe o endereço completo do seu espaço
+              </Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              <View style={[styles.addressContainer, isDarkMode && { backgroundColor: theme.card }]}>
+                <View style={styles.addressRow}>
+                  <MaterialIcons name="location-on" size={24} color={colors.blue} style={styles.addressIcon} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.addressLabel, isDarkMode && { color: theme.text }]}>Endereço</Text>
+                    <Text style={[styles.addressText, isDarkMode && { color: theme.text }]}>
+                      {street ? `${street}, ${number}` : 'Endereço não informado'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity 
+                    style={[styles.useCurrentLocationButton, isDarkMode && { backgroundColor: theme.card }]}
+                    onPress={async () => {
+                      try {
+                        setLoading(true);
+                        const { status } = await Location.requestForegroundPermissionsAsync();
+                        if (status !== 'granted') {
+                          Alert.alert('Permissão negada', 'Precisamos da sua localização para preencher o endereço');
+                          return;
+                        }
+
+                        const location = await Location.getCurrentPositionAsync({
+                          accuracy: Location.Accuracy.High,
+                        });
+
+                        const newLocation = {
+                          latitude: location.coords.latitude,
+                          longitude: location.coords.longitude,
+                        };
+
+                        setLocation(newLocation);
+
+                        // Buscar o endereço usando a API de geocodificação reversa
+                        const response = await fetch(
+                          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLocation.latitude}&lon=${newLocation.longitude}`
+                        );
+                        const data = await response.json();
+
+                        if (data.address) {
+                          setStreet(data.address.road || data.address.pedestrian || '');
+                          setNumber(data.address.house_number || '');
+                          setNeighborhood(data.address.suburb || data.address.neighbourhood || '');
+                          setCity(data.address.city || data.address.town || '');
+                          setState(data.address.state || '');
+                          setZipCode(data.address.postcode || '');
+                        }
+                      } catch (error) {
+                        Alert.alert('Erro', 'Não foi possível obter seu endereço atual');
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    <MaterialIcons name="my-location" size={24} color={colors.blue} />
+                  </TouchableOpacity>
+                </View>
               </View>
 
-              <View style={styles.formContainer}>
-                <View style={[styles.addressContainer, isDarkMode && { backgroundColor: theme.card }]}>
-                  <View style={styles.addressRow}>
-                    <MaterialIcons name="location-on" size={24} color={colors.blue} style={styles.addressIcon} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.addressLabel, isDarkMode && { color: theme.text }]}>Endereço</Text>
-                      <Text style={[styles.addressText, isDarkMode && { color: theme.text }]}>
-                        {street ? `${street}, ${number}` : 'Endereço não informado'}
-                      </Text>
-                    </View>
+              <View style={[styles.mapContainer, isDarkMode && { backgroundColor: theme.card }]}>
+                {mapLoading ? (
+                  <View style={styles.mapLoadingContainer}>
+                    <ActivityIndicator size="large" color={colors.blue} />
+                  </View>
+                ) : (
+                  <>
+                    <MapView
+                      provider={PROVIDER_GOOGLE}
+                      style={styles.map}
+                      initialRegion={location ? {
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                        latitudeDelta: 0.005,
+                        longitudeDelta: 0.005,
+                      } : undefined}
+                    >
+                      {location && (
+                        <Marker
+                          coordinate={{
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                          }}
+                        />
+                      )}
+                    </MapView>
                     <TouchableOpacity 
-                      style={[styles.useCurrentLocationButton, isDarkMode && { backgroundColor: theme.card }]}
+                      style={styles.currentLocationButton}
                       onPress={async () => {
                         try {
-                          setLoading(true);
-                          const { status } = await Location.requestForegroundPermissionsAsync();
-                          if (status !== 'granted') {
-                            Alert.alert('Permissão negada', 'Precisamos da sua localização para preencher o endereço');
-                            return;
-                          }
-
+                          setMapLoading(true);
                           const location = await Location.getCurrentPositionAsync({
                             accuracy: Location.Accuracy.High,
                           });
-
                           const newLocation = {
                             latitude: location.coords.latitude,
                             longitude: location.coords.longitude,
                           };
-
                           setLocation(newLocation);
-
-                          // Buscar o endereço usando a API de geocodificação reversa
-                          const response = await fetch(
-                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${newLocation.latitude}&lon=${newLocation.longitude}`
-                          );
-                          const data = await response.json();
-
-                          if (data.address) {
-                            setStreet(data.address.road || data.address.pedestrian || '');
-                            setNumber(data.address.house_number || '');
-                            setNeighborhood(data.address.suburb || data.address.neighbourhood || '');
-                            setCity(data.address.city || data.address.town || '');
-                            setState(data.address.state || '');
-                            setZipCode(data.address.postcode || '');
-                          }
+                          // Aqui você pode adicionar a lógica para buscar o CEP mais próximo
+                          // e preencher o endereço
                         } catch (error) {
-                          Alert.alert('Erro', 'Não foi possível obter seu endereço atual');
+                          Alert.alert('Erro', 'Não foi possível obter sua localização');
                         } finally {
-                          setLoading(false);
+                          setMapLoading(false);
                         }
                       }}
                     >
-                      <MaterialIcons name="my-location" size={24} color={colors.blue} />
+                      <MaterialIcons name="my-location" size={24} color={colors.white} />
                     </TouchableOpacity>
-                  </View>
-                </View>
+                  </>
+                )}
+              </View>
 
-                <View style={[styles.mapContainer, isDarkMode && { backgroundColor: theme.card }]}>
-                  {mapLoading ? (
-                    <View style={styles.mapLoadingContainer}>
-                      <ActivityIndicator size="large" color={colors.blue} />
-                    </View>
-                  ) : (
-                    <>
-                      <MapView
-                        provider={PROVIDER_GOOGLE}
-                        style={styles.map}
-                        initialRegion={location ? {
-                          latitude: location.latitude,
-                          longitude: location.longitude,
-                          latitudeDelta: 0.005,
-                          longitudeDelta: 0.005,
-                        } : undefined}
-                      >
-                        {location && (
-                          <Marker
-                            coordinate={{
-                              latitude: location.latitude,
-                              longitude: location.longitude,
-                            }}
-                          />
-                        )}
-                      </MapView>
-                      <TouchableOpacity 
-                        style={styles.currentLocationButton}
-                        onPress={async () => {
-                          try {
-                            setMapLoading(true);
-                            const location = await Location.getCurrentPositionAsync({
-                              accuracy: Location.Accuracy.High,
-                            });
-                            const newLocation = {
-                              latitude: location.coords.latitude,
-                              longitude: location.coords.longitude,
-                            };
-                            setLocation(newLocation);
-                            // Aqui você pode adicionar a lógica para buscar o CEP mais próximo
-                            // e preencher o endereço
-                          } catch (error) {
-                            Alert.alert('Erro', 'Não foi possível obter sua localização');
-                          } finally {
-                            setMapLoading(false);
-                          }
-                        }}
-                      >
-                        <MaterialIcons name="my-location" size={24} color={colors.white} />
-                      </TouchableOpacity>
-                    </>
-                  )}
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="CEP"
+                  placeholder="Digite o CEP"
+                  value={zipCode}
+                  onChangeText={handleZipCodeChange}
+                  keyboardType="numeric"
+                  maxLength={9}
+                  rightIcon={loading ? <ActivityIndicator color={colors.blue} /> : undefined}
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="CEP"
-                    placeholder="Digite o CEP"
-                    value={zipCode}
-                    onChangeText={handleZipCodeChange}
-                    keyboardType="numeric"
-                    maxLength={9}
-                    rightIcon={loading ? <ActivityIndicator color={colors.blue} /> : undefined}
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Endereço"
+                  placeholder="Digite o endereço"
+                  value={street}
+                  onChangeText={setStreet}
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Endereço"
-                    placeholder="Digite o endereço"
-                    value={street}
-                    onChangeText={setStreet}
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Número"
+                  placeholder="Digite o número"
+                  value={number}
+                  onChangeText={setNumber}
+                  keyboardType="numeric"
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Número"
-                    placeholder="Digite o número"
-                    value={number}
-                    onChangeText={setNumber}
-                    keyboardType="numeric"
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Complemento"
+                  placeholder="Digite o complemento (opcional)"
+                  value={complement}
+                  onChangeText={setComplement}
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Complemento"
-                    placeholder="Digite o complemento (opcional)"
-                    value={complement}
-                    onChangeText={setComplement}
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Bairro"
+                  placeholder="Digite o bairro"
+                  value={neighborhood}
+                  onChangeText={setNeighborhood}
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Bairro"
-                    placeholder="Digite o bairro"
-                    value={neighborhood}
-                    onChangeText={setNeighborhood}
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Cidade"
+                  placeholder="Digite a cidade"
+                  value={city}
+                  onChangeText={setCity}
+                />
+              </View>
 
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Cidade"
-                    placeholder="Digite a cidade"
-                    value={city}
-                    onChangeText={setCity}
-                  />
-                </View>
-
-                <View style={styles.inputContainer}>
-                  <RegisterSpaceInput
-                    label="Estado"
-                    placeholder="Digite o estado"
-                    value={state}
-                    onChangeText={setState}
-                  />
-                </View>
+              <View style={styles.inputContainer}>
+                <RegisterSpaceInput
+                  label="Estado"
+                  placeholder="Digite o estado"
+                  value={state}
+                  onChangeText={setState}
+                />
               </View>
             </View>
-          </TouchableWithoutFeedback>
-        </ScrollView>
+          </ScrollView>
 
-        <NavigationButtons
-          onBack={() => navigation.goBack()}
-          onNext={handleProsseguir}
-          disabled={!street || !number || !neighborhood || !city || !state || !zipCode}
-        />
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <NavigationButtons
+            onBack={() => navigation.goBack()}
+            onNext={handleProsseguir}
+            disabled={!street || !number || !neighborhood || !city || !state || !zipCode}
+          />
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

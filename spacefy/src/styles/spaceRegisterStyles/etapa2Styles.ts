@@ -1,14 +1,15 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
-const statusBarHeight = Constants.statusBarHeight;
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
+const statusBarHeight = Platform.OS === 'ios' ? Constants.statusBarHeight : StatusBar.currentHeight || 0;
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.light_gray,
+        backgroundColor: colors.white,
+        paddingTop: statusBarHeight,
     },
     progressContainer: {
         backgroundColor: colors.white,
@@ -16,33 +17,32 @@ export const styles = StyleSheet.create({
         paddingBottom: 5,
         borderBottomWidth: 1,
         borderBottomColor: colors.light_gray,
+        marginBottom: 16,
     },
     contentContainer: {
         flex: 1,
         paddingHorizontal: 24,
-        paddingTop: 24,
     },
     header: {
-        marginBottom: 24,
+        marginBottom: 32,
+        paddingTop: 24,
     },
     title: {
         fontSize: 28,
         fontWeight: '700',
         color: colors.black,
-        marginBottom: 16,
-        lineHeight: 36,
+        marginBottom: 8,
     },
     description: {
         fontSize: 16,
         color: colors.dark_gray,
         lineHeight: 24,
-        marginBottom: 16,
     },
     formContainer: {
         flex: 1,
     },
     inputContainer: {
-        marginBottom: 16,
+        marginBottom: 24,
     },
     inputLabel: {
         fontSize: 16,
@@ -51,12 +51,12 @@ export const styles = StyleSheet.create({
         marginBottom: 8,
     },
     input: {
-        backgroundColor: colors.white,
-        borderRadius: 12,
-        padding: 16,
-        fontSize: 16,
-        color: colors.black,
+        height: 48,
         borderWidth: 1,
+        borderRadius: 8,
+        paddingHorizontal: 16,
+        justifyContent: 'center',
+        backgroundColor: colors.white,
         borderColor: colors.light_gray,
     },
     inputError: {
@@ -103,14 +103,12 @@ export const styles = StyleSheet.create({
     },
     mapContainer: {
         height: 200,
-        borderRadius: 12,
+        marginVertical: 16,
+        borderRadius: 8,
         overflow: 'hidden',
-        marginBottom: 16,
-        backgroundColor: colors.light_gray,
     },
     map: {
-        width: '100%',
-        height: '100%',
+        flex: 1,
     },
     mapLoadingContainer: {
         flex: 1,
@@ -141,5 +139,16 @@ export const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: colors.light_blue,
         marginLeft: 12,
+    },
+    buttonRowFixed: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        paddingHorizontal: 30,
+        marginBottom: '8%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 12,
     },
 }); 

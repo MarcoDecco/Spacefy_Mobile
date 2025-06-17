@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NavigationProps } from '../../../navigation/types';
@@ -17,6 +18,7 @@ import { colors } from '../../../styles/globalStyles/colors';
 import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 // Array com todas as categorias e seus itens
 const CATEGORIAS = [
@@ -132,28 +134,48 @@ interface CheckboxItemProps {
   onChange: (id: string, checked: boolean) => void;
 }
 
-const CheckboxItem: React.FC<CheckboxItemProps> = ({ item, checked, onChange }) => (
-  <TouchableOpacity
-    style={[styles.itemContainer, checked && styles.itemContainerSelected]}
-    onPress={() => onChange(item.id, !checked)}
-  >
-    <View style={styles.itemContent}>
-      <View style={[styles.itemIconContainer, checked && styles.itemIconContainerSelected]}>
-        <Ionicons
-          name={item.icon as any}
-          size={20}
-          color={checked ? colors.blue : colors.dark_gray}
-        />
+const CheckboxItem: React.FC<CheckboxItemProps> = ({ item, checked, onChange }) => {
+  const { theme } = useTheme();
+  
+  return (
+    <TouchableOpacity
+      style={[
+        styles.itemContainer,
+        { backgroundColor: theme.card, borderColor: theme.border },
+        checked && styles.itemContainerSelected
+      ]}
+      onPress={() => onChange(item.id, !checked)}
+    >
+      <View style={styles.itemContent}>
+        <View style={[
+          styles.itemIconContainer,
+          { backgroundColor: theme.background },
+          checked && styles.itemIconContainerSelected
+        ]}>
+          <Ionicons
+            name={item.icon as any}
+            size={24}
+            color={checked ? colors.blue : theme.text}
+          />
+        </View>
+        <Text style={[
+          styles.itemLabel,
+          { color: theme.text },
+          checked && styles.itemLabelSelected
+        ]}>
+          {item.label}
+        </Text>
       </View>
-      <Text style={[styles.itemLabel, checked && styles.itemLabelSelected]}>
-        {item.label}
-      </Text>
-    </View>
-    <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-      {checked && <Ionicons name="checkmark" size={16} color={colors.white} />}
-    </View>
-  </TouchableOpacity>
-);
+      <View style={[
+        styles.checkbox,
+        { borderColor: theme.border },
+        checked && styles.checkboxChecked
+      ]}>
+        {checked && <Ionicons name="checkmark" size={16} color={colors.white} />}
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 interface CategoriaProps {
   titulo: string;
@@ -167,31 +189,36 @@ interface CategoriaProps {
   onChange: (id: string, checked: boolean) => void;
 }
 
-const Categoria: React.FC<CategoriaProps> = ({ titulo, icon, itens, checkedItems, onChange }) => (
-  <View style={styles.categorySection}>
-    <View style={styles.categoryHeader}>
-      <View style={styles.categoryIconContainer}>
-        <Ionicons name={icon as any} size={24} color={colors.blue} />
+const Categoria: React.FC<CategoriaProps> = ({ titulo, icon, itens, checkedItems, onChange }) => {
+  const { theme } = useTheme();
+  
+  return (
+    <View style={styles.categorySection}>
+      <View style={styles.categoryHeader}>
+        <View style={[styles.categoryIconContainer, { backgroundColor: theme.background }]}>
+          <Ionicons name={icon as any} size={24} color={theme.blue} />
+        </View>
+        <Text style={[styles.categoryTitle, { color: theme.text }]}>{titulo}</Text>
       </View>
-      <Text style={styles.categoryTitle}>{titulo}</Text>
+      <View style={styles.itemsGrid}>
+        {itens.map((item) => (
+          <CheckboxItem
+            key={item.id}
+            item={item}
+            checked={checkedItems.includes(item.id)}
+            onChange={onChange}
+          />
+        ))}
+      </View>
     </View>
-    <View style={styles.itemsGrid}>
-      {itens.map((item) => (
-        <CheckboxItem
-          key={item.id}
-          item={item}
-          checked={checkedItems.includes(item.id)}
-          onChange={onChange}
-        />
-      ))}
-    </View>
-  </View>
-);
+  );
+};
 
 const Etapa6 = () => {
   const navigation = useNavigation<NavigationProps>();
   const { formData, updateFormData } = useSpaceRegister();
   const [selectedItems, setSelectedItems] = useState<string[]>(formData.space_amenities || []);
+  const { theme, isDarkMode } = useTheme();
 
   const handleItemChange = (itemId: string, checked: boolean) => {
     if (checked) {
@@ -216,14 +243,18 @@ const Etapa6 = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.progressContainer}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <StatusBar 
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        />
+        
+        <View style={[styles.progressContainer, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
           <ProgressBar progress={0.75} currentStep={6} totalSteps={8} />
         </View>
 
         <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Comodidades do Espaço</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.text }]}>Comodidades do Espaço</Text>
+          <Text style={[styles.subtitle, { color: theme.text }]}>
             Selecione as comodidades disponíveis no seu espaço
           </Text>
 
@@ -244,7 +275,7 @@ const Etapa6 = () => {
           onNext={handleProsseguir}
           disabled={selectedItems.length === 0}
         />
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

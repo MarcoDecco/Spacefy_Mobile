@@ -15,6 +15,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   StyleSheet,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
@@ -30,6 +31,7 @@ import api from '../../../services/api';
 import { CampoTexto } from '../../../components/CampoTexto';
 import { CampoDocumento } from '../../../components/CampoDocumento';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 interface CampoTextoProps {
   titulo: string;
@@ -59,15 +61,16 @@ interface SpaceRegisterData {
 
 const VisualizadorDocumento: React.FC<VisualizadorDocumentoProps> = ({ url }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <View style={styles.documentPreview}>
       <TouchableOpacity
-        style={styles.previewButton}
+        style={[styles.previewButton, { backgroundColor: theme.card }]}
         onPress={() => setModalVisible(true)}
       >
-        <Ionicons name="document-text-outline" size={24} color={colors.blue} />
-        <Text style={styles.previewText}>Visualizar Documento</Text>
+        <Ionicons name="document-text-outline" size={24} color={theme.blue} />
+        <Text style={[styles.previewText, { color: theme.text }]}>Visualizar Documento</Text>
       </TouchableOpacity>
 
       <Modal
@@ -76,10 +79,10 @@ const VisualizadorDocumento: React.FC<VisualizadorDocumentoProps> = ({ url }) =>
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0,0,0,0.9)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[styles.closeButton, { backgroundColor: theme.blue }]}
               onPress={() => setModalVisible(false)}
             >
               <Ionicons name="close" size={24} color={colors.white} />
@@ -100,6 +103,7 @@ const Etapa7: React.FC = () => {
   const navigation = useNavigation();
   const { formData, updateFormData } = useSpaceRegister();
   const [loading, setLoading] = useState(false);
+  const { isDarkMode, theme } = useTheme();
 
   const handleChange = (e: { target: { name: string; value: string } }) => {
     updateFormData({ [e.target.name]: e.target.value });
@@ -151,41 +155,98 @@ const Etapa7: React.FC = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.progressContainer}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <StatusBar 
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={isDarkMode ? theme.background : colors.white}
+        />
+        
+        <View style={[styles.progressContainer, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
           <ProgressBar progress={0.875} currentStep={7} totalSteps={8} />
         </View>
 
         <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Informações do Proprietário e Documentos</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.text }]}>Informações do Proprietário e Documentos</Text>
+          <Text style={[styles.subtitle, { color: theme.text }]}>
             Preencha os dados do proprietário e anexe os documentos necessários para o cadastro do seu espaço.
           </Text>
 
-          <CampoTexto
-            titulo="Nome do Proprietário"
-            value={formData.owner_name || ''}
-            onChange={handleChange}
-            name="owner_name"
-          />
-          <CampoTexto
-            titulo="E-mail"
-            value={formData.owner_email || ''}
-            onChange={handleChange}
-            name="owner_email"
-          />
-          <CampoTexto
-            titulo="Telefone"
-            value={formData.owner_phone || ''}
-            onChange={handleChange}
-            name="owner_phone"
-          />
-          <CampoTexto
-            titulo="CPF ou CNPJ"
-            value={formData.document_number || ''}
-            onChange={handleChange}
-            name="document_number"
-          />
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>Nome do Proprietário</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                }
+              ]}
+              value={formData.owner_name || ''}
+              onChangeText={(text) => handleChange({ target: { name: 'owner_name', value: text } })}
+              placeholder="Digite o nome do proprietário"
+              placeholderTextColor={theme.gray}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>E-mail</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                }
+              ]}
+              value={formData.owner_email || ''}
+              onChangeText={(text) => handleChange({ target: { name: 'owner_email', value: text } })}
+              placeholder="Digite o e-mail"
+              placeholderTextColor={theme.gray}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>Telefone</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                }
+              ]}
+              value={formData.owner_phone || ''}
+              onChangeText={(text) => handleChange({ target: { name: 'owner_phone', value: text } })}
+              placeholder="Digite o telefone"
+              placeholderTextColor={theme.gray}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={[styles.inputLabel, { color: theme.text }]}>CPF ou CNPJ</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.card,
+                  color: theme.text,
+                  borderColor: theme.border,
+                }
+              ]}
+              value={formData.document_number || ''}
+              onChangeText={(text) => handleChange({ target: { name: 'document_number', value: text } })}
+              placeholder="Digite o CPF ou CNPJ"
+              placeholderTextColor={theme.gray}
+              keyboardType="numeric"
+            />
+          </View>
+
           <CampoDocumento
             titulo="Documento do Proprietário"
             value={formData.document_photo || ''}
@@ -208,15 +269,15 @@ const Etapa7: React.FC = () => {
         {loading && (
           <View style={{
             ...StyleSheet.absoluteFillObject,
-            backgroundColor: 'rgba(255,255,255,0.7)',
+            backgroundColor: 'rgba(0,0,0,0.7)',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 10,
           }}>
-            <ActivityIndicator size="large" color={colors.blue} />
+            <ActivityIndicator size="large" color={theme.blue} />
           </View>
         )}
-      </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

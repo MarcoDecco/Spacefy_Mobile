@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 import { styles } from '../styles/spaceRegisterStyles/etapa7Styles';
 import { colors } from '../styles/globalStyles/colors';
 import { VisualizadorDocumento } from './VisualizadorDocumento';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CampoDocumentoProps {
   titulo: string;
@@ -15,6 +16,7 @@ interface CampoDocumentoProps {
 }
 
 export const CampoDocumento: React.FC<CampoDocumentoProps> = ({ titulo, value, onChange, name }) => {
+  const { theme } = useTheme();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -140,7 +142,7 @@ export const CampoDocumento: React.FC<CampoDocumentoProps> = ({ titulo, value, o
 
   return (
     <View style={styles.documentContainer}>
-      <Text style={styles.documentTitle}>{titulo}</Text>
+      <Text style={[styles.documentTitle, { color: theme.text }]}>{titulo}</Text>
       <View style={styles.documentButtons}>
         <TouchableOpacity
           style={[styles.selectButton, isUploading && styles.disabled]}

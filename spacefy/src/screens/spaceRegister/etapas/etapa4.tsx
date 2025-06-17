@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  SafeAreaView,
   Platform,
   Modal,
   TextInput,
+  StatusBar,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,6 +19,7 @@ import { ProgressBar } from '../../../components/ProgressBar';
 import { useSpaceRegister } from '../../../contexts/SpaceRegisterContext';
 import { NavigationButtons } from '../../../components/buttons/NavigationButtons';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 const weekDays = [
   { key: 'mon', label: 'Segunda' },
@@ -49,6 +50,7 @@ function splitTime(time: string) {
 export default function Etapa4() {
   const navigation = useNavigation<Etapa4ScreenNavigationProp>();
   const { formData, updateFormData } = useSpaceRegister();
+  const { isDarkMode, theme } = useTheme();
   const [pricePerHour, setPricePerHour] = useState(formData.price_per_hour || '');
   const [days, setDays] = useState<Record<string, DaySlot>>(() => {
     const initial: Record<string, DaySlot> = {};
@@ -190,30 +192,40 @@ export default function Etapa4() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.progressContainer}>
+    <View style={[styles.container, isDarkMode && { backgroundColor: theme.background }]}>
+      <StatusBar 
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={isDarkMode ? theme.background : colors.white}
+      />
+      
+      <View style={[styles.progressContainer, isDarkMode && { backgroundColor: theme.card }]}>
         <ProgressBar progress={0.5} currentStep={4} totalSteps={8} />
       </View>
+      
       <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Disponibilidade do espaço</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, isDarkMode && { color: theme.text }]}>Disponibilidade do espaço</Text>
+        <Text style={[styles.subtitle, isDarkMode && { color: theme.text }]}>
           Selecione os dias e horários em que seu espaço estará disponível para reserva.
         </Text>
 
         {/* Campo de preço por hora */}
-        <View style={styles.priceContainer}>
-          <Text style={styles.priceLabel}>Preço por hora (R$)</Text>
+        <View style={[styles.priceContainer, isDarkMode && { backgroundColor: theme.card }]}>
+          <Text style={[styles.priceLabel, isDarkMode && { color: theme.text }]}>Preço por hora (R$)</Text>
           <TextInput
-            style={styles.priceInput}
+            style={[styles.priceInput, isDarkMode && { 
+              backgroundColor: theme.background,
+              color: theme.text,
+              borderColor: theme.border
+            }]}
             value={pricePerHour}
             onChangeText={setPricePerHour}
             keyboardType="numeric"
             placeholder="0,00"
-            placeholderTextColor={colors.gray}
+            placeholderTextColor={isDarkMode ? theme.gray : colors.gray}
           />
         </View>
 
-        <View style={styles.availabilityContainer}>
+        <View style={[styles.availabilityContainer, isDarkMode && { backgroundColor: theme.card }]}>
           {weekDays.map(day => (
             <View key={day.key} style={{ marginBottom: 16 }}>
               <TouchableOpacity
@@ -221,43 +233,46 @@ export default function Etapa4() {
                 onPress={() => toggleDay(day.key)}
               >
                 <View style={{
-                  width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: days[day.key].enabled ? colors.blue : colors.gray, backgroundColor: days[day.key].enabled ? colors.blue : 'transparent', marginRight: 12, justifyContent: 'center', alignItems: 'center',
+                  width: 24, height: 24, borderRadius: 6, borderWidth: 2, 
+                  borderColor: days[day.key].enabled ? colors.blue : (isDarkMode ? theme.border : colors.gray), 
+                  backgroundColor: days[day.key].enabled ? colors.blue : 'transparent', 
+                  marginRight: 12, justifyContent: 'center', alignItems: 'center',
                 }}>
                   {days[day.key].enabled && <Ionicons name="checkmark" size={18} color={colors.white} />}
                 </View>
-                <Text style={{ fontSize: 16, color: colors.black, fontWeight: '500' }}>{day.label}</Text>
+                <Text style={{ fontSize: 16, color: isDarkMode ? theme.text : colors.black, fontWeight: '500' }}>{day.label}</Text>
               </TouchableOpacity>
               {days[day.key].enabled && days[day.key].slots.map((slot, idx) => (
-                <View key={idx} style={styles.timeSlotRow}>
+                <View key={idx} style={[styles.timeSlotRow, isDarkMode && { backgroundColor: theme.background }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <Text style={{ fontSize: 14, color: colors.dark_gray, marginRight: 8 }}>Início:</Text>
+                    <Text style={{ fontSize: 14, color: isDarkMode ? theme.text : colors.dark_gray, marginRight: 8 }}>Início:</Text>
                     <TouchableOpacity
                       style={{
                         borderWidth: 1,
-                        borderColor: colors.light_gray,
+                        borderColor: isDarkMode ? theme.border : colors.light_gray,
                         borderRadius: 6,
                         paddingHorizontal: 12,
                         paddingVertical: Platform.OS === 'ios' ? 8 : 4,
                         marginRight: 8,
-                        backgroundColor: colors.white,
+                        backgroundColor: isDarkMode ? theme.card : colors.white,
                       }}
                       onPress={() => openEditModal(day.key, idx, 'start', slot.start)}
                     >
-                      <Text style={{ fontSize: 16, color: colors.black }}>{slot.start}</Text>
+                      <Text style={{ fontSize: 16, color: isDarkMode ? theme.text : colors.black }}>{slot.start}</Text>
                     </TouchableOpacity>
-                    <Text style={{ fontSize: 14, color: colors.dark_gray, marginRight: 8 }}>Fim:</Text>
+                    <Text style={{ fontSize: 14, color: isDarkMode ? theme.text : colors.dark_gray, marginRight: 8 }}>Fim:</Text>
                     <TouchableOpacity
                       style={{
                         borderWidth: 1,
-                        borderColor: colors.light_gray,
+                        borderColor: isDarkMode ? theme.border : colors.light_gray,
                         borderRadius: 6,
                         paddingHorizontal: 12,
                         paddingVertical: Platform.OS === 'ios' ? 8 : 4,
-                        backgroundColor: colors.white,
+                        backgroundColor: isDarkMode ? theme.card : colors.white,
                       }}
                       onPress={() => openEditModal(day.key, idx, 'end', slot.end)}
                     >
-                      <Text style={{ fontSize: 16, color: colors.black }}>{slot.end}</Text>
+                      <Text style={{ fontSize: 16, color: isDarkMode ? theme.text : colors.black }}>{slot.end}</Text>
                     </TouchableOpacity>
                   </View>
                   <TouchableOpacity
@@ -269,16 +284,29 @@ export default function Etapa4() {
                 </View>
               ))}
               {days[day.key].enabled && (
-                <TouchableOpacity style={styles.addTimeSlotButton} onPress={() => addSlot(day.key)}>
+                <TouchableOpacity style={[styles.addTimeSlotButton, isDarkMode && { backgroundColor: theme.background }]} onPress={() => addSlot(day.key)}>
                   <Ionicons name="add-circle" size={20} color={colors.blue} />
-                  <Text style={styles.addTimeSlotText}>Adicionar horário</Text>
+                  <Text style={[styles.addTimeSlotText, isDarkMode && { color: theme.blue }]}>Adicionar horário</Text>
                 </TouchableOpacity>
               )}
             </View>
           ))}
-          <TouchableOpacity style={[styles.addTimeSlotButton, { marginTop: 8 }]} onPress={replicateFirstDay}>
-            <Ionicons name="copy" size={20} color={colors.blue} />
-            <Text style={styles.addTimeSlotText}>Replicar horários do primeiro dia</Text>
+          <TouchableOpacity 
+            style={[
+              styles.addTimeSlotButton, 
+              { marginTop: 8 }, 
+              isDarkMode && { 
+                backgroundColor: theme.background,
+                borderWidth: 1,
+                borderColor: theme.blue
+              }
+            ]} 
+            onPress={replicateFirstDay}
+          >
+            <Ionicons name="copy" size={20} color={isDarkMode ? theme.blue : colors.blue} />
+            <Text style={[styles.addTimeSlotText, isDarkMode && { color: theme.blue }]}>
+              Replicar horários do primeiro dia
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -294,28 +322,28 @@ export default function Etapa4() {
         onRequestClose={() => setEditModal({ ...editModal, visible: false })}
       >
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ backgroundColor: colors.white, borderRadius: 16, padding: 24, width: 280, alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, fontWeight: '700', marginBottom: 16 }}>Editar horário</Text>
+          <View style={[styles.modalContent, isDarkMode && { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, isDarkMode && { color: theme.text }]}>Editar horário</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
               <View style={{ alignItems: 'center', marginRight: 16 }}>
-                <Text style={{ fontSize: 14, color: colors.dark_gray }}>Hora</Text>
+                <Text style={{ fontSize: 14, color: isDarkMode ? theme.text : colors.dark_gray }}>Hora</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, hour: Math.max(0, m.hour - 1) }))}>
                     <Ionicons name="remove-circle-outline" size={28} color={colors.blue} />
                   </TouchableOpacity>
-                  <Text style={{ fontSize: 24, marginHorizontal: 8, minWidth: 32, textAlign: 'center' }}>{pad(editModal.hour)}</Text>
+                  <Text style={[styles.modalTimeText, isDarkMode && { color: theme.text }]}>{pad(editModal.hour)}</Text>
                   <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, hour: Math.min(23, m.hour + 1) }))}>
                     <Ionicons name="add-circle-outline" size={28} color={colors.blue} />
                   </TouchableOpacity>
                 </View>
               </View>
               <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontSize: 14, color: colors.dark_gray }}>Minuto</Text>
+                <Text style={{ fontSize: 14, color: isDarkMode ? theme.text : colors.dark_gray }}>Minuto</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, minute: Math.max(0, m.minute - 5) }))}>
                     <Ionicons name="remove-circle-outline" size={28} color={colors.blue} />
                   </TouchableOpacity>
-                  <Text style={{ fontSize: 24, marginHorizontal: 8, minWidth: 32, textAlign: 'center' }}>{pad(editModal.minute)}</Text>
+                  <Text style={[styles.modalTimeText, isDarkMode && { color: theme.text }]}>{pad(editModal.minute)}</Text>
                   <TouchableOpacity onPress={() => setEditModal(m => ({ ...m, minute: Math.min(55, m.minute + 5) }))}>
                     <Ionicons name="add-circle-outline" size={28} color={colors.blue} />
                   </TouchableOpacity>
@@ -324,21 +352,21 @@ export default function Etapa4() {
             </View>
             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: colors.light_gray, padding: 12, borderRadius: 8, alignItems: 'center', marginRight: 8 }}
+                style={[styles.modalButton, styles.modalButtonCancel, isDarkMode && { backgroundColor: theme.background }]}
                 onPress={() => setEditModal({ ...editModal, visible: false })}
               >
-                <Text style={{ color: colors.dark_gray, fontWeight: '600' }}>Cancelar</Text>
+                <Text style={[styles.modalButtonText, isDarkMode && { color: theme.text }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flex: 1, backgroundColor: colors.blue, padding: 12, borderRadius: 8, alignItems: 'center' }}
+                style={[styles.modalButton, styles.modalButtonSave]}
                 onPress={saveEditModal}
               >
-                <Text style={{ color: colors.white, fontWeight: '600' }}>Salvar</Text>
+                <Text style={styles.modalButtonText}>Salvar</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 } 

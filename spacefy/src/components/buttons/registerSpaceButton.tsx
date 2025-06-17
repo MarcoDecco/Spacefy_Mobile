@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { colors } from '../../styles/globalStyles/colors';
 import { registerSpaceButtonStyles } from '../../styles/componentStyles/buttonStyles';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface RegisterSpaceButtonProps {
   title: string;
@@ -19,11 +20,21 @@ export default function RegisterSpaceButton({
   variant = 'primary',
   disabled = false,
 }: RegisterSpaceButtonProps) {
+  const { isDarkMode, theme } = useTheme();
+
   return (
     <TouchableOpacity
       style={[
         registerSpaceButtonStyles.button,
-        variant === 'secondary' ? registerSpaceButtonStyles.secondary : registerSpaceButtonStyles.primary,
+        variant === 'secondary' 
+          ? [
+              registerSpaceButtonStyles.secondary,
+              isDarkMode && { 
+                backgroundColor: theme.card,
+                borderColor: theme.blue 
+              }
+            ] 
+          : registerSpaceButtonStyles.primary,
         disabled && registerSpaceButtonStyles.disabled,
         style,
       ]}
@@ -33,7 +44,12 @@ export default function RegisterSpaceButton({
     >
       <Text style={[
         registerSpaceButtonStyles.text,
-        variant === 'secondary' ? registerSpaceButtonStyles.secondaryText : {},
+        variant === 'secondary' 
+          ? [
+              registerSpaceButtonStyles.secondaryText,
+              isDarkMode && { color: theme.blue }
+            ] 
+          : {},
         textStyle,
       ]}>
         {title}

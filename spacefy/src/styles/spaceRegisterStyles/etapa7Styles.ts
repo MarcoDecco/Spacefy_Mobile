@@ -1,14 +1,15 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
 import { colors } from '../globalStyles/colors';
 import Constants from 'expo-constants';
 
-const statusBarHeight = Constants.statusBarHeight;
+const { width } = Dimensions.get('window');
+const statusBarHeight = Platform.OS === 'ios' ? Constants.statusBarHeight : StatusBar.currentHeight || 0;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.light_gray,
-    marginTop: Constants.statusBarHeight,
+    paddingTop: statusBarHeight,
   },
   progressContainer: {
     backgroundColor: colors.white,
@@ -21,22 +22,19 @@ export const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingBottom: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: colors.black,
-    marginBottom: 8,
-    marginTop: 16,
-    paddingHorizontal: 4,
+    marginBottom: 16,
+    paddingTop: 24,
   },
   subtitle: {
     fontSize: 16,
     color: colors.dark_gray,
-    lineHeight: 22,
-    marginBottom: 20,
-    paddingHorizontal: 4,
+    lineHeight: 24,
+    marginBottom: 24,
   },
   sectionContainer: {
     marginBottom: 24,
@@ -48,21 +46,22 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
   inputLabel: {
     fontSize: 16,
-    color: colors.dark_gray,
+    fontWeight: '600',
+    color: colors.black,
     marginBottom: 8,
   },
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: colors.gray,
     borderRadius: 8,
     paddingHorizontal: 16,
     fontSize: 16,
-    color: colors.dark_gray,
+    backgroundColor: colors.white,
+    borderColor: colors.light_gray,
   },
   textArea: {
     borderWidth: 1,
@@ -126,56 +125,61 @@ export const styles = StyleSheet.create({
     marginLeft: 36,
   },
   documentPreview: {
-    marginVertical: 12,
-    alignItems: 'flex-start',
+    marginBottom: 24,
   },
   previewButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.light_blue,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.light_gray,
   },
   previewText: {
-    color: colors.blue,
+    marginLeft: 12,
     fontSize: 16,
-    marginLeft: 8,
-    fontWeight: '600',
+    color: colors.black,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.9)',
   },
   modalContent: {
+    width: width * 0.9,
+    height: width * 1.2,
     backgroundColor: colors.white,
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
-    maxWidth: '90%',
-    maxHeight: '80%',
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
   },
   closeButton: {
     position: 'absolute',
     top: 8,
     right: 8,
-    zIndex: 2,
-  },
-  modalImage: {
-    width: 300,
-    height: 400,
-    resizeMode: 'contain',
-    marginTop: 32,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.blue,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   buttonRowFixed: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 30,
+    marginBottom: '8%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.light_gray,
     gap: 12,
   },
   navigationButton: {
