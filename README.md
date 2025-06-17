@@ -136,6 +136,7 @@
 - Breno Kuhn
 - Marco Decco
 - Hian Matheus
+- Yuri Queiroz
 
 ---
 
